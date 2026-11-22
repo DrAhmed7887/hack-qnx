@@ -1,0 +1,11 @@
+# Quiet Ward build tasks (v0, host side)
+Goal: reduce false ICU arrhythmia alarms on the PhysioNet 2015 Challenge training set without missing true ones, in a C11 core that will also build for QNX 8.0.
+
+1. scripts/convert.py: read each record in data/raw/training/ (WFDB .hea/.mat, use the `wfdb` package from .venv) and write data/bin/<rec>.qw: little-endian header (magic "QW01", fs uint32, n_channels uint32, n_samples uint32, then per channel a 16-byte name), then float32 samples channel-major. Also write data/bin/labels.csv (record, alarm_type, true_alarm 0/1) from data/raw/training/ALARMS (or RECORDS/header comments; inspect the files first).
+2. src/qw_core.{h,c}: pure C11, no allocations in the per-window path after init. Functions: load .qw; beat detection on ECG (simple Pan-Tompkins-like) and pulse onset detection on ABP/PPG; per-channel signal-quality index 0..1; decide(alarm_type, rules) -> {CONFIRM, SUPPRESS_TO_REVIEW} with a reason string. All thresholds come from rules/alarm_rules.json (write a tiny JSON reader for this file's fixed shape in src/rules.c). Never suppress types in suppression.never_suppress.
+3. src/qw_cli.c: `qw <record.qw> <alarm_type> rules/alarm_rules.json` prints one JSON line {record, alarm, decision, reason, sqi}.
+4. Makefile: `make` builds build/qw with cc -std=c11 -O2 -Wall -Wextra -Werror; `make test`; `make eval`.
+5. eval/run_eval.py: runs build/qw over all records, compares to labels.csv, writes eval/results/train_v0.json with TP/TN/FP/FN overall and per alarm type, Challenge score (TP+TN)/(TP+TN+FP+5*FN), true alarms suppressed count, and a "baseline_no_suppression" row (all alarms confirmed). TRUE alarm confirmed = TP, FALSE alarm suppressed = TN.
+6. tests/: pytest for convert round-trip, JSON rule reader, and a synthetic sine-pulse test where suppression must happen; and one where never_suppress type is never suppressed.
+7. src/qnx/README.md only (no code yet): planned QNX 8.0 mapping — acquisition thread at high priority with timer pulses, MsgSend from detector to alarm manager, resource manager /dev/quietward, slog2 logging, HAM restart.
+Run `make test` and `make eval` yourself and fix until green. Report the eval/results/train_v0.json numbers exactly.

@@ -1,0 +1,10 @@
+{
+  "name": "qw-builder",
+  "description": "Quiet Ward builder: C core, eval scripts and tests; cannot touch clinical rules or claims.",
+  "prompt": "Follow every file in .kiro/steering/. Write only src/**, tests/**, eval/*.py, scripts/*.py (not scripts/hooks), Makefile, docs/** except docs/EVIDENCE.md. Never edit rules/**, CLAIMS.md, .kiro/**. Do not run git.",
+  "tools": ["read", "write", "shell"],
+  "allowedTools": ["read", "write", "shell"],
+  "toolsSettings": {"write": {"allowedPaths": ["src/**", "tests/**", "eval/**", "scripts/*.py", "Makefile", "docs/**", "README.md"], "deniedPaths": ["rules/**", "CLAIMS.md", ".kiro/**", "scripts/hooks/**", "docs/EVIDENCE.md"]}},
+  "resources": ["file://.kiro/steering/*.md", "file://rules/alarm_rules.json"],
+  "hooks": {"preToolUse": [{"matcher": "write", "command": "python3 -I scripts/hooks/guard_signed.py", "timeout_ms": 10000}]}
+}

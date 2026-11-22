@@ -1,0 +1,22 @@
+{
+  "status": "pending_signoff",
+  "signed_by": null,
+  "signed_on": null,
+  "note": "Alarm definitions copied verbatim from PhysioNet/CinC Challenge 2015 Table 1 (checked 2026-11-22). Suppression thresholds below are engineering defaults, NOT clinical rules, until Dr Zayed signs.",
+  "source": "https://physionet.org/content/challenge-2015/1.0.0/ (Table 1); ODC-BY 1.0",
+  "alarms": {
+    "Asystole": {"definition": "No QRS for at least 4 seconds", "no_beat_s": 4},
+    "Bradycardia": {"definition": "Heart rate lower than 40 bpm for 5 consecutive beats", "hr_below_bpm": 40, "beats": 5},
+    "Tachycardia": {"definition": "Heart rate higher than 140 bpm for 17 consecutive beats", "hr_above_bpm": 140, "beats": 17},
+    "Ventricular_Tachycardia": {"definition": "5 or more ventricular beats with heart rate higher than 100 bpm", "beats": 5, "hr_above_bpm": 100},
+    "Ventricular_Flutter_Fib": {"definition": "Fibrillatory, flutter, or oscillatory waveform for at least 4 seconds", "duration_s": 4}
+  },
+  "suppression": {
+    "status": "pending_signoff",
+    "rule": "Suppress (route to quiet review, never discard) only when a high-quality pulsatile channel (ABP or PPG) contradicts the alarm for the whole window before the alarm.",
+    "window_s": 16,
+    "min_signal_quality": 0.9,
+    "never_suppress": ["Ventricular_Flutter_Fib"]
+  },
+  "score": "Challenge score = (TP+TN)/(TP+TN+FP+5*FN)"
+}

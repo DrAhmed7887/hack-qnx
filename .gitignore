@@ -1,0 +1,6 @@
+data/raw/
+*.o
+build/
+__pycache__/
+.env*
+.venv/
