@@ -1,18 +1,24 @@
-/* qw_cli.c -- `qw <record.qw> <alarm_type> <rules.json>`
+/* qw_cli.c -- `qw <record.qw> <alarm_type> <rules.json> [detector.json]`
  *
  * Prints one JSON line to stdout:
  *   {"record": "...", "alarm": "...", "decision": "CONFIRM"|"SUPPRESS_TO_REVIEW",
  *    "reason": "...", "sqi": 0.00}
  *
- * Exit code 0 on success, nonzero on any load/parse error (with a message
- * on stderr).
+ * Exit code 0 on success, nonzero on any load/parse/validation error
+ * (with a message on stderr). Both the rules file and the detector
+ * engineering-constants file are validated fail-closed: a missing or
+ * out-of-range field in either is a fatal error, not a silently-assumed
+ * default.
  */
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
 
 #include "qw_core.h"
+#include "qw_detector_config.h"
 #include "rules.h"
+
+#define QW_DEFAULT_DETECTOR_CONFIG "config/detector.json"
 
 static void print_json_string(FILE *out, const char *s) {
     fputc('"', out);
@@ -41,18 +47,25 @@ static const char *record_basename(const char *path) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 4) {
-        fprintf(stderr, "usage: %s <record.qw> <alarm_type> <rules.json>\n", argv[0]);
+    if (argc != 4 && argc != 5) {
+        fprintf(stderr, "usage: %s <record.qw> <alarm_type> <rules.json> [detector.json]\n", argv[0]);
         return 2;
     }
 
     const char *record_path = argv[1];
     const char *alarm_type = argv[2];
     const char *rules_path = argv[3];
+    const char *detector_config_path = (argc == 5) ? argv[4] : QW_DEFAULT_DETECTOR_CONFIG;
 
     qw_rules_t rules;
     if (qw_rules_load(rules_path, &rules) != 0) {
         fprintf(stderr, "error: failed to load rules file '%s'\n", rules_path);
+        return 1;
+    }
+
+    qw_detector_config_t cfg;
+    if (qw_detector_config_load(detector_config_path, &cfg) != 0) {
+        fprintf(stderr, "error: failed to load detector config file '%s'\n", detector_config_path);
         return 1;
     }
 
@@ -62,8 +75,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    /* Stack-allocated workspace: qw_decide() is reentrant and keeps no
+     * static state, so each call gets its own scratch buffers. */
+    qw_decide_workspace_t ws;
     qw_decision_result_t result;
-    if (qw_decide(&rec, alarm_type, &rules, &result) != 0) {
+    if (qw_decide(&rec, alarm_type, &rules, &cfg, &ws, &result) != 0) {
         fprintf(stderr, "error: decide() failed for record '%s' alarm '%s'\n", record_path, alarm_type);
         qw_record_free(&rec);
         return 1;

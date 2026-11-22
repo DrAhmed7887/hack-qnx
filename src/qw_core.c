@@ -5,8 +5,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <inttypes.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 /* ---------------- loading ---------------- */
+
+/* Format/sanity bounds for the .qw header fields. These are not clinical
+ * thresholds -- they bound what a plausible monitoring device could ever
+ * produce, so a corrupt or truncated file is rejected before we trust its
+ * header enough to compute a malloc size from it. */
+#define QW_MIN_FS 1u
+#define QW_MAX_FS 10000u
+#define QW_MIN_CHANNELS 1u
+#define QW_MAX_CHANNELS_RANGE 16u /* documented contract bound; QW_MAX_CHANNELS further bounds storage */
+/* PhysioNet 2015 Challenge convention used throughout qw_decide(): every
+ * alarm fires at this many seconds into the record. 300*fs must fit in a
+ * uint32_t sample-index without overflow for any fs this loader accepts. */
+#define QW_ALARM_OFFSET_S_LOADER 300u
 
 static qw_channel_kind_t classify_channel(const char *name) {
     /* ECG-like leads seen in the PhysioNet 2015 Challenge training set. */
@@ -29,16 +45,34 @@ int qw_record_load(const char *path, qw_record_t *rec) {
     memset(rec, 0, sizeof(*rec));
 
     FILE *f = fopen(path, "rb");
-    if (!f) return -1;
+    if (!f) {
+        fprintf(stderr, "record error: %s: cannot open file\n", path);
+        return -1;
+    }
+
+    struct stat st;
+    if (fstat(fileno(f), &st) != 0) {
+        fprintf(stderr, "record error: %s: fstat failed\n", path);
+        fclose(f);
+        return -1;
+    }
+    if (st.st_size < 0 || (uint64_t)st.st_size < (4 + 12)) {
+        fprintf(stderr, "record error: %s: file too small for header\n", path);
+        fclose(f);
+        return -1;
+    }
+    uint64_t file_size = (uint64_t)st.st_size;
 
     unsigned char magic[4];
     if (fread(magic, 1, 4, f) != 4 || memcmp(magic, QW_MAGIC, 4) != 0) {
+        fprintf(stderr, "record error: %s: bad magic\n", path);
         fclose(f);
         return -1;
     }
 
     unsigned char hdr[12];
     if (fread(hdr, 1, 12, f) != 12) {
+        fprintf(stderr, "record error: %s: truncated header\n", path);
         fclose(f);
         return -1;
     }
@@ -46,7 +80,67 @@ int qw_record_load(const char *path, qw_record_t *rec) {
     uint32_t n_channels = (uint32_t)hdr[4] | ((uint32_t)hdr[5] << 8) | ((uint32_t)hdr[6] << 16) | ((uint32_t)hdr[7] << 24);
     uint32_t n_samples = (uint32_t)hdr[8] | ((uint32_t)hdr[9] << 8) | ((uint32_t)hdr[10] << 16) | ((uint32_t)hdr[11] << 24);
 
-    if (n_channels == 0 || n_channels > QW_MAX_CHANNELS) {
+    /* Range-check the header BEFORE trusting it for any size arithmetic
+     * or malloc. fs and n_channels bound the device's plausible output;
+     * n_channels is additionally bounded by QW_MAX_CHANNELS, the fixed
+     * storage this struct provides. */
+    if (fs < QW_MIN_FS || fs > QW_MAX_FS) {
+        fprintf(stderr, "record error: %s: fs=%u out of range [%u, %u]\n", path, fs, QW_MIN_FS, QW_MAX_FS);
+        fclose(f);
+        return -1;
+    }
+    if (n_channels < QW_MIN_CHANNELS || n_channels > QW_MAX_CHANNELS_RANGE) {
+        fprintf(stderr, "record error: %s: n_channels=%u out of range [%u, %u]\n",
+                path, n_channels, QW_MIN_CHANNELS, QW_MAX_CHANNELS_RANGE);
+        fclose(f);
+        return -1;
+    }
+    if (n_channels > QW_MAX_CHANNELS) {
+        fprintf(stderr, "record error: %s: n_channels=%u exceeds QW_MAX_CHANNELS=%u\n",
+                path, n_channels, (unsigned)QW_MAX_CHANNELS);
+        fclose(f);
+        return -1;
+    }
+
+    /* 300*fs and window_s*fs (window_s comes from rules.json, read by the
+     * caller, but the largest sane window is bounded by the record length
+     * convention) must fit a uint32_t sample index without overflow.
+     * fs<=10000 and the offset constant are both small enough that this
+     * can't overflow in practice, but check explicitly rather than assume
+     * -- this is the contract qw_decide() depends on. */
+    {
+        uint64_t offset_samples = (uint64_t)QW_ALARM_OFFSET_S_LOADER * (uint64_t)fs;
+        if (offset_samples > (uint64_t)UINT32_MAX) {
+            fprintf(stderr, "record error: %s: 300*fs=%llu overflows uint32_t for fs=%u\n",
+                    path, (unsigned long long)offset_samples, fs);
+            fclose(f);
+            return -1;
+        }
+        /* window_s*fs: rules.json enforces window_s > 0 but places no
+         * upper bound; guard generously up to 24h worth of samples at this
+         * fs, which is far beyond any plausible suppression window and
+         * still fits uint32_t for the fs range accepted above. */
+        uint64_t max_window_s = 24u * 3600u;
+        uint64_t window_samples_bound = max_window_s * (uint64_t)fs;
+        if (window_samples_bound > (uint64_t)UINT32_MAX) {
+            fprintf(stderr, "record error: %s: window_s*fs could overflow uint32_t for fs=%u\n", path, fs);
+            fclose(f);
+            return -1;
+        }
+    }
+
+    /* Validate the header against the actual file size BEFORE allocating
+     * the sample buffer: a corrupted or truncated header must not drive a
+     * malloc sized from an untrustworthy n_samples. */
+    uint64_t expected_channel_names = (uint64_t)n_channels * (uint64_t)QW_CHANNEL_NAME_LEN;
+    uint64_t expected_samples = (uint64_t)n_channels * (uint64_t)n_samples;
+    uint64_t expected_sample_bytes = expected_samples * (uint64_t)sizeof(float);
+    uint64_t expected_total = 4 + 12 + expected_channel_names + expected_sample_bytes;
+
+    if (expected_total != file_size) {
+        fprintf(stderr,
+                "record error: %s: header declares %" PRIu64 " bytes but file is %" PRIu64 " bytes\n",
+                path, expected_total, file_size);
         fclose(f);
         return -1;
     }
@@ -54,6 +148,7 @@ int qw_record_load(const char *path, qw_record_t *rec) {
     char names[QW_MAX_CHANNELS][QW_CHANNEL_NAME_LEN];
     for (uint32_t c = 0; c < n_channels; c++) {
         if (fread(names[c], 1, QW_CHANNEL_NAME_LEN, f) != QW_CHANNEL_NAME_LEN) {
+            fprintf(stderr, "record error: %s: truncated channel name table\n", path);
             fclose(f);
             return -1;
         }
@@ -64,17 +159,37 @@ int qw_record_load(const char *path, qw_record_t *rec) {
     if (total_samples > 0) {
         buf = (float *)malloc(total_samples * sizeof(float));
         if (!buf) {
+            fprintf(stderr, "record error: %s: out of memory allocating sample buffer\n", path);
             fclose(f);
             return -1;
         }
         size_t n_read = fread(buf, sizeof(float), total_samples, f);
         if (n_read != total_samples) {
+            fprintf(stderr, "record error: %s: truncated sample data\n", path);
             free(buf);
             fclose(f);
             return -1;
         }
     }
     fclose(f);
+
+    /* Reject NaN/Inf samples outright: a detector fed non-finite input can
+     * silently propagate garbage through the whole decision path (e.g. an
+     * SQI of NaN compares false against every threshold, which look like
+     * "low quality" but for the wrong reason, and is not something we want
+     * to guess about on an alarm path). Count every bad sample before
+     * failing so the stderr message gives a useful diagnostic. */
+    size_t n_nonfinite = 0;
+    for (size_t i = 0; i < total_samples; i++) {
+        if (!isfinite((double)buf[i])) n_nonfinite++;
+    }
+    if (n_nonfinite > 0) {
+        fprintf(stderr,
+                "record error: %s: %zu of %zu samples are NaN or infinite; rejecting record\n",
+                path, n_nonfinite, total_samples);
+        free(buf);
+        return -1;
+    }
 
     rec->fs = fs;
     rec->n_channels = n_channels;
@@ -179,8 +294,9 @@ size_t qw_detect_beats_ecg(const float *samples, uint32_t n_samples, uint32_t fs
 /* ---------------- pulse onset detection ---------------- */
 
 size_t qw_detect_pulses(const float *samples, uint32_t n_samples, uint32_t fs,
-                         uint32_t *out_idx, size_t max_idx) {
-    if (!samples || n_samples < 4 || fs == 0 || max_idx == 0) return 0;
+                         uint32_t *out_idx, size_t max_idx,
+                         const qw_detector_config_t *cfg) {
+    if (!samples || n_samples < 4 || fs == 0 || max_idx == 0 || !cfg) return 0;
 
     /* Global min/max over the window gives a stable amplitude reference.
      * A slow-drifting local envelope (updated sample by sample) gets
@@ -220,7 +336,7 @@ size_t qw_detect_pulses(const float *samples, uint32_t n_samples, uint32_t fs,
     double prev_smoothed = (double)samples[0];
     int rising = 0;
     double trough_since_last_peak = (double)samples[0];
-    double min_prominence = 0.15 * g_range; /* reject sub-15%-of-range wiggles */
+    double min_prominence = cfg->min_prominence_frac * g_range; /* reject sub-fraction-of-range wiggles; see config/detector.json */
 
     size_t n_found = 0;
 
@@ -258,8 +374,9 @@ size_t qw_detect_pulses(const float *samples, uint32_t n_samples, uint32_t fs,
 /* ---------------- signal quality index ---------------- */
 
 double qw_signal_quality(const float *samples, uint32_t n_samples, uint32_t fs,
-                          const uint32_t *beat_idx, size_t n_beats) {
-    if (!samples || n_samples < 2) return 0.0;
+                          const uint32_t *beat_idx, size_t n_beats,
+                          const qw_detector_config_t *cfg) {
+    if (!samples || n_samples < 2 || !cfg) return 0.0;
 
     /* 1. Flatline / clipping check: fraction of samples that differ from
      *    their predecessor by more than a tiny epsilon (catches a
@@ -355,15 +472,13 @@ double qw_signal_quality(const float *samples, uint32_t n_samples, uint32_t fs,
         if (regularity_score > 1.0) regularity_score = 1.0;
     }
 
-    double sqi = 0.8 * activity_score + 0.2 * regularity_score;
+    double sqi = cfg->activity_weight * activity_score + cfg->regularity_weight * regularity_score;
     if (sqi < 0.0) sqi = 0.0;
     if (sqi > 1.0) sqi = 1.0;
     return sqi;
 }
 
 /* ---------------- decision ---------------- */
-
-#define QW_MAX_BEATS 4096
 
 static double heart_rate_from_beats(const uint32_t *idx, size_t n, uint32_t fs, size_t use_last_n) {
     if (n < 2 || fs == 0) return -1.0;
@@ -403,9 +518,11 @@ static double interval_cv_from_beats(const uint32_t *idx, size_t n, size_t use_l
 /* Does ANY pulse-channel event occur within the suppression window
  * immediately before the alarm onset? Used as the "pulsatile channel
  * contradicts the alarm" signal. alarm_sample is the sample index at
- * which the alarm fired (see QW_ALARM_OFFSET_S in qw_decide). */
+ * which the alarm fired (see QW_ALARM_OFFSET_S in qw_decide). cfg
+ * supplies the minimum-expected-pulse-rate engineering constants. */
 static int pulse_present_in_window(const uint32_t *pulse_idx, size_t n_pulses,
-                                    uint32_t alarm_sample, uint32_t fs, double window_s) {
+                                    uint32_t alarm_sample, uint32_t fs, double window_s,
+                                    const qw_detector_config_t *cfg) {
     if (n_pulses == 0 || fs == 0) return 0;
     uint32_t window_samples = (uint32_t)(window_s * (double)fs);
     uint32_t window_start = (alarm_sample > window_samples) ? (alarm_sample - window_samples) : 0;
@@ -415,13 +532,14 @@ static int pulse_present_in_window(const uint32_t *pulse_idx, size_t n_pulses,
     }
     /* require a plausible number of pulses across the window, not just one
      * stray detection, so we don't treat noise as a contradicting pulse. */
-    double expected_min_pulses = (window_s / 60.0) * 30.0; /* >=30bpm floor */
-    return count_in_window >= 2 && (double)count_in_window >= expected_min_pulses * 0.5;
+    double expected_min_pulses = (window_s / 60.0) * cfg->min_expected_bpm_floor;
+    return count_in_window >= 2 && (double)count_in_window >= expected_min_pulses * cfg->min_expected_fraction;
 }
 
 int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *rules,
+              const qw_detector_config_t *cfg, qw_decide_workspace_t *ws,
               qw_decision_result_t *result) {
-    if (!rec || !alarm_type || !rules || !result) return -1;
+    if (!rec || !alarm_type || !rules || !cfg || !ws || !result) return -1;
 
     memset(result, 0, sizeof(*result));
     result->decision = QW_DECISION_CONFIRM;
@@ -446,8 +564,12 @@ int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *
     uint32_t alarm_sample = (uint32_t)(QW_ALARM_OFFSET_S * (double)rec->fs);
     if (alarm_sample > rec->n_samples) alarm_sample = rec->n_samples;
 
-    static uint32_t beat_idx[QW_MAX_BEATS];
-    static uint32_t pulse_idx[QW_MAX_BEATS];
+    /* ws->beat_idx / ws->pulse_idx are caller-owned scratch space (see
+     * qw_decide_workspace_t in qw_core.h); this function keeps no static
+     * or thread-local state, so it is reentrant across concurrent calls
+     * each with their own ws. */
+    uint32_t *beat_idx = ws->beat_idx;
+    uint32_t *pulse_idx = ws->pulse_idx;
 
     /* Pick the best ECG channel (first one found) for beat detection, and
      * the best pulsatile channel (first one found) for pulse detection. */
@@ -465,14 +587,14 @@ int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *
     double ecg_sqi = 0.0;
     if (ecg_ch) {
         n_beats = qw_detect_beats_ecg(ecg_ch->samples, alarm_sample, rec->fs, beat_idx, QW_MAX_BEATS);
-        ecg_sqi = qw_signal_quality(ecg_ch->samples, alarm_sample, rec->fs, beat_idx, n_beats);
+        ecg_sqi = qw_signal_quality(ecg_ch->samples, alarm_sample, rec->fs, beat_idx, n_beats, cfg);
     }
 
     size_t n_pulses = 0;
     double pulse_sqi = 0.0;
     if (pulse_ch) {
-        n_pulses = qw_detect_pulses(pulse_ch->samples, alarm_sample, rec->fs, pulse_idx, QW_MAX_BEATS);
-        pulse_sqi = qw_signal_quality(pulse_ch->samples, alarm_sample, rec->fs, pulse_idx, n_pulses);
+        n_pulses = qw_detect_pulses(pulse_ch->samples, alarm_sample, rec->fs, pulse_idx, QW_MAX_BEATS, cfg);
+        pulse_sqi = qw_signal_quality(pulse_ch->samples, alarm_sample, rec->fs, pulse_idx, n_pulses, cfg);
     }
 
     double best_sqi = (pulse_sqi > ecg_sqi) ? pulse_sqi : ecg_sqi;
@@ -505,7 +627,7 @@ int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *
     }
 
     int pulse_present = pulse_present_in_window(pulse_idx, n_pulses, alarm_sample, rec->fs,
-                                                 rules->suppression.window_s);
+                                                 rules->suppression.window_s, cfg);
     if (!pulse_present) {
         snprintf(result->reason, QW_REASON_LEN,
                  "no regular pulse detected in suppression window (%.0fs) despite high sqi=%.2f; confirming %s",
@@ -533,9 +655,10 @@ int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *
      * alarm; treat that the same as "could not compute" rather than
      * trusting a possibly-wrong number sign suppression. Asystole's
      * contradiction test only needs pulse presence (checked above via
-     * pulse_present_in_window's minimum count), so it is not gated here. */
-    const double QW_MAX_TRUSTED_CV = 0.3;
-    int hr_trustworthy = (window_cv >= 0.0) && (window_cv <= QW_MAX_TRUSTED_CV);
+     * pulse_present_in_window's minimum count), so it is not gated here.
+     * max_trusted_interval_cv is an engineering constant from
+     * config/detector.json, not a clinical threshold. */
+    int hr_trustworthy = (window_cv >= 0.0) && (window_cv <= cfg->max_trusted_interval_cv);
 
     int contradicts = 0;
     char detail[128];

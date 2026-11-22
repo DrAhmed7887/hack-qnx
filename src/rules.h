@@ -54,8 +54,11 @@ typedef struct {
 } qw_alarm_def_t;
 
 typedef struct {
+    int has_window_s;
     double window_s;
+    int has_min_signal_quality;
     double min_signal_quality;
+    int has_never_suppress;
     char never_suppress[QW_MAX_NEVER_SUPPRESS][QW_NAME_LEN];
     size_t n_never_suppress;
 } qw_suppression_t;
@@ -67,9 +70,17 @@ typedef struct {
 } qw_rules_t;
 
 /* Load and parse rules.json (the fixed shape described above) into *out.
- * Returns 0 on success, nonzero on failure (bad path, malformed JSON, or
- * missing expected fields). On failure *out is left in an unspecified
- * state and must not be used. */
+ * Returns 0 on success, nonzero on failure: bad path, malformed JSON,
+ * missing expected fields, OR any of the following fail-closed checks:
+ *   - suppression.window_s present and > 0
+ *   - suppression.min_signal_quality present and in (0, 1]
+ *   - suppression.never_suppress present (may be an empty array)
+ *   - every alarm definition has at least one recognized threshold field
+ *     (no_beat_s, hr_below_bpm, hr_above_bpm, or duration_s)
+ * On failure *out is left in an unspecified state and must not be used,
+ * and the caller (qw_cli.c) exits nonzero with a message on stderr. The
+ * alarm path never silently runs on a partially-loaded or guessed-at
+ * rules file. */
 int qw_rules_load(const char *path, qw_rules_t *out);
 
 /* Look up an alarm definition by name. Returns NULL if not found. */
