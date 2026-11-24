@@ -8,7 +8,7 @@ LDLIBS = -lm
 
 SRC_DIR = src
 BUILD_DIR = build
-PYTHON = .venv/bin/python
+PYTHON ?= $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || echo python3)
 
 CORE_SRCS = $(SRC_DIR)/qw_core.c $(SRC_DIR)/rules.c $(SRC_DIR)/qw_detector_config.c
 CLI_SRCS = $(SRC_DIR)/qw_cli.c
@@ -19,8 +19,11 @@ TARGET = $(BUILD_DIR)/qw
 RULES_DUMP_TARGET = $(BUILD_DIR)/qw_rules_dump
 DETECTOR_CONFIG_DUMP_TARGET = $(BUILD_DIR)/qw_detector_config_dump
 REENTRANT_TEST_TARGET = $(BUILD_DIR)/qw_reentrant_test
+GATEWAY_TEST_TARGET = $(BUILD_DIR)/qw_gateway_test
+QNX_DIR = $(SRC_DIR)/qnx
+QNX_HDRS = $(QNX_DIR)/qw_ipc.h $(QNX_DIR)/qw_ring.h $(QNX_DIR)/qw_gateway_state.h
 
-.PHONY: all clean test eval eval-train eval-heldout eval-full demo-pack demo-verify convert
+.PHONY: all clean test gateway-test reentrant-test fuzz eval eval-train eval-heldout eval-full demo-pack demo-verify convert
 
 all: $(TARGET)
 
@@ -47,6 +50,17 @@ $(DETECTOR_CONFIG_DUMP_TARGET): $(BUILD_DIR)/qw_detector_config.o $(BUILD_DIR)/q
 $(REENTRANT_TEST_TARGET): $(BUILD_DIR)/qw_core.o $(BUILD_DIR)/rules.o $(BUILD_DIR)/qw_detector_config.o $(BUILD_DIR)/qw_reentrant_test.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(BUILD_DIR)/qw_core.o $(BUILD_DIR)/rules.o $(BUILD_DIR)/qw_detector_config.o $(BUILD_DIR)/qw_reentrant_test.o $(LDLIBS) -lpthread
 
+# Gateway subsystems (portable C11 under src/qnx/). Deliberately NOT linked
+# into build/qw. Host test binary only; the QNX resource manager wraps these.
+GATEWAY_OBJS = $(BUILD_DIR)/qw_ring.o $(BUILD_DIR)/qw_gateway_state.o $(BUILD_DIR)/qw_gateway_test.o
+
+$(BUILD_DIR)/%.o: $(QNX_DIR)/%.c $(QNX_HDRS) $(SRC_DIR)/qw_core.h $(SRC_DIR)/rules.h $(SRC_DIR)/qw_json_lexer.h
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I$(SRC_DIR) -I$(QNX_DIR) -c -o $@ $<
+
+$(GATEWAY_TEST_TARGET): $(GATEWAY_OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(GATEWAY_OBJS) $(LDLIBS) -lpthread
+
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_DIR)/qw_core.h $(SRC_DIR)/rules.h $(SRC_DIR)/qw_detector_config.h $(SRC_DIR)/qw_json_lexer.h
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I$(SRC_DIR) -c -o $@ $<
@@ -62,9 +76,19 @@ convert:
 # suppression behaviour). Builds qw first since some tests exercise the CLI.
 # Also runs the standalone reentrancy C harness directly (not via pytest)
 # since it has no Python bindings to call through.
-test: $(TARGET) $(RULES_DUMP_TARGET) $(DETECTOR_CONFIG_DUMP_TARGET) $(REENTRANT_TEST_TARGET)
+test: $(TARGET) $(RULES_DUMP_TARGET) $(DETECTOR_CONFIG_DUMP_TARGET) $(REENTRANT_TEST_TARGET) $(GATEWAY_TEST_TARGET)
 	$(PYTHON) -m pytest -q tests
 	./$(REENTRANT_TEST_TARGET)
+	./$(GATEWAY_TEST_TARGET)
+
+gateway-test: $(GATEWAY_TEST_TARGET)
+	./$(GATEWAY_TEST_TARGET)
+
+reentrant-test: $(REENTRANT_TEST_TARGET)
+	./$(REENTRANT_TEST_TARGET)
+
+fuzz:
+	$(PYTHON) scripts/fuzz_qw.py --count 1000
 
 # Run build/qw over records in data/bin/ and write
 # eval/results/{split}_{version}.json (see eval/run_eval.py --help).
