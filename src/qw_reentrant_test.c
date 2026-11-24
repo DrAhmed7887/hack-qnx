@@ -17,6 +17,9 @@
  * Not part of the shipped qw CLI; built and run only for `make test`.
  */
 #include <math.h>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>

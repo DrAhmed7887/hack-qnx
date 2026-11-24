@@ -1,4 +1,7 @@
 /* qw_core.c -- Quiet Ward C11 core implementation. See qw_core.h. */
+#if !defined(_POSIX_C_SOURCE) && !defined(__QNX__)
+#define _POSIX_C_SOURCE 200809L
+#endif
 #include "qw_core.h"
 
 #include <stdio.h>
