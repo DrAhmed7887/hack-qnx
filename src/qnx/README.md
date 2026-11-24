@@ -17,6 +17,33 @@ Written, **not compiled with `qcc` and not run on QEMU** (the `#ifdef __QNX__` b
 
 Build entry points: `make qnx` (cross-build with `qcc`) and `make qnx-check` (is `qcc` available). Both wait on P1, the myQNX SDP 8.0 licence. The sections below describe the intended mapping; every QNX primitive named there is a plan until it has been built and booted on 8.0.
 
+## Where QNX 8.0 Appears (Reviewer Map)
+
+Same table as the top-level `README.md`. Every primitive below is present in the committed source in this directory; every target output is unbooted.
+
+| File | QNX 8.0 / POSIX / C11 primitives & tooling present in source | Expected target output | Scene |
+|---|---|---|---|
+| `qw_acq.c` | `shm_open`, `mmap`, `ChannelCreate`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceivePulse`, `name_open`, `MsgSendPulse`, `name_close` | [PENDING P1: replay .qw ring + QW_PULSE_ALARM_RAISED pulse, visible in pidin] | S02, S05 |
+| `qw_detector.c` | `name_attach`, `name_open`, `name_close`, `shm_open`, `mmap`, `MsgReceive`, `MsgReply`, `MsgError`, `TimerTimeout`, `MsgSend`, `ConnectDetach` | [PENDING P1: reads seqlock ring, sends QW_MSG_DECISION via MsgSend, restarted/killed in soak] | S02, S05 |
+| `qw_alarm_mgr.c` | `name_attach`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceive`, `MsgReply`, `MsgError`, `pthread_create`, `pthread_detach` | [PENDING P1: 50 ms watchdog tick, deadline latch CONFIRM, journal + /dev/quietward thread, visible in pidin] | S02, S05 |
+| `qw_failopen.c` | `open` with `O_NOFOLLOW`, `write` of `CONFIRM_ALL`, `qw_log_emit` at CRIT (decoupled from the supervisor) | [PENDING P1: writes CONFIRM_ALL to /var/run/quietward/alarm_out + CRIT in slog2info -b quietward] | S02, S05 |
+| `qw_supervisor.c` | `posix_spawn`, `waitpid`, `kill`, `sigaction` | [PENDING P1: spawns/restarts qw_alarm_mgr and qw_detector, invokes qw_failopen after >3 restarts, visible in pidin] | S02, S05 |
+| `qw_bedctl.c` | `open("/dev/quietward")`, `devctl(QW_DCMD_BED_STATE)` | [PENDING P1: prints per-bed JSON including failopen_active via devctl] | S05 |
+| `qw_resmgr.c` | `dispatch_create`, `iofunc_func_init`, `iofunc_attr_init`, `resmgr_attach("/dev/quietward")`, `dispatch_context_alloc`, `dispatch_block`, `dispatch_handler`, `iofunc_read_verify`, `iofunc_write_verify`, `iofunc_devctl_default`, `resmgr_msgget`, `_IO_SET_WRITE_NBYTES`, `MsgReply` | [PENDING P1: cat /dev/quietward JSONL stream, write() nurse ACK] | S02, S05 |
+| `qw_log.c` | `slog2_register`, `slog2f` (`SLOG2_INFO`, `SLOG2_WARNING`, `SLOG2_ERROR`, `SLOG2_CRITICAL`) | [PENDING P1: slog2info -b quietward audit lines] | S05 |
+| `qw_ring.h`, `qw_ring.c` | C11 `_Atomic` seqlock ring over `/qw_ring_bed%u` shared memory (`qw_ring_init`, `qw_ring_write`, `qw_ring_read_tail`; mapped with `shm_open`/`mmap` on QNX) | [PENDING P1: lock-free sample ring between qw_acq and qw_detector over /dev/shmem/qw_ring_bed*] | S02, S05 |
+| `qw_ipc.h` | `QW_DCMD_BED_STATE`, `QW_PULSE_*`, `QW_MSG_DECISION`, `qw_ring_hdr_t` (`_Atomic` ring header) | [PENDING P1: shared IPC contract across all QNX processes] | S02, S05 |
+| `qw_gateway_state.h`, `qw_gateway_state.c`, `qw_gateway_test.c` | portable C11 gateway state machine, `O_NOFOLLOW` journal, `529 checks, 0 failed` on host | `qw_gateway_test: 529 checks, 0 failed` (host); [PENDING P1: linked into qw_alarm_mgr, qw_acq, qw_failopen] | S02, S05 |
+| `qw_resmgr.h`, `qw_log.h` | C11 interfaces for `/dev/quietward` JSONL serializer and `slog2` audit formatter | host-verified in `qw_gateway_test`; [PENDING P1: /dev/quietward + slog2f on target] | S02, S05 |
+| `../../scripts/p1_hello_ipc.c` | `ChannelCreate`, `ConnectAttach`, `MsgSend`, `MsgReceive`, `MsgReply`, `TimerTimeout`, `slog2_register`, `slog2f`, `clock_gettime` | [PENDING P1: P1_HELLO_RESULT=PASS + slog2info -b qw_hello] | S05 |
+| `../../scripts/p1_qplms_probe.sh` | `plms` / `plmsctrl` / `slog2info -b plms` availability probe | [PENDING P1: PROBE_RESULT=QPLMS_PRESENT or USE_QW_SUPERVISOR_FALLBACK] | S02, S07 |
+| `../../scripts/p1_tcg_jitter.c` | `clock_gettime(CLOCK_MONOTONIC)`, `clock_gettime(CLOCK_REALTIME)`, `nanosleep` QEMU TCG jitter calibrator | [PENDING P1: recommended --watchdog-ms] | S05, S07 |
+| `../../Makefile` | `qnx-check`, `qnx`, `qnx-build`, `qnx-clean`: `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`, `-lm -lslog2` | [PENDING P1: build/qnx/{qw_acq,qw_detector,qw_alarm_mgr,qw_failopen,qw_supervisor,qw_bedctl}] | S07 |
+| `../../scripts/p3_qnx_soak.sh` | `pidin`, `slay`, `/dev/quietward`, `qw_bedctl`, `slog2info` (10 runs) | [PENDING P1: submission/g3/g3_run_01..10.txt] | S05 |
+| `../../.devcontainer/devcontainer.json` | Ubuntu 24.04 + `qemu-system-x86` + `build-essential` bring-up container | [PENDING P1: devcontainer config written, not yet built or run] | S07 |
+
+Build and run steps: top-level `README.md`, section "QNX 8.0 Target, Toolchain & Build/Run Instructions".
+
 ## Planned mapping
 
 This document describes how the host-side C11 core (`src/qw_core.c`,
@@ -126,13 +153,7 @@ operational record.
 
 ## Fault recovery & supervision: `QPLMS` (with `qw_supervisor` fallback)
 
-High Availability Manager (`HAM`) is deprecated in QNX 8.0; the QNX 8.0
-replacement is **QNX Process Launch and Monitor Service (`QPLMS`: `plms`,
-dev utility `plmsctrl`)**, configured declaratively via a
-component DAG config file (`depend`, `task "recovery"`, `task "monitor"`,
-`on_fault`) rather than a C registration API (`research/QPLMS_NOTES.md`).
-SDP 8.x removes `aps`, enforces priorities `1-253`, and replaces `runmask`
-with `cluster`.
+We plan to use **QNX Process Launch and Monitor Service (`QPLMS`: `plms`, dev utility `plmsctrl`)** declaratively via a component DAG config file (`depend`, `task "recovery"`, `task "monitor"`, `on_fault`) instead of `HAM` (unverified on our target image until P1; all `QPLMS`, `aps`, priority `1-253`, and `cluster` details remain to be verified against SDP 8.0 headers/image at P1).
 
 - **Acquisition (`qw_acq`)** feeds a per-bed seqlock shared-memory ring and
   raises `QW_PULSE_ALARM_RAISED` directly to both `qw_detector` and
@@ -142,9 +163,9 @@ with `cluster`.
   `CONFIRM` automatically on timeout or pending-table overflow. Fail-open
   (`qw_failopen`) is decoupled from process supervision so alarm
   preservation does not depend on QPLMS staying up.
-- **P1 QSTI verification & fallback:** At QNX 8.0 target bring-up, QPLMS
+- **P1 QEMU target verification & fallback:** At QNX 8.0 target bring-up, QPLMS
   availability in the target image is checked within a 45-minute cap. If
-  `plms` is absent or unsupported in the QSTI image, a ~40-line parent
+  `plms` is absent or unsupported in the QNX 8.0 QEMU image, a ~40-line parent
   `qw_supervisor` (`posix_spawn()` + `waitpid()` / death pulse) provides
   honestly labelled process supervision instead of claiming QPLMS.
 

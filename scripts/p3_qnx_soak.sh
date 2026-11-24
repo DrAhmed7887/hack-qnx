@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # p3_qnx_soak.sh -- G3 soak harness for the Quiet Ward QNX 8.0 gateway.
 #
 # Run ON the QNX target (QEMU image) as root, after `make qnx` binaries and
@@ -58,13 +58,13 @@ FAILS=0
 CHECKS=0
 
 check() { # check <description> <command...>
-    local desc=$1
+    check_desc=$1
     shift
     CHECKS=$((CHECKS + 1))
     if "$@" >/dev/null 2>&1; then
-        echo "PASS  $desc"
+        echo "PASS  $check_desc"
     else
-        echo "FAIL  $desc"
+        echo "FAIL  $check_desc"
         FAILS=$((FAILS + 1))
     fi
 }
@@ -86,8 +86,12 @@ replay_record() { # replay_record <name> <alarm> <bed> <seq>
 journal_has() { grep -q "^$1 $2 " "$STATE_DIR/journal"; } # journal_has <op> <seq>
 
 one_run() {
-    local n=$1 seq=100
-    echo "=== run $n of $RUNS: $(date) ==="
+    # POSIX sh/ksh: no `local`; one_run is not recursive, so plain variables
+    # are safe (run_n is distinct from the main loop's n).
+    unset review_seq old_det new_det
+    run_n=$1
+    seq=100
+    echo "=== run $run_n of $RUNS: $(date) ==="
     reset_state
 
     "$BIN_DIR/qw_supervisor" "$RULES" "$DETCFG" --bin-dir "$BIN_DIR" &
@@ -101,10 +105,20 @@ one_run() {
     check "$DEV exists" test -c "$DEV"
 
     # 3. replay the demo records, one bed each, and let the deadline pass
-    local bed=0 rec alarm_var alarm
+    bed=0
     for rec in $RECORDS; do
-        alarm_var="ALARM_FOR_$rec"
-        alarm=${!alarm_var}
+        case "$rec" in
+            a109l) alarm=$ALARM_FOR_a109l ;;
+            a653l) alarm=$ALARM_FOR_a653l ;;
+            v188s) alarm=$ALARM_FOR_v188s ;;
+            *)
+                echo "error: unknown demo record '$rec'" >&2
+                kill "$SUP_PID" 2>/dev/null
+                wait "$SUP_PID" 2>/dev/null
+                reset_state
+                exit 2
+                ;;
+        esac
         seq=$((seq + 1))
         replay_record "$rec" "$alarm" "$bed" "$seq"
         check "replay $rec ($alarm, bed $bed, seq $seq): qw_acq exit 0" test $? -eq 0
@@ -116,7 +130,6 @@ one_run() {
 
     # 4. resource manager: read, nurse ACK, bedctl
     check "cat $DEV returns JSONL" sh -c "cat $DEV | head -n 1 | grep -q '^{\"seq\":'"
-    local review_seq
     review_seq=$(grep '^Q ' "$STATE_DIR/journal" | tail -n 1 | cut -d' ' -f2)
     if [ -n "$review_seq" ]; then
         check "nurse ACK of seq $review_seq via write()" sh -c \
@@ -130,7 +143,6 @@ one_run() {
     check "qw_bedctl 9 (bad bed) fails" sh -c "! $BIN_DIR/qw_bedctl 9"
 
     # 5. detector killed: next alarm must still be latched CONFIRM
-    local old_det
     old_det=$(pidin -p qw_detector 2>/dev/null | awk 'NR==2{print $1}')
     slay -s KILL qw_detector
     seq=$((seq + 1))
@@ -141,19 +153,20 @@ one_run() {
         "$BIN_DIR/qw_bedctl 3 | grep -q '\"failopen_active\":1'"
     sleep 2
     check "supervisor restarted qw_detector" alive qw_detector
-    local new_det
     new_det=$(pidin -p qw_detector 2>/dev/null | awk 'NR==2{print $1}')
-    check "restarted detector has a new pid (was ${old_det:-none})" test "$new_det" != "$old_det"
+    check "restarted detector has a new pid (was ${old_det:-none})" \
+        sh -c '[ -n "$1" ] && [ -n "$2" ] && [ "$1" != "$2" ]' _ "$old_det" "$new_det"
 
     # 6. slog2 evidence, then stop
-    slog2info -b quietward > "$OUT_DIR/slog2_run_$(printf '%02d' "$n").txt" 2>&1
-    check "slog2info captured quietward audit lines" grep -q 'sev=' "$OUT_DIR/slog2_run_$(printf '%02d' "$n").txt"
-    check "slog2info shows the fail-open latch (CRIT)" grep -q 'sev=CRIT' "$OUT_DIR/slog2_run_$(printf '%02d' "$n").txt"
+    slog_out="$OUT_DIR/slog2_run_$(printf '%02d' "$run_n").txt"
+    slog2info -b quietward > "$slog_out" 2>&1
+    check "slog2info captured quietward audit lines" grep -q 'sev=' "$slog_out"
+    check "slog2info shows the fail-open latch (CRIT)" grep -q 'sev=CRIT' "$slog_out"
 
     kill "$SUP_PID" 2>/dev/null
     wait "$SUP_PID" 2>/dev/null
     reset_state
-    echo "=== run $n done ==="
+    echo "=== run $run_n done ==="
 }
 
 mkdir -p "$OUT_DIR" || exit 2

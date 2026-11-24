@@ -189,14 +189,15 @@ int main(int argc, char **argv) {
             uint16_t type;
             char raw[64];
         } m;
+        m.type = 0;
         struct _msg_info info;
-        int rcvid = MsgReceive(att->chid, &m, sizeof m, &info);
+        rcvid_t rcvid = MsgReceive(att->chid, &m, sizeof m, &info);
         if (rcvid == -1) {
             if (errno == EINTR) continue;
             break;
         }
         if (rcvid > 0) { /* name_open() handshake or stray message */
-            if (m.type == _IO_CONNECT)
+            if (info.msglen >= (ssize_t)sizeof m.type && m.type == _IO_CONNECT)
                 MsgReply(rcvid, EOK, NULL, 0);
             else
                 MsgError(rcvid, ENOSYS);

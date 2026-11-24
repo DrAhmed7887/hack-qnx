@@ -1,0 +1,1 @@
+d1d0bd6587d3a27291406ed82ee949a69b5dea2e 2026-11-22 18:26:01 +0100 chore: scaffold Quiet Ward (steering, guard, pending rules, evidence)

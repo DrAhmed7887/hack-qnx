@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -186,6 +187,8 @@ int main(int argc, char **argv) {
     pthread_t rt;
     if (pthread_create(&rt, NULL, resmgr_thread, &ctx) != 0)
         qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "cannot start resource manager thread");
+    else
+        pthread_detach(rt);
 
     name_attach_t *att = name_attach(NULL, QW_NAME_ALARM_MGR, 0);
     if (att == NULL) {
@@ -221,15 +224,17 @@ int main(int argc, char **argv) {
             qw_msg_decision_t decision;
             char raw[256];
         } m;
+        m.type = 0;
         struct _msg_info info;
-        int rcvid = MsgReceive(att->chid, &m, sizeof m, &info);
+        rcvid_t rcvid = MsgReceive(att->chid, &m, sizeof m, &info);
         if (rcvid == -1) {
             if (errno == EINTR) continue;
             break;
         }
 
         if (rcvid > 0) {
-            if (info.msglen == (int)sizeof(qw_msg_decision_t) && info.srcmsglen == info.msglen) {
+            if (info.msglen >= 0 && (size_t)info.msglen == sizeof(qw_msg_decision_t) &&
+                info.srcmsglen == info.msglen) {
                 qw_msg_reply_t reply = {QW_IPC_VERSION, (int32_t)QW_ST_BAD_VERSION, 0};
                 if (m.decision.version == QW_IPC_VERSION) {
                     pthread_mutex_lock(&g_mu);
@@ -240,7 +245,7 @@ int main(int argc, char **argv) {
                     qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "decision with bad version rejected");
                 }
                 MsgReply(rcvid, EOK, &reply, sizeof reply);
-            } else if (m.type == _IO_CONNECT) { /* name_open() handshake */
+            } else if (info.msglen >= (ssize_t)sizeof m.type && m.type == _IO_CONNECT) { /* name_open() handshake */
                 MsgReply(rcvid, EOK, NULL, 0);
             } else {
                 MsgError(rcvid, EBADMSG);
@@ -253,7 +258,7 @@ int main(int argc, char **argv) {
             continue;
         }
         if (m.pulse.code == _PULSE_CODE_UNBLOCK) {
-            MsgError(m.pulse.value.sival_int, EINTR);
+            MsgError((rcvid_t)m.pulse.value.sival_long, EINTR);
             continue;
         }
 

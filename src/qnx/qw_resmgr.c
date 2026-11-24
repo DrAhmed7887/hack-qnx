@@ -127,8 +127,10 @@ typedef struct qw_ocb qw_ocb_t;
 #define IOFUNC_OCB_T qw_ocb_t
 #include <sys/dispatch.h>
 #include <sys/iofunc.h>
+#include <sys/resmgr.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "qw_log.h"
 
@@ -211,8 +213,9 @@ static int qw_io_write(resmgr_context_t *ctp, io_write_t *msg, RESMGR_OCB_T *ocb
 
     size_t nbytes = (size_t)msg->i.nbytes;
     if (nbytes > QW_ACK_MAX_BYTES) return EMSGSIZE;
-    char buf[QW_ACK_MAX_BYTES];
+    char buf[QW_ACK_MAX_BYTES + 1];
     if (nbytes > 0 && resmgr_msgget(ctp, buf, nbytes, sizeof(msg->i)) != (ssize_t)nbytes) return EIO;
+    buf[nbytes] = '\0';
     _IO_SET_WRITE_NBYTES(ctp, (int)nbytes);
 
     uint32_t seq = 0;
@@ -292,8 +295,14 @@ int qw_resmgr_run(qw_resmgr_ctx_t *ctx) {
     ifuncs.write = qw_io_write;
     ifuncs.devctl = qw_io_devctl;
 
-    static iofunc_funcs_t ocb_funcs = {_IOFUNC_NFUNCS, qw_ocb_calloc, qw_ocb_free};
-    static iofunc_mount_t mount = {0, 0, 0, 0, &ocb_funcs};
+    static iofunc_funcs_t ocb_funcs = {
+        .nfuncs = _IOFUNC_NFUNCS,
+        .ocb_calloc = qw_ocb_calloc,
+        .ocb_free = qw_ocb_free,
+    };
+    static iofunc_mount_t mount = {
+        .funcs = &ocb_funcs,
+    };
     iofunc_attr_t ioattr;
     iofunc_attr_init(&ioattr, S_IFCHR | 0660, NULL, &mount); /* nurse-station group, not world */
 

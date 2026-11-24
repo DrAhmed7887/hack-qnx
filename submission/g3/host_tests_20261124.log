@@ -1,0 +1,10 @@
+=== make gateway-test ===
+./build/qw_gateway_test
+ring stress: 10000 frames, 4 readers, ok=8968 busy=85936 torn=0
+qw_gateway_test: 529 checks, 0 failed
+=== make reentrant-test ===
+./build/qw_reentrant_test
+ok: 320 concurrent qw_decide() calls across 8 threads, all consistent with their own record
+=== make fuzz ===
+.venv/bin/python scripts/fuzz_qw.py --count 1000
+fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 4.4s; 0 failure(s)

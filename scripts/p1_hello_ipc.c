@@ -5,10 +5,16 @@
  *   3. slog2_register + slog2f (read back with: slog2info -b qw_hello)
  *   4. clock_gettime(CLOCK_MONOTONIC)
  *
- * QNX build: qcc -Vgcc_ntox86_64 -std=c11 -o p1_hello_ipc scripts/p1_hello_ipc.c
+ * QNX build: qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror -o p1_hello_ipc scripts/p1_hello_ipc.c -lslog2
  * Off QNX this compiles to a stub that says so.
  */
+#ifdef __QNX__
+#ifndef _QNX_SOURCE
+#define _QNX_SOURCE
+#endif
+#else
 #define _POSIX_C_SOURCE 200809L
+#endif
 
 #include <stdio.h>
 
@@ -43,13 +49,13 @@ static void *server(void *arg) {
     (void)arg;
     req_t req;
     struct _msg_info info;
-    int rcvid = MsgReceive(atomic_load(&g_chid), &req, sizeof req, &info);
+    rcvid_t rcvid = MsgReceive(atomic_load(&g_chid), &req, sizeof req, &info);
     if (rcvid <= 0) { /* -1 error, 0 = pulse (none expected here) */
         g_server_rc = 1;
         destroy_channel_once(); /* unblocks a send-blocked client with an error */
         return NULL;
     }
-    if (info.msglen < (int)sizeof req) {
+    if (info.msglen < 0 || (size_t)info.msglen < sizeof req) {
         MsgError(rcvid, EBADMSG);
         g_server_rc = 2;
         return NULL;
