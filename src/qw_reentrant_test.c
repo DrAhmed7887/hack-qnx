@@ -146,6 +146,10 @@ int main(void) {
 
     memset(&g_cfg, 0, sizeof(g_cfg));
     g_cfg.min_prominence_frac = 0.15;
+    g_cfg.min_pulse_interval_s = 0.24;
+    g_cfg.trailing_margin_s = 1.0;
+    g_cfg.max_trailing_gap_frac = 0.80;
+    g_cfg.min_trailing_pulses = 2;
     g_cfg.activity_weight = 0.8;
     g_cfg.regularity_weight = 0.2;
     g_cfg.min_expected_bpm_floor = 30.0;

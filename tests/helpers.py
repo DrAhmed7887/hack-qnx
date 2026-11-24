@@ -99,7 +99,8 @@ def make_ecg_like(fs: int, duration_s: float, bpm: float, amplitude: float = 1.0
     return sig.astype(np.float32)
 
 
-def write_rules(path: Path, window_s=16, min_signal_quality=0.9, never_suppress=None, omit_suppression_keys=None):
+def write_rules(path: Path, window_s=16, min_signal_quality=0.9, never_suppress=None, omit_suppression_keys=None,
+                alarm_overrides=None):
     """omit_suppression_keys is an optional iterable of keys among
     {"window_s", "min_signal_quality", "never_suppress"} to leave out of
     the suppression object entirely, for testing fail-closed behaviour."""
@@ -141,6 +142,8 @@ def write_rules(path: Path, window_s=16, min_signal_quality=0.9, never_suppress=
         "suppression": suppression,
         "score": "Challenge score = (TP+TN)/(TP+TN+FP+5*FN)",
     }
+    for name, fields in (alarm_overrides or {}).items():
+        rules["alarms"].setdefault(name, {}).update(fields)
     with open(path, "w") as f:
         json.dump(rules, f, indent=2)
 
@@ -153,6 +156,10 @@ def write_detector_config(
     min_expected_bpm_floor=30.0,
     min_expected_fraction=0.5,
     max_trusted_interval_cv=0.3,
+    min_pulse_interval_s=0.24,
+    trailing_margin_s=1.0,
+    max_trailing_gap_frac=0.80,
+    min_trailing_pulses=2,
     omit_keys=None,
 ):
     """Write a config/detector.json-shaped fixture. omit_keys is an
@@ -174,9 +181,23 @@ def write_detector_config(
         "status": "engineering_default",
         "note": "test fixture",
     }
-    pulse_detector = section("pulse_detector", {"min_prominence_frac": min_prominence_frac})
+    pulse_detector = section(
+        "pulse_detector",
+        {"min_prominence_frac": min_prominence_frac, "min_pulse_interval_s": min_pulse_interval_s},
+    )
     if pulse_detector:
         cfg["pulse_detector"] = pulse_detector
+
+    asystole_trailing = section(
+        "asystole_trailing",
+        {
+            "trailing_margin_s": trailing_margin_s,
+            "max_trailing_gap_frac": max_trailing_gap_frac,
+            "min_trailing_pulses": min_trailing_pulses,
+        },
+    )
+    if asystole_trailing:
+        cfg["asystole_trailing"] = asystole_trailing
 
     signal_quality = section(
         "signal_quality",

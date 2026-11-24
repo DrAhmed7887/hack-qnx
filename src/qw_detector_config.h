@@ -17,7 +17,8 @@
  * {
  *   "status": "engineering_default",
  *   "note": "...",
- *   "pulse_detector": { "min_prominence_frac": 0.15 },
+ *   "pulse_detector": { "min_prominence_frac": 0.15, "min_pulse_interval_s": 0.24 },
+ *   "asystole_trailing": { "trailing_margin_s": 1.0, "max_trailing_gap_frac": 0.80, "min_trailing_pulses": 2 },
  *   "signal_quality": { "activity_weight": 0.8, "regularity_weight": 0.2 },
  *   "pulse_presence": { "min_expected_bpm_floor": 30.0, "min_expected_fraction": 0.5 },
  *   "suppression_contradiction": { "max_trusted_interval_cv": 0.3 }
@@ -32,6 +33,10 @@ extern "C" {
 
 typedef struct {
     double min_prominence_frac;      /* pulse_detector.min_prominence_frac; must be in (0, 1) */
+    double min_pulse_interval_s;     /* pulse_detector.min_pulse_interval_s; must be in (0, 1) */
+    double trailing_margin_s;        /* asystole_trailing.trailing_margin_s; must be in [0, 10] */
+    double max_trailing_gap_frac;    /* asystole_trailing.max_trailing_gap_frac; must be in (0, 1] */
+    long min_trailing_pulses;        /* asystole_trailing.min_trailing_pulses; integer >= 1 */
     double activity_weight;          /* signal_quality.activity_weight; must be in [0, 1] */
     double regularity_weight;        /* signal_quality.regularity_weight; must be in [0, 1] */
     double min_expected_bpm_floor;   /* pulse_presence.min_expected_bpm_floor; must be > 0 */

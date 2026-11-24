@@ -2,7 +2,13 @@
   "status": "engineering_default",
   "note": "Detector/signal-processing engineering constants, NOT clinical rules. These tune the beat/pulse detectors and signal-quality index implemented in src/qw_core.c; they do not encode any alarm threshold (those live in rules/alarm_rules.json). Loaded at startup; qw fails closed (nonzero exit, stderr message) if any field below is missing or out of range.",
   "pulse_detector": {
-    "min_prominence_frac": 0.15
+    "min_prominence_frac": 0.15,
+    "min_pulse_interval_s": 0.24
+  },
+  "asystole_trailing": {
+    "trailing_margin_s": 1.0,
+    "max_trailing_gap_frac": 0.80,
+    "min_trailing_pulses": 2
   },
   "signal_quality": {
     "activity_weight": 0.8,

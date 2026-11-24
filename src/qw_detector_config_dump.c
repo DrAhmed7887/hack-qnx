@@ -21,6 +21,10 @@ int main(int argc, char **argv) {
     }
 
     printf("min_prominence_frac=%g\n", cfg.min_prominence_frac);
+    printf("min_pulse_interval_s=%g\n", cfg.min_pulse_interval_s);
+    printf("trailing_margin_s=%g\n", cfg.trailing_margin_s);
+    printf("max_trailing_gap_frac=%g\n", cfg.max_trailing_gap_frac);
+    printf("min_trailing_pulses=%ld\n", cfg.min_trailing_pulses);
     printf("activity_weight=%g\n", cfg.activity_weight);
     printf("regularity_weight=%g\n", cfg.regularity_weight);
     printf("min_expected_bpm_floor=%g\n", cfg.min_expected_bpm_floor);

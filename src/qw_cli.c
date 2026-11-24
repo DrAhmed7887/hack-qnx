@@ -2,7 +2,8 @@
  *
  * Prints one JSON line to stdout:
  *   {"record": "...", "alarm": "...", "decision": "CONFIRM"|"SUPPRESS_TO_REVIEW",
- *    "reason": "...", "sqi": 0.00}
+ *    "reason": "...", "sqi": 0.00, "rules_status": "...", "ecg_sqi": 0.00,
+ *    "pulse_sqi": 0.00}
  *
  * Exit code 0 on success, nonzero on any load/parse/validation error
  * (with a message on stderr). Both the rules file and the detector
@@ -104,7 +105,10 @@ int main(int argc, char **argv) {
     print_json_string(stdout, decision_str);
     printf(", \"reason\": ");
     print_json_string(stdout, result.reason);
-    printf(", \"sqi\": %.4f}\n", result.sqi);
+    printf(", \"sqi\": %.4f", result.sqi);
+    printf(", \"rules_status\": ");
+    print_json_string(stdout, rules.status);
+    printf(", \"ecg_sqi\": %.4f, \"pulse_sqi\": %.4f}\n", result.ecg_sqi, result.pulse_sqi);
 
     qw_record_free(&rec);
     return 0;

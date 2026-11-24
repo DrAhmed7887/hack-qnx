@@ -52,6 +52,10 @@ def test_reads_real_project_detector_config():
         out[key] = value
 
     assert out["min_prominence_frac"] == "0.15"
+    assert out["min_pulse_interval_s"] == "0.24"
+    assert out["trailing_margin_s"] == "1"
+    assert out["max_trailing_gap_frac"] == "0.8"
+    assert out["min_trailing_pulses"] == "2"
     assert out["activity_weight"] == "0.8"
     assert out["regularity_weight"] == "0.2"
     assert out["min_expected_bpm_floor"] == "30"
@@ -81,6 +85,10 @@ def test_missing_file_fails_loudly(tmp_path):
     "missing_key",
     [
         "pulse_detector.min_prominence_frac",
+        "pulse_detector.min_pulse_interval_s",
+        "asystole_trailing.trailing_margin_s",
+        "asystole_trailing.max_trailing_gap_frac",
+        "asystole_trailing.min_trailing_pulses",
         "signal_quality.activity_weight",
         "signal_quality.regularity_weight",
         "pulse_presence.min_expected_bpm_floor",
@@ -107,6 +115,52 @@ def test_min_prominence_frac_out_of_range_fails_closed(tmp_path, bad_frac):
 
     assert proc.returncode != 0
     assert "load_failed" in proc.stderr
+
+
+@pytest.mark.parametrize(
+    "field,bad_value",
+    [
+        ("min_pulse_interval_s", 0),
+        ("min_pulse_interval_s", -0.1),
+        ("min_pulse_interval_s", 1.0),
+        ("min_pulse_interval_s", 2.0),
+        ("trailing_margin_s", -0.5),
+        ("trailing_margin_s", 10.5),
+        ("max_trailing_gap_frac", 0),
+        ("max_trailing_gap_frac", -0.2),
+        ("max_trailing_gap_frac", 1.1),
+        ("min_trailing_pulses", 0),
+        ("min_trailing_pulses", -1),
+        ("min_trailing_pulses", 1.5),
+    ],
+)
+def test_new_fields_out_of_range_fail_closed(tmp_path, field, bad_value):
+    cfg_path = tmp_path / "detector.json"
+    write_detector_config(cfg_path, **{field: bad_value})
+
+    proc = dump_config_raw(cfg_path)
+
+    assert proc.returncode != 0
+    assert "load_failed" in proc.stderr
+    assert field in proc.stderr
+
+
+@pytest.mark.parametrize(
+    "field,ok_value",
+    [
+        ("trailing_margin_s", 0.0),
+        ("trailing_margin_s", 10.0),
+        ("max_trailing_gap_frac", 1.0),
+        ("min_trailing_pulses", 1),
+    ],
+)
+def test_new_fields_boundary_values_accepted(tmp_path, field, ok_value):
+    cfg_path = tmp_path / "detector.json"
+    write_detector_config(cfg_path, **{field: ok_value})
+
+    proc = dump_config_raw(cfg_path)
+
+    assert proc.returncode == 0, proc.stderr
 
 
 @pytest.mark.parametrize("bad_weight", [-0.1, 1.1])

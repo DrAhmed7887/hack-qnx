@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    printf("rules.status=%s\n", rules.status);
     printf("n_alarms=%zu\n", rules.n_alarms);
     for (size_t i = 0; i < rules.n_alarms; i++) {
         const qw_alarm_def_t *a = &rules.alarms[i];

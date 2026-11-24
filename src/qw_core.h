@@ -118,6 +118,8 @@ typedef struct {
     qw_decision_t decision;
     char reason[QW_REASON_LEN];
     double sqi; /* best available signal-quality index considered */
+    double ecg_sqi;   /* SQI of the selected ECG channel (0 if none) */
+    double pulse_sqi; /* SQI of the selected pulsatile channel (0 if none) */
 } qw_decision_result_t;
 
 /* Caller-provided scratch space for qw_decide(), replacing the function-
@@ -128,6 +130,7 @@ typedef struct {
 typedef struct {
     uint32_t beat_idx[QW_MAX_BEATS];
     uint32_t pulse_idx[QW_MAX_BEATS];
+    uint32_t cand_idx[QW_MAX_BEATS]; /* per-candidate-channel scratch for channel selection */
 } qw_decide_workspace_t;
 
 /* Decide CONFIRM vs SUPPRESS_TO_REVIEW for alarm_type raised at the end of

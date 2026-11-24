@@ -1,0 +1,4836 @@
+{
+  "split": "train",
+  "split_sha256": "859456c8f10ac4007d651d5ba7c742f7387d8513c6890416112eab7ea8e43d76",
+  "version": "fixed",
+  "rules_status": "pending_signoff",
+  "n_records": 523,
+  "overall": {
+    "TP": 202,
+    "TN": 86,
+    "FP": 232,
+    "FN": 3,
+    "challenge_score": 0.5383177570093458,
+    "score_pct": 53.83
+  },
+  "per_alarm_type": {
+    "Asystole": {
+      "TP": 14,
+      "TN": 54,
+      "FP": 16,
+      "FN": 1,
+      "challenge_score": 0.7640449438202247,
+      "score_pct": 76.4
+    },
+    "Bradycardia": {
+      "TP": 31,
+      "TN": 22,
+      "FP": 8,
+      "FN": 1,
+      "challenge_score": 0.803030303030303,
+      "score_pct": 80.3
+    },
+    "Tachycardia": {
+      "TP": 92,
+      "TN": 1,
+      "FP": 5,
+      "FN": 0,
+      "challenge_score": 0.9489795918367347,
+      "score_pct": 94.9
+    },
+    "Ventricular_Tachycardia": {
+      "TP": 61,
+      "TN": 9,
+      "FP": 167,
+      "FN": 1,
+      "challenge_score": 0.2892561983471074,
+      "score_pct": 28.93
+    },
+    "Ventricular_Flutter_Fib": {
+      "TP": 4,
+      "TN": 0,
+      "FP": 36,
+      "FN": 0,
+      "challenge_score": 0.1,
+      "score_pct": 10.0
+    }
+  },
+  "true_alarms_suppressed_count": 3,
+  "baseline_no_suppression": {
+    "overall": {
+      "TP": 205,
+      "TN": 0,
+      "FP": 318,
+      "FN": 0,
+      "challenge_score": 0.3919694072657744,
+      "score_pct": 39.2
+    },
+    "per_alarm_type": {
+      "Asystole": {
+        "TP": 15,
+        "TN": 0,
+        "FP": 70,
+        "FN": 0,
+        "challenge_score": 0.17647058823529413,
+        "score_pct": 17.65
+      },
+      "Bradycardia": {
+        "TP": 32,
+        "TN": 0,
+        "FP": 30,
+        "FN": 0,
+        "challenge_score": 0.5161290322580645,
+        "score_pct": 51.61
+      },
+      "Tachycardia": {
+        "TP": 92,
+        "TN": 0,
+        "FP": 6,
+        "FN": 0,
+        "challenge_score": 0.9387755102040817,
+        "score_pct": 93.88
+      },
+      "Ventricular_Tachycardia": {
+        "TP": 62,
+        "TN": 0,
+        "FP": 176,
+        "FN": 0,
+        "challenge_score": 0.2605042016806723,
+        "score_pct": 26.05
+      },
+      "Ventricular_Flutter_Fib": {
+        "TP": 4,
+        "TN": 0,
+        "FP": 36,
+        "FN": 0,
+        "challenge_score": 0.1,
+        "score_pct": 10.0
+      }
+    }
+  },
+  "true_alarms_suppressed": [
+    {
+      "record": "a161l",
+      "alarm_type": "Asystole",
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=3, trailing_gap=0.63s, max_gap=1.77s < 3.20s) contradicts asystole; sqi=0.93, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v636s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=84bpm and ecg max hr=82bpm vs threshold >100bpm; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b734s",
+      "alarm_type": "Bradycardia",
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=45bpm, ecg min hr=45bpm vs bradycardia threshold <40bpm; sqi=0.93, logged for nurse review (never discarded)"
+    }
+  ],
+  "details": [
+    {
+      "record": "v100s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9941,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.35 too irregular to trust hr=131bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v102s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.987,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=111bpm exceeds threshold >100bpm (pulse max hr=112bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "a104s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8637,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "a105l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.832,
+      "reason": "pulsatile channel sqi=0.74 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "t106s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9572,
+      "reason": "pulsatile channel sqi=0.85 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t107l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9571,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t108s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9349,
+      "reason": "pulsatile channel sqi=0.80 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "a109l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.978,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.12s, max_gap=1.02s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t110s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9667,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=159bpm exceeds threshold >140bpm (pulse max hr=168bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v111l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9351,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=125bpm exceeds threshold >100bpm (pulse max hr=125bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t112s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9696,
+      "reason": "pulsatile channel sqi=0.82 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t116s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.965,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=160bpm exceeds threshold >140bpm (pulse max hr=71bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "t117l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9695,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t118s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9402,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v119l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9335,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.31 too irregular to trust hr=133bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "f121l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9375,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.94)"
+    },
+    {
+      "record": "v122s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9105,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.38 too irregular to trust hr=97bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "b124s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9456,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=38bpm, ecg min hr=38bpm vs bradycardia threshold <40bpm); confirming (sqi=0.95)"
+    },
+    {
+      "record": "b126s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9066,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=40bpm, ecg min hr=34bpm vs bradycardia threshold <40bpm); confirming (sqi=0.91)"
+    },
+    {
+      "record": "v127l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9259,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=104bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v128s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9344,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=197bpm exceeds threshold >100bpm (pulse max hr=100bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "f130s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9649,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.96)"
+    },
+    {
+      "record": "v132s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9288,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.35 too irregular to trust hr=135bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v133l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9316,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.43 too irregular to trust hr=132bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "a134s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9845,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.12s, max_gap=0.74s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v135l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9546,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=135bpm exceeds threshold >100bpm (pulse max hr=137bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v139l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9182,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.31 too irregular to trust hr=72bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v140s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9931,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=177bpm exceeds threshold >100bpm (pulse max hr=143bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v141l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9369,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "a142s",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8586,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v143l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9163,
+      "reason": "pulsatile channel sqi=0.80 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "f144s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9586,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.96)"
+    },
+    {
+      "record": "v146s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9355,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=96bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v148s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.996,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=187bpm exceeds threshold >100bpm (pulse max hr=64bpm)); confirming (sqi=1.00)"
+    },
+    {
+      "record": "t149l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9802,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.37 too irregular to trust hr=107bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "t150s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9795,
+      "reason": "pulsatile channel sqi=0.88 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t151l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9773,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.46 too irregular to trust hr=103bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "a152s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9835,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=9, trailing_gap=0.06s, max_gap=0.58s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v153l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9892,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=120bpm exceeds threshold >100bpm (pulse max hr=98bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v154s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.991,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=216bpm exceeds threshold >100bpm (pulse max hr=117bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "t156s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9482,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t157l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9396,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.36 too irregular to trust hr=105bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v158s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.925,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.31 too irregular to trust hr=73bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v160s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9548,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=223bpm exceeds threshold >100bpm (pulse max hr=209bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "a161l",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "FN",
+      "sqi": 0.9293,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=3, trailing_gap=0.63s, max_gap=1.77s < 3.20s) contradicts asystole; sqi=0.93, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v162s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9467,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.32 too irregular to trust hr=115bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "a165l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9881,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.26s, max_gap=0.84s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v166s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9507,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=119bpm exceeds threshold >100bpm (pulse max hr=149bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "a167l",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.86,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v168s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9793,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.33 too irregular to trust hr=157bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v169l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9533,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=154bpm exceeds threshold >100bpm (pulse max hr=108bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "a171l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9818,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=11, trailing_gap=0.34s, max_gap=0.46s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t175l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.97,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=176bpm exceeds threshold >140bpm (pulse max hr=178bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v176s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9696,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=200bpm exceeds threshold >100bpm (pulse max hr=80bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "v177l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.945,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=229bpm exceeds threshold >100bpm (pulse max hr=157bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "a178s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.991,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.58s, max_gap=0.77s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v179l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9886,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=115bpm exceeds threshold >100bpm (pulse max hr=88bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v180s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9517,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=69bpm and ecg max hr=92bpm vs threshold >100bpm; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v181l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9667,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v182s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9657,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=121bpm exceeds threshold >100bpm (pulse max hr=173bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "b183l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8879,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "b184s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9604,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=61bpm, ecg min hr=35bpm vs bradycardia threshold <40bpm); confirming (sqi=0.96)"
+    },
+    {
+      "record": "a185l",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8612,
+      "reason": "pulsatile channel sqi=0.06 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "a186s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8608,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "b187l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9273,
+      "reason": "pulsatile channel sqi=0.83 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "v188s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9673,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=69bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "f189l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.988,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.99)"
+    },
+    {
+      "record": "t191l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9539,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=142bpm exceeds threshold >140bpm (pulse max hr=134bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "t192s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9425,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.43 too irregular to trust hr=101bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "t193l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.963,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=142bpm exceeds threshold >140bpm (pulse max hr=127bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v194s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9384,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.34 too irregular to trust hr=82bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "f196s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.946,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.95)"
+    },
+    {
+      "record": "v197l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9532,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=109bpm exceeds threshold >100bpm (pulse max hr=111bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v198s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9593,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=192bpm exceeds threshold >100bpm (pulse max hr=120bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v199l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9677,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=129bpm exceeds threshold >100bpm (pulse max hr=131bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v200s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9689,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=197bpm exceeds threshold >100bpm (pulse max hr=121bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "a203l",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.86,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v205l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9367,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.35 too irregular to trust hr=94bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v206s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9466,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=136bpm exceeds threshold >100bpm (pulse max hr=136bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "t209l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9245,
+      "reason": "pulsatile channel sqi=0.88 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v210s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9933,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=178bpm exceeds threshold >100bpm (pulse max hr=129bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v211l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9799,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=134bpm exceeds threshold >100bpm (pulse max hr=126bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v212s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9947,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=146bpm exceeds threshold >100bpm (pulse max hr=126bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "t214s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9603,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=151bpm exceeds threshold >140bpm (pulse max hr=152bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "b216s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9824,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=71bpm, ecg min hr=38bpm vs bradycardia threshold <40bpm); confirming (sqi=0.98)"
+    },
+    {
+      "record": "v217l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9921,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=229bpm exceeds threshold >100bpm (pulse max hr=128bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v218s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9956,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=201bpm exceeds threshold >100bpm (pulse max hr=112bpm)); confirming (sqi=1.00)"
+    },
+    {
+      "record": "a219l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.7629,
+      "reason": "pulsatile channel sqi=0.56 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "b220s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.7274,
+      "reason": "pulsatile channel sqi=0.38 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "v221l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9585,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.34 too irregular to trust hr=97bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v222s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9697,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=87bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "a223l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.992,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.48s, max_gap=0.76s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v224s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9782,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=117bpm exceeds threshold >100bpm (pulse max hr=87bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "a225l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9933,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.37s, max_gap=0.77s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a226s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9649,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.15s, max_gap=0.88s < 3.20s) contradicts asystole; sqi=0.96, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b227l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9287,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=39bpm, ecg min hr=39bpm vs bradycardia threshold <40bpm); confirming (sqi=0.92)"
+    },
+    {
+      "record": "b228s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9443,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=39bpm, ecg min hr=39bpm vs bradycardia threshold <40bpm); confirming (sqi=0.94)"
+    },
+    {
+      "record": "b229l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.941,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=38bpm, ecg min hr=38bpm vs bradycardia threshold <40bpm); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v230s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9904,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=121bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "b231l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9582,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=108bpm, ecg min hr=53bpm vs bradycardia threshold <40bpm; sqi=0.96, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v232s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.92,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.43 too irregular to trust hr=93bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "v233l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9664,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=221bpm exceeds threshold >100bpm (pulse max hr=99bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "t234s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9605,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=154bpm exceeds threshold >140bpm (pulse max hr=139bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "t235l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9357,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=147bpm exceeds threshold >140bpm (pulse max hr=128bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "f236s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9792,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.98)"
+    },
+    {
+      "record": "f237l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9873,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.99)"
+    },
+    {
+      "record": "t238s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9214,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.37 too irregular to trust hr=115bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "t240s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9498,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=151bpm exceeds threshold >140bpm (pulse max hr=151bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v245l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9526,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ECG evidence unavailable (pulse max hr=85bpm vs threshold >100bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v250s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9434,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=115bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t251l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9519,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.34 too irregular to trust hr=97bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "t252s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9541,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.34 too irregular to trust hr=100bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v253l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9536,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=173bpm exceeds threshold >100bpm (pulse max hr=132bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v254s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9293,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.34 too irregular to trust hr=99bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v255l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9596,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=164bpm exceeds threshold >100bpm (pulse max hr=165bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v256s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9807,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=92bpm and ecg max hr=92bpm vs threshold >100bpm; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v257l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.96,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=100bpm and ecg max hr=79bpm vs threshold >100bpm; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v259l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9788,
+      "reason": "pulsatile channel sqi=0.39 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "f260s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9221,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.92)"
+    },
+    {
+      "record": "v262s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9175,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "t263l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9351,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t264s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9511,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=146bpm exceeds threshold >140bpm (pulse max hr=122bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "a267l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.934,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.29s, max_gap=1.09s < 3.20s) contradicts asystole; sqi=0.93, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b268s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9048,
+      "reason": "pulse does not contradict Bradycardia (pulse interval cv=0.39 too irregular to trust hr=63bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "t270s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9319,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v271l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9634,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.41 too irregular to trust hr=102bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "a273l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9721,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=10, trailing_gap=0.29s, max_gap=0.54s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v274s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9946,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=108bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v275l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9256,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.33 too irregular to trust hr=95bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "t277l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9547,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=144bpm exceeds threshold >140bpm (pulse max hr=113bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "a279l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9794,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=9, trailing_gap=0.04s, max_gap=0.70s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v280s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9355,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "f281l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9494,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.95)"
+    },
+    {
+      "record": "v282s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.942,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v283l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9759,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=59bpm and ecg max hr=85bpm vs threshold >100bpm; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t284s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9709,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "b285l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9845,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=70bpm, ecg min hr=69bpm vs bradycardia threshold <40bpm; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b286s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9489,
+      "reason": "pulsatile channel sqi=0.82 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "a287l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9785,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.32s, max_gap=1.02s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a288s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9768,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.17s, max_gap=1.01s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v289l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9434,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=131bpm exceeds threshold >100bpm (pulse max hr=132bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v290s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9401,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v295l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9923,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=230bpm exceeds threshold >100bpm (pulse max hr=66bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v296s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9514,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=103bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "a297l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9658,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=8, trailing_gap=0.42s, max_gap=0.69s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v298s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9768,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=226bpm exceeds threshold >100bpm (pulse max hr=105bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "t300s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9549,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "a301l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9701,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=9, trailing_gap=0.10s, max_gap=0.79s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a302s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9922,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=9, trailing_gap=0.47s, max_gap=0.59s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t305l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9737,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "a306s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9846,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.28s, max_gap=0.88s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b308s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9783,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=69bpm, ecg min hr=43bpm vs bradycardia threshold <40bpm; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v309l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9462,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.43 too irregular to trust hr=125bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "a310s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9986,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=8, trailing_gap=0.35s, max_gap=1.08s < 3.20s) contradicts asystole; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v312s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9894,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=144bpm exceeds threshold >100bpm (pulse max hr=203bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "b314s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9387,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=70bpm, ecg min hr=69bpm vs bradycardia threshold <40bpm; sqi=0.94, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v316s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9923,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=123bpm exceeds threshold >100bpm (pulse max hr=80bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v317l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.995,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=159bpm exceeds threshold >100bpm (pulse max hr=80bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v319l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.992,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=148bpm exceeds threshold >100bpm (pulse max hr=66bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "t320s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9589,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "f321l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9467,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.95)"
+    },
+    {
+      "record": "v323l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9523,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=179bpm exceeds threshold >100bpm (pulse max hr=87bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v324s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9869,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=56bpm and ecg max hr=96bpm vs threshold >100bpm; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v325l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9935,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=148bpm exceeds threshold >100bpm (pulse max hr=61bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v327l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.978,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=86bpm and ecg max hr=93bpm vs threshold >100bpm; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v328s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9423,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=147bpm exceeds threshold >100bpm (pulse max hr=114bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "b331l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9949,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=79bpm, ecg min hr=68bpm vs bradycardia threshold <40bpm; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b332s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9969,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=73bpm, ecg min hr=71bpm vs bradycardia threshold <40bpm; sqi=1.00, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t333l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9385,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=152bpm exceeds threshold >140bpm (pulse max hr=147bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v334s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.945,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=126bpm exceeds threshold >100bpm (pulse max hr=122bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t335l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.929,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.30 too irregular to trust hr=110bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v336s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9887,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=135bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v337l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9796,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=147bpm exceeds threshold >100bpm (pulse max hr=148bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "v338s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9913,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=129bpm exceeds threshold >100bpm (pulse max hr=105bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "b339l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9458,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=45bpm, ecg min hr=45bpm vs bradycardia threshold <40bpm; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b340s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9559,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=51bpm, ecg min hr=52bpm vs bradycardia threshold <40bpm; sqi=0.96, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b341l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.943,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=45bpm, ecg min hr=45bpm vs bradycardia threshold <40bpm; sqi=0.94, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t343l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9248,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t344s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9401,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.36 too irregular to trust hr=101bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v348s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.946,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=126bpm exceeds threshold >100bpm (pulse max hr=80bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t350s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9536,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=159bpm exceeds threshold >140bpm (pulse max hr=149bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "f352s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9744,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.97)"
+    },
+    {
+      "record": "t357l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9624,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=142bpm exceeds threshold >140bpm (pulse max hr=138bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "t358s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9665,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v359l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.991,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=160bpm exceeds threshold >100bpm (pulse max hr=69bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v360s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9808,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=135bpm exceeds threshold >100bpm (pulse max hr=62bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "f362s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9874,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.99)"
+    },
+    {
+      "record": "a363l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9919,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=11, trailing_gap=0.16s, max_gap=0.46s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v364s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9766,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=189bpm exceeds threshold >100bpm (pulse max hr=140bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "v366s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9915,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=145bpm exceeds threshold >100bpm (pulse max hr=77bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v367l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9153,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v368s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9175,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.39 too irregular to trust hr=86bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v370s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9916,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=127bpm exceeds threshold >100bpm (pulse max hr=135bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "a372s",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.7784,
+      "reason": "pulsatile channel sqi=0.06 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v373l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9484,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.30 too irregular to trust hr=93bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v374s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9632,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=102bpm exceeds threshold >100bpm (pulse max hr=93bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v375l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9909,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.34 too irregular to trust hr=94bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "a376s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9604,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.66s, max_gap=1.06s < 3.20s) contradicts asystole; sqi=0.91, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a377l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9688,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.54s, max_gap=0.74s < 3.20s) contradicts asystole; sqi=0.96, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a378s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.999,
+      "reason": "pulse does not contradict Asystole (pulse not continuous in trailing 5.0s (trail_count=0, trailing_gap=5.00s, max_gap=5.00s, limit 3.20s)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "b379l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9216,
+      "reason": "pulse does not contradict Bradycardia (pulse interval cv=0.45 too irregular to trust hr=87bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "v380s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9283,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v381l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.993,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=183bpm exceeds threshold >100bpm (pulse max hr=123bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "t383l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9947,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=202bpm exceeds threshold >140bpm (pulse max hr=95bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "b387l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9726,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=45bpm, ecg min hr=45bpm vs bradycardia threshold <40bpm; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v390s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9784,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=160bpm exceeds threshold >100bpm (pulse max hr=152bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "a391l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9082,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=9, trailing_gap=0.33s, max_gap=1.21s < 3.20s) contradicts asystole; sqi=0.91, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t394s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.993,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=151bpm exceeds threshold >140bpm (pulse max hr=149bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v395l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9934,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=99bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "a396s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.995,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=8, trailing_gap=0.04s, max_gap=0.66s < 3.20s) contradicts asystole; sqi=1.00, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a397l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9926,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=8, trailing_gap=0.16s, max_gap=0.65s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v398s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9572,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=165bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v399l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9309,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.44 too irregular to trust hr=123bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "v400s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9077,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.40 too irregular to trust hr=105bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "v401l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9331,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v403l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9628,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=132bpm exceeds threshold >100bpm (pulse max hr=53bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v405l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9786,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=214bpm exceeds threshold >100bpm (pulse max hr=162bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "f408s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9992,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=1.00)"
+    },
+    {
+      "record": "t409l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9996,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=242bpm exceeds threshold >140bpm (pulse max hr=158bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "t412s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9294,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.34 too irregular to trust hr=126bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "f414s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.7978,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.80)"
+    },
+    {
+      "record": "f415l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9025,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.90)"
+    },
+    {
+      "record": "t416s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9109,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.37 too irregular to trust hr=88bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "t417l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9447,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=151bpm exceeds threshold >140bpm (pulse max hr=134bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t418s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9236,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.34 too irregular to trust hr=99bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "a420s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.932,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.93s, max_gap=1.07s < 3.20s) contradicts asystole; sqi=0.93, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v421l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9201,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.36 too irregular to trust hr=67bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "a422s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9892,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=4, trailing_gap=0.53s, max_gap=1.39s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t425l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9444,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v426s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9779,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=157bpm exceeds threshold >100bpm (pulse max hr=82bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "b428s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9876,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=83bpm, ecg min hr=83bpm vs bradycardia threshold <40bpm; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a429l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9943,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.25s, max_gap=0.76s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v431l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.993,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=214bpm exceeds threshold >100bpm (pulse max hr=87bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v432s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9938,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=183bpm exceeds threshold >100bpm (pulse max hr=84bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v433l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9909,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=152bpm exceeds threshold >100bpm (pulse max hr=128bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "a435l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9762,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v438s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9905,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=117bpm exceeds threshold >100bpm (pulse max hr=79bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "a439l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9539,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.28s, max_gap=1.04s < 3.20s) contradicts asystole; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "f440s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9426,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.94)"
+    },
+    {
+      "record": "f441l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9253,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.93)"
+    },
+    {
+      "record": "a442s",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.86,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "a446s",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.86,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "t447l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9624,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "a449l",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8368,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "f450s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9163,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.92)"
+    },
+    {
+      "record": "v452s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9946,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=135bpm exceeds threshold >100bpm (pulse max hr=66bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v453l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9769,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=130bpm exceeds threshold >100bpm (pulse max hr=87bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "v454s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9872,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=67bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "b455l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9164,
+      "reason": "pulse does not contradict Bradycardia (pulse interval cv=0.32 too irregular to trust hr=48bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "b456s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9175,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=37bpm, ecg min hr=37bpm vs bradycardia threshold <40bpm); confirming (sqi=0.92)"
+    },
+    {
+      "record": "a457l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9773,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.02s, max_gap=0.93s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t458s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9531,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=148bpm exceeds threshold >140bpm (pulse max hr=143bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v459l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9239,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.31 too irregular to trust hr=76bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v460s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9379,
+      "reason": "pulsatile channel sqi=0.83 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "a461l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9725,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=9, trailing_gap=0.22s, max_gap=0.74s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a462s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9872,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=10, trailing_gap=0.23s, max_gap=0.52s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v463l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8929,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "a465l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9918,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=10, trailing_gap=0.46s, max_gap=0.49s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v466s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9789,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=175bpm exceeds threshold >100bpm (pulse max hr=142bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "t467l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9138,
+      "reason": "pulsatile channel sqi=0.78 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t468s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9226,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.35 too irregular to trust hr=108bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v470s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9251,
+      "reason": "pulsatile channel sqi=0.80 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v471l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9687,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=224bpm exceeds threshold >100bpm (pulse max hr=108bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "v472s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9585,
+      "reason": "pulsatile channel sqi=0.59 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v473l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9588,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=133bpm exceeds threshold >100bpm (pulse max hr=134bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "f474s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9318,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.93)"
+    },
+    {
+      "record": "v475l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9029,
+      "reason": "pulsatile channel sqi=0.06 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "t477l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9363,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.43 too irregular to trust hr=97bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "t478s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9182,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.36 too irregular to trust hr=96bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v479l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9569,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=205bpm exceeds threshold >100bpm (pulse max hr=102bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v480s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9394,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=207bpm exceeds threshold >100bpm (pulse max hr=122bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v482s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9923,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=135bpm exceeds threshold >100bpm (pulse max hr=82bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "b484s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9744,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=58bpm, ecg min hr=44bpm vs bradycardia threshold <40bpm; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b486s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9657,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=56bpm, ecg min hr=45bpm vs bradycardia threshold <40bpm; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b488s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.975,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=44bpm, ecg min hr=44bpm vs bradycardia threshold <40bpm; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a490s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9656,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=12, trailing_gap=0.04s, max_gap=0.54s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v491l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9375,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=117bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v492s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9168,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.37 too irregular to trust hr=104bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "b494s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.7848,
+      "reason": "pulsatile channel sqi=0.78 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "t496s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9909,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=88bpm and ecg max hr=96bpm vs threshold >140bpm; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b497l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9184,
+      "reason": "pulse does not contradict Bradycardia (pulse interval cv=0.34 too irregular to trust hr=58bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v498s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9769,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=74bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "f499l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9487,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.95)"
+    },
+    {
+      "record": "f500s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9806,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.98)"
+    },
+    {
+      "record": "v501l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9774,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=94bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "t503l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9523,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t504s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9538,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v505l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9101,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.44 too irregular to trust hr=78bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "t507l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9473,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t509l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9481,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.45 too irregular to trust hr=93bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "v510s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9906,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=164bpm exceeds threshold >100bpm (pulse max hr=83bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v511l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9958,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=76bpm)); confirming (sqi=1.00)"
+    },
+    {
+      "record": "a512s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9932,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.22s, max_gap=0.70s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v513l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.96,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=147bpm exceeds threshold >100bpm (pulse max hr=128bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "a514s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9915,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "b516s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9812,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=37bpm, ecg min hr=37bpm vs bradycardia threshold <40bpm); confirming (sqi=0.98)"
+    },
+    {
+      "record": "b517l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9795,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=38bpm, ecg min hr=38bpm vs bradycardia threshold <40bpm); confirming (sqi=0.98)"
+    },
+    {
+      "record": "v518s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9852,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=67bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "v519l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9872,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=70bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "t520s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9664,
+      "reason": "pulsatile channel sqi=0.06 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v522s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9611,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=109bpm exceeds threshold >100bpm (pulse max hr=87bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v523l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9727,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=128bpm exceeds threshold >100bpm (pulse max hr=90bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "t524s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.961,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v525l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9587,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=163bpm exceeds threshold >100bpm (pulse max hr=166bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "a527l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9804,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.09s, max_gap=0.99s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b528s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9434,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=64bpm, ecg min hr=-1bpm vs bradycardia threshold <40bpm; sqi=0.94, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "f529l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9136,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.91)"
+    },
+    {
+      "record": "f530s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.4611,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.46)"
+    },
+    {
+      "record": "v531l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9796,
+      "reason": "pulsatile channel sqi=0.06 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v532s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9454,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=151bpm exceeds threshold >100bpm (pulse max hr=111bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v534s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9704,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.32 too irregular to trust hr=149bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v536s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.996,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=174bpm exceeds threshold >100bpm (pulse max hr=82bpm)); confirming (sqi=1.00)"
+    },
+    {
+      "record": "b537l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8946,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "b538s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9552,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=47bpm, ecg min hr=29bpm vs bradycardia threshold <40bpm); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v540s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.987,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v542s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9207,
+      "reason": "pulsatile channel sqi=0.85 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "f544s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9039,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.90)"
+    },
+    {
+      "record": "f545l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9686,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.97)"
+    },
+    {
+      "record": "t546s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9608,
+      "reason": "pulsatile channel sqi=0.88 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t547l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9918,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v548s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9541,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=151bpm exceeds threshold >100bpm (pulse max hr=105bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v549l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9628,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=126bpm exceeds threshold >100bpm (pulse max hr=130bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v551l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9813,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=176bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "b553l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9711,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=73bpm, ecg min hr=83bpm vs bradycardia threshold <40bpm; sqi=0.96, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b554s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9661,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=74bpm, ecg min hr=77bpm vs bradycardia threshold <40bpm; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a555l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9926,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.24s, max_gap=1.04s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v557l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9935,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=151bpm exceeds threshold >100bpm (pulse max hr=60bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "a558s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9955,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.73s, max_gap=1.06s < 3.20s) contradicts asystole; sqi=1.00, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v559l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9189,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.38 too irregular to trust hr=85bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "b561l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9339,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=27bpm, ecg min hr=30bpm vs bradycardia threshold <40bpm); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v564s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9032,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.37 too irregular to trust hr=78bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "t565l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9472,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=158bpm exceeds threshold >140bpm (pulse max hr=158bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v566s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9838,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=86bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "t567l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9455,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.46 too irregular to trust hr=98bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "v568s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9685,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=108bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "v569l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9484,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=106bpm exceeds threshold >100bpm (pulse max hr=112bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v574s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9712,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=135bpm exceeds threshold >100bpm (pulse max hr=178bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v575l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9811,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=176bpm exceeds threshold >100bpm (pulse max hr=79bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "f576s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.984,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.98)"
+    },
+    {
+      "record": "t577l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9387,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.34 too irregular to trust hr=90bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "b578s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9452,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=42bpm, ecg min hr=39bpm vs bradycardia threshold <40bpm); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v579l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9441,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=227bpm exceeds threshold >100bpm (pulse max hr=138bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t580s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9667,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "a582s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.932,
+      "reason": "pulsatile channel sqi=0.85 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v583l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9504,
+      "reason": "pulsatile channel sqi=0.79 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "f586s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9918,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.99)"
+    },
+    {
+      "record": "b587l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8773,
+      "reason": "pulsatile channel sqi=0.88 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "t589l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9889,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=160bpm exceeds threshold >140bpm (pulse max hr=149bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v590s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9189,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=230bpm exceeds threshold >100bpm (pulse max hr=72bpm)); confirming (sqi=0.92)"
+    },
+    {
+      "record": "a591l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8536,
+      "reason": "pulsatile channel sqi=0.81 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "f593l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9803,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.98)"
+    },
+    {
+      "record": "t595l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9399,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.43 too irregular to trust hr=96bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "v596s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9695,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=118bpm exceeds threshold >100bpm (pulse max hr=137bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "a599l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9916,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=8, trailing_gap=0.40s, max_gap=0.65s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b600s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9742,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=96bpm, ecg min hr=55bpm vs bradycardia threshold <40bpm; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v601l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9924,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=108bpm exceeds threshold >100bpm (pulse max hr=109bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "a603l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.926,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "f605l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.994,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.99)"
+    },
+    {
+      "record": "a606s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8875,
+      "reason": "pulsatile channel sqi=0.76 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v607l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9458,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=111bpm exceeds threshold >100bpm (pulse max hr=211bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v609l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9273,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "f610s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8997,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.90)"
+    },
+    {
+      "record": "v611l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9177,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.35 too irregular to trust hr=84bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v612s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9927,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=109bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v615l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9888,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=84bpm and ecg max hr=95bpm vs threshold >100bpm; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v616s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9998,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "b617l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9126,
+      "reason": "pulsatile channel sqi=0.82 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "f618s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.961,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.96)"
+    },
+    {
+      "record": "v620s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9941,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=73bpm and ecg max hr=94bpm vs threshold >100bpm; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t622s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9592,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v623l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9801,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ECG evidence unavailable (pulse max hr=99bpm vs threshold >100bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "a624s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9669,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.40s, max_gap=0.91s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v625l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9409,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=135bpm exceeds threshold >100bpm (pulse max hr=135bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v627l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9498,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse max hr=163bpm and ecg max hr=99bpm vs threshold >100bpm); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v628s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9596,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=150bpm exceeds threshold >100bpm (pulse max hr=102bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v629l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9403,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=132bpm exceeds threshold >100bpm (pulse max hr=130bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v630s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9454,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=138bpm exceeds threshold >100bpm (pulse max hr=133bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v632s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9447,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v634s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9225,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.39 too irregular to trust hr=63bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "v635l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9635,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=130bpm exceeds threshold >100bpm (pulse max hr=93bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v636s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "FN",
+      "sqi": 0.9526,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=84bpm and ecg max hr=82bpm vs threshold >100bpm; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "f637l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9068,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.91)"
+    },
+    {
+      "record": "v638s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9373,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=149bpm exceeds threshold >100bpm (pulse max hr=134bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "a639l",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8586,
+      "reason": "pulsatile channel sqi=0.81 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v640s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.964,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=115bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v641l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9945,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=169bpm exceeds threshold >100bpm (pulse max hr=121bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "f642s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.988,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.99)"
+    },
+    {
+      "record": "v643l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9403,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.42 too irregular to trust hr=67bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "v644s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9787,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=148bpm exceeds threshold >100bpm (pulse max hr=71bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "a645l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9866,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=8, trailing_gap=0.28s, max_gap=0.68s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v647l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9158,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=153bpm exceeds threshold >100bpm (pulse max hr=84bpm)); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v648s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.936,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=233bpm exceeds threshold >100bpm (pulse max hr=93bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v649l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9338,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.31 too irregular to trust hr=89bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "a653l",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9699,
+      "reason": "pulse does not contradict Asystole (pulse not continuous in trailing 5.0s (trail_count=3, trailing_gap=3.41s, max_gap=3.41s, limit 3.20s)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "a654s",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.7852,
+      "reason": "pulsatile channel sqi=0.79 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "b659l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.899,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "v660s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9872,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=133bpm exceeds threshold >100bpm (pulse max hr=88bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "a661l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8953,
+      "reason": "pulsatile channel sqi=0.85 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "t662s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9599,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=162bpm exceeds threshold >140bpm (pulse max hr=160bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v663l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9667,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=233bpm exceeds threshold >100bpm (pulse max hr=115bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "t665l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9846,
+      "reason": "pulsatile channel sqi=0.88 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "a668s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 1.0,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=8, trailing_gap=0.19s, max_gap=0.68s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b669l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9374,
+      "reason": "pulsatile channel sqi=0.88 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "a670s",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9473,
+      "reason": "pulsatile channel sqi=0.88 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "a673l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8699,
+      "reason": "pulsatile channel sqi=0.87 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v674s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9959,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=101bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "v676s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9245,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.33 too irregular to trust hr=88bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "t677l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9615,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=151bpm exceeds threshold >140bpm (pulse max hr=193bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "t678s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9938,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=190bpm exceeds threshold >140bpm (pulse max hr=156bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "t679l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9475,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=155bpm exceeds threshold >140bpm (pulse max hr=145bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "t683l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9048,
+      "reason": "pulsatile channel sqi=0.80 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "b684s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.991,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=62bpm, ecg min hr=36bpm vs bradycardia threshold <40bpm); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v686s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9339,
+      "reason": "pulsatile channel sqi=0.85 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v687l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.958,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=139bpm exceeds threshold >100bpm (pulse max hr=92bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "t689l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9512,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=145bpm exceeds threshold >140bpm (pulse max hr=135bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "t690s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.95,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=160bpm exceeds threshold >140bpm (pulse max hr=149bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "f691l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.927,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.93)"
+    },
+    {
+      "record": "t693l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9773,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "a694s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9389,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.01s, max_gap=0.91s < 3.20s) contradicts asystole; sqi=0.94, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b695l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9941,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=95bpm, ecg min hr=48bpm vs bradycardia threshold <40bpm; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v696s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9546,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=135bpm exceeds threshold >100bpm (pulse max hr=61bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "f697l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8634,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.86)"
+    },
+    {
+      "record": "t698s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9926,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.36 too irregular to trust hr=136bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "a699l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8185,
+      "reason": "pulsatile channel sqi=0.82 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v701l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9416,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=129bpm exceeds threshold >100bpm (pulse max hr=100bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t702s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9442,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=144bpm exceeds threshold >140bpm (pulse max hr=145bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v704s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9937,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=219bpm exceeds threshold >100bpm (pulse max hr=75bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "t707l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9284,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.31 too irregular to trust hr=102bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "b708s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9317,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=38bpm, ecg min hr=37bpm vs bradycardia threshold <40bpm); confirming (sqi=0.93)"
+    },
+    {
+      "record": "t709l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9646,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=148bpm exceeds threshold >140bpm (pulse max hr=137bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v710s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9092,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "a712s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9332,
+      "reason": "pulsatile channel sqi=0.83 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v713l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9503,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=182bpm exceeds threshold >100bpm (pulse max hr=108bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "a715l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9703,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.58s, max_gap=0.69s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t716s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9307,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.32 too irregular to trust hr=116bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "t717l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9728,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v718s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9366,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=231bpm exceeds threshold >100bpm (pulse max hr=101bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t719l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9646,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=159bpm exceeds threshold >140bpm (pulse max hr=143bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v720s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9699,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=158bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "b722s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8851,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "v725l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9314,
+      "reason": "pulsatile channel sqi=0.80 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v727l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9833,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=71bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "v728s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9644,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=140bpm exceeds threshold >100bpm (pulse max hr=104bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "b730s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9399,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=40bpm, ecg min hr=34bpm vs bradycardia threshold <40bpm); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t731l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9494,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=140bpm exceeds threshold >140bpm (pulse max hr=139bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v733l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9683,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=181bpm exceeds threshold >100bpm (pulse max hr=108bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "b734s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "FN",
+      "sqi": 0.9336,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=45bpm, ecg min hr=45bpm vs bradycardia threshold <40bpm; sqi=0.93, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a735l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9872,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.68s, max_gap=0.78s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v736s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9305,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.32 too irregular to trust hr=60bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "t739l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9417,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=146bpm exceeds threshold >140bpm (pulse max hr=122bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "a740s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9702,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=4, trailing_gap=0.72s, max_gap=1.26s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t741l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9415,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=155bpm exceeds threshold >140bpm (pulse max hr=130bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "t742s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9651,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v743l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9837,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=162bpm exceeds threshold >100bpm (pulse max hr=92bpm)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "t744s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9751,
+      "reason": "pulsatile channel sqi=0.79 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "t747l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9466,
+      "reason": "pulsatile channel sqi=0.85 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v748s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.956,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=149bpm exceeds threshold >100bpm (pulse max hr=150bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "a750s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8483,
+      "reason": "pulsatile channel sqi=0.77 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "f751l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9348,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.93)"
+    },
+    {
+      "record": "b753l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8951,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "a754s",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8932,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Asystole"
+    },
+    {
+      "record": "v756s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9115,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.39 too irregular to trust hr=64bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "b757l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9085,
+      "reason": "pulse does not contradict Bradycardia (pulse interval cv=0.37 too irregular to trust hr=63bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "v758s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.942,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.35 too irregular to trust hr=92bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v759l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9514,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=133bpm exceeds threshold >100bpm (pulse max hr=86bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "t760s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9449,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=150bpm exceeds threshold >140bpm (pulse max hr=150bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v761l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9418,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse max hr=101bpm and ecg max hr=86bpm vs threshold >100bpm); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v763l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.926,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.41 too irregular to trust hr=61bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "b764s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9441,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=34bpm, ecg min hr=34bpm vs bradycardia threshold <40bpm); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v766s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9245,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.33 too irregular to trust hr=46bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v767l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9473,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.43 too irregular to trust hr=89bpm estimate); confirming (sqi=0.90)"
+    },
+    {
+      "record": "f768s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9429,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.94)"
+    },
+    {
+      "record": "v769l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9334,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=145bpm exceeds threshold >100bpm (pulse max hr=138bpm)); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v774s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8955,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v775l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9147,
+      "reason": "pulsatile channel sqi=0.81 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "a776s",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9799,
+      "reason": "pulse does not contradict Asystole (pulse not continuous in trailing 5.0s (trail_count=1, trailing_gap=4.38s, max_gap=4.38s, limit 3.20s)); confirming (sqi=0.98)"
+    },
+    {
+      "record": "t777l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9422,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=200bpm exceeds threshold >140bpm (pulse max hr=158bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v779l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9637,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=145bpm exceeds threshold >100bpm (pulse max hr=118bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "a780s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.97,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=14, trailing_gap=0.14s, max_gap=0.80s < 3.20s) contradicts asystole; sqi=0.92, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v782s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.8732,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v784s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9968,
+      "reason": "SUPPRESS_TO_REVIEW: pulse max hr=64bpm and ecg max hr=92bpm vs threshold >100bpm; sqi=1.00, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a785l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9539,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=8, trailing_gap=0.69s, max_gap=0.79s < 3.20s) contradicts asystole; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t787l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9602,
+      "reason": "pulse does not contradict Tachycardia (pulse interval cv=0.33 too irregular to trust hr=108bpm estimate); confirming (sqi=0.93)"
+    },
+    {
+      "record": "v788s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9189,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.38 too irregular to trust hr=68bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "v791l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.922,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.35 too irregular to trust hr=80bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "f792s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9481,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.95)"
+    },
+    {
+      "record": "v795l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9422,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=168bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "v797l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9247,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.30 too irregular to trust hr=86bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "a798s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9902,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.28s, max_gap=0.87s < 3.20s) contradicts asystole; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "f799l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9058,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.91)"
+    },
+    {
+      "record": "t801l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9466,
+      "reason": "pulsatile channel sqi=0.86 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "a802s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9291,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=6, trailing_gap=0.55s, max_gap=1.26s < 3.20s) contradicts asystole; sqi=0.93, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v804s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9273,
+      "reason": "pulsatile channel sqi=0.82 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v806s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9467,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=112bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "a807l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9576,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=4, trailing_gap=2.26s, max_gap=2.26s < 3.20s) contradicts asystole; sqi=0.95, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v809l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9597,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=142bpm exceeds threshold >100bpm (pulse max hr=93bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "a810s",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9572,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=7, trailing_gap=0.54s, max_gap=1.02s < 3.20s) contradicts asystole; sqi=0.96, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "t812s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9684,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=156bpm exceeds threshold >140bpm (pulse max hr=153bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "v813l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9282,
+      "reason": "pulsatile channel sqi=0.90 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "v815l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9642,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=173bpm exceeds threshold >100bpm (pulse max hr=143bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "v818s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9671,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=165bpm exceeds threshold >100bpm (pulse max hr=167bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "a819l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.932,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=12, trailing_gap=0.13s, max_gap=0.76s < 3.20s) contradicts asystole; sqi=0.93, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b820s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.948,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=37bpm, ecg min hr=37bpm vs bradycardia threshold <40bpm); confirming (sqi=0.95)"
+    },
+    {
+      "record": "t821l",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9383,
+      "reason": "pulsatile channel sqi=0.80 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v823l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9369,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=111bpm exceeds threshold >100bpm (pulse max hr=73bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "b824s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9532,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=50bpm, ecg min hr=50bpm vs bradycardia threshold <40bpm; sqi=0.93, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v827l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9108,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.42 too irregular to trust hr=146bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "v828s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9135,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.40 too irregular to trust hr=110bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "f829l",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9395,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.94)"
+    },
+    {
+      "record": "v831l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9426,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=164bpm exceeds threshold >100bpm (pulse max hr=146bpm)); confirming (sqi=0.94)"
+    },
+    {
+      "record": "b832s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9918,
+      "reason": "pulse does not contradict Bradycardia (pulse min hr=122bpm, ecg min hr=40bpm vs bradycardia threshold <40bpm); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v833l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9894,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=113bpm exceeds threshold >100bpm (pulse max hr=72bpm)); confirming (sqi=0.99)"
+    },
+    {
+      "record": "v834s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9535,
+      "reason": "pulsatile channel sqi=0.89 below min_signal_quality=0.90; confirming Ventricular_Tachycardia"
+    },
+    {
+      "record": "b835l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9892,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=112bpm, ecg min hr=88bpm vs bradycardia threshold <40bpm; sqi=0.99, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "v836s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9501,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=192bpm exceeds threshold >100bpm (pulse max hr=154bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "v837l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9192,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (pulse interval cv=0.34 too irregular to trust hr=97bpm estimate); confirming (sqi=0.92)"
+    },
+    {
+      "record": "b838s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9059,
+      "reason": "pulse does not contradict Bradycardia (pulse interval cv=0.37 too irregular to trust hr=59bpm estimate); confirming (sqi=0.91)"
+    },
+    {
+      "record": "b839l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.8438,
+      "reason": "pulsatile channel sqi=0.84 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "b840s",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 1,
+      "decision": "CONFIRM",
+      "outcome": "TP",
+      "sqi": 0.9215,
+      "reason": "pulsatile channel sqi=0.76 below min_signal_quality=0.90; confirming Bradycardia"
+    },
+    {
+      "record": "v843l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9732,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=73bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "v845l",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 0,
+      "decision": "CONFIRM",
+      "outcome": "FP",
+      "sqi": 0.9514,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=126bpm exceeds threshold >100bpm (pulse max hr=127bpm)); confirming (sqi=0.95)"
+    },
+    {
+      "record": "a847l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9668,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.62s, max_gap=1.00s < 3.20s) contradicts asystole; sqi=0.97, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "b849l",
+      "alarm_type": "Bradycardia",
+      "true_alarm": 0,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "outcome": "TN",
+      "sqi": 0.9943,
+      "reason": "SUPPRESS_TO_REVIEW: pulse min hr=87bpm, ecg min hr=87bpm vs bradycardia threshold <40bpm; sqi=0.99, logged for nurse review (never discarded)"
+    }
+  ]
+}

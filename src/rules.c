@@ -164,7 +164,15 @@ static int parse_root(qw_lexer_t *lx, qw_rules_t *rules) {
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
 
-        if (strcmp(key, "alarms") == 0) {
+        if (strcmp(key, "status") == 0) {
+            if (qw_lex_next(lx, &t) != 0) return -1;
+            if (t.kind == QW_TOK_STRING) {
+                strncpy(rules->status, t.text, sizeof(rules->status) - 1);
+                rules->status[sizeof(rules->status) - 1] = '\0';
+            } else if (qw_skip_value_depth(lx, &t, 0) != 0) {
+                return -1;
+            }
+        } else if (strcmp(key, "alarms") == 0) {
             if (parse_alarms_object(lx, rules) != 0) return -1;
         } else if (strcmp(key, "suppression") == 0) {
             if (parse_suppression_object(lx, &rules->suppression) != 0) return -1;
@@ -200,6 +208,45 @@ static int validate_rules(const qw_rules_t *rules, const char *path) {
         }
     }
 
+    double min_required_window_s = 0.0;
+    for (size_t i = 0; i < rules->n_alarms; i++) {
+        const qw_alarm_def_t *a = &rules->alarms[i];
+        if (a->has_no_beat_s) {
+            if (!(a->no_beat_s > 0.0)) {
+                fprintf(stderr, "rules error: %s: alarm '%s' no_beat_s=%g must be > 0\n",
+                        path, a->name, a->no_beat_s);
+                return -1;
+            }
+            if (a->no_beat_s > min_required_window_s) min_required_window_s = a->no_beat_s;
+        }
+        if (a->has_hr_below_bpm || a->has_hr_above_bpm) {
+            if (!a->has_beats || a->beats < 2) {
+                fprintf(stderr,
+                        "rules error: %s: alarm '%s' has an hr threshold and requires beats >= 2\n",
+                        path, a->name);
+                return -1;
+            }
+        }
+        if (a->has_hr_below_bpm) {
+            if (!(a->hr_below_bpm > 0.0)) {
+                fprintf(stderr, "rules error: %s: alarm '%s' hr_below_bpm=%g must be > 0\n",
+                        path, a->name, a->hr_below_bpm);
+                return -1;
+            }
+            double w = (double)(a->beats - 1) * 60.0 / a->hr_below_bpm;
+            if (w > min_required_window_s) min_required_window_s = w;
+        }
+        if (a->has_hr_above_bpm) {
+            if (!(a->hr_above_bpm > 0.0)) {
+                fprintf(stderr, "rules error: %s: alarm '%s' hr_above_bpm=%g must be > 0\n",
+                        path, a->name, a->hr_above_bpm);
+                return -1;
+            }
+            double w = (double)(a->beats - 1) * 60.0 / a->hr_above_bpm;
+            if (w > min_required_window_s) min_required_window_s = w;
+        }
+    }
+
     const qw_suppression_t *s = &rules->suppression;
     if (!s->has_window_s) {
         fprintf(stderr, "rules error: %s: suppression.window_s is missing\n", path);
@@ -207,6 +254,13 @@ static int validate_rules(const qw_rules_t *rules, const char *path) {
     }
     if (s->window_s <= 0.0) {
         fprintf(stderr, "rules error: %s: suppression.window_s=%g must be > 0\n", path, s->window_s);
+        return -1;
+    }
+    if (s->window_s < min_required_window_s) {
+        fprintf(stderr,
+                "rules error: %s: suppression.window_s=%g is shorter than the longest rolling span "
+                "required by the alarm definitions (%g s)\n",
+                path, s->window_s, min_required_window_s);
         return -1;
     }
     if (!s->has_min_signal_quality) {
@@ -276,6 +330,10 @@ int qw_rules_load(const char *path, qw_rules_t *out) {
     if (rc != 0) {
         fprintf(stderr, "rules error: %s: malformed JSON or unexpected document shape\n", path);
         return -1;
+    }
+
+    if (out->status[0] == '\0') {
+        strcpy(out->status, "unknown");
     }
 
     if (validate_rules(out, path) != 0) {

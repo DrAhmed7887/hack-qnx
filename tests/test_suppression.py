@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import make_sine_pulse, run_qw, write_qw, write_rules  # noqa: E402
+from helpers import make_ecg_like, make_sine_pulse, run_qw, write_qw, write_rules  # noqa: E402
 
 FS = 250
 ALARM_OFFSET_S = 300.0  # PhysioNet 2015 Challenge convention: alarm always at 300s
@@ -19,11 +19,13 @@ ALARM_OFFSET_S = 300.0  # PhysioNet 2015 Challenge convention: alarm always at 3
 
 def _padded_record(path: Path, fs: int, pulse_bpm: float, duration_s: float = ALARM_OFFSET_S):
     """A record with a clean, regular pulsatile ABP channel at pulse_bpm
-    for the full pre-alarm duration, plus a flat ECG channel (so the ECG
-    detector doesn't interfere; the pulsatile channel alone should drive
-    the decision here)."""
+    for the full pre-alarm duration, plus a QRS-like ECG channel at the same
+    rate. The decision for HR-above alarms now cross-checks the ECG rolling
+    rate (a sine "ECG" is read by the beat detector at its refractory limit,
+    ~240 bpm, which correctly blocks suppression), so the ECG must be
+    physiologically consistent with the pulse for these fixtures."""
     abp = 80.0 + 20.0 * (make_sine_pulse(fs, duration_s, pulse_bpm) - 0.5)
-    ecg = make_sine_pulse(fs, duration_s, pulse_bpm, amplitude=0.05, offset=0.0)
+    ecg = make_ecg_like(fs, duration_s, pulse_bpm)
     write_qw(path, fs, {"II": ecg, "ABP": abp})
 
 

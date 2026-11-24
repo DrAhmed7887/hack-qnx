@@ -64,6 +64,7 @@ typedef struct {
 } qw_suppression_t;
 
 typedef struct {
+    char status[QW_NAME_LEN]; /* root "status" string; "unknown" if absent */
     qw_alarm_def_t alarms[8];
     size_t n_alarms;
     qw_suppression_t suppression;

@@ -27,7 +27,8 @@
 static qw_channel_kind_t classify_channel(const char *name) {
     /* ECG-like leads seen in the PhysioNet 2015 Challenge training set. */
     static const char *ecg_names[] = {
-        "II", "I", "III", "MCL", "MCL1", "aVR", "aVF", "aVL", NULL
+        "II", "I", "III", "MCL", "MCL1", "aVR", "aVF", "aVL",
+        "V", "V1", "V2", "V3", "V4", "V5", "V6", NULL
     };
     /* Pulsatile channels. */
     static const char *pulse_names[] = { "PLETH", "ABP", NULL };
@@ -329,7 +330,8 @@ size_t qw_detect_pulses(const float *samples, uint32_t n_samples, uint32_t fs,
     size_t ring_pos = 0;
     double ring_sum = (double)samples[0] * (double)smooth_win;
 
-    int min_rr = (int)(0.3 * (double)fs); /* <=200bpm cap on pulse rate */
+    double min_iv = (cfg->min_pulse_interval_s > 0.0) ? cfg->min_pulse_interval_s : 0.24;
+    int min_rr = (int)(min_iv * (double)fs); /* physiological cap on pulse rate */
     if (min_rr < 1) min_rr = 1;
     int since_last = 1000000000;
 
@@ -515,6 +517,13 @@ static double interval_cv_from_beats(const uint32_t *idx, size_t n, size_t use_l
     return sqrt(var) / mean;
 }
 
+static uint32_t clamp_window_samples(double seconds, uint32_t fs, uint32_t max_samples) {
+    if (seconds <= 0.0 || fs == 0 || max_samples == 0) return 0u;
+    double n = seconds * (double)fs;
+    if (n >= (double)max_samples) return max_samples;
+    return (uint32_t)n;
+}
+
 /* Does ANY pulse-channel event occur within the suppression window
  * immediately before the alarm onset? Used as the "pulsatile channel
  * contradicts the alarm" signal. alarm_sample is the sample index at
@@ -524,7 +533,7 @@ static int pulse_present_in_window(const uint32_t *pulse_idx, size_t n_pulses,
                                     uint32_t alarm_sample, uint32_t fs, double window_s,
                                     const qw_detector_config_t *cfg) {
     if (n_pulses == 0 || fs == 0) return 0;
-    uint32_t window_samples = (uint32_t)(window_s * (double)fs);
+    uint32_t window_samples = clamp_window_samples(window_s, fs, alarm_sample);
     uint32_t window_start = (alarm_sample > window_samples) ? (alarm_sample - window_samples) : 0;
     size_t count_in_window = 0;
     for (size_t i = 0; i < n_pulses; i++) {
@@ -534,6 +543,50 @@ static int pulse_present_in_window(const uint32_t *pulse_idx, size_t n_pulses,
      * stray detection, so we don't treat noise as a contradicting pulse. */
     double expected_min_pulses = (window_s / 60.0) * cfg->min_expected_bpm_floor;
     return count_in_window >= 2 && (double)count_in_window >= expected_min_pulses * cfg->min_expected_fraction;
+}
+
+/* Min (want_max == 0) or max (want_max != 0) heart rate over every window
+ * of `beats` consecutive events. Returns -1.0 if no valid window exists. */
+static double rolling_hr_extreme(const uint32_t *idx, size_t n, uint32_t fs, size_t beats, int want_max) {
+    if (!idx || fs == 0 || beats < 2 || n < beats) return -1.0;
+    double best = -1.0;
+    for (size_t i = 0; i + beats <= n; i++) {
+        uint32_t span = idx[i + beats - 1] - idx[i];
+        if (span == 0) continue;
+        double hr = 60.0 * (double)(beats - 1) * (double)fs / (double)span;
+        if (best < 0.0 || (want_max ? hr > best : hr < best)) best = hr;
+    }
+    return best;
+}
+
+/* Run detection on every channel of `kind` over [tail_start, tail_start+tail_len)
+ * and keep the highest-SQI channel (first channel wins ties). Winning event
+ * indices are copied into out_idx (relative to tail_start). */
+static size_t select_best_channel(const qw_record_t *rec, qw_channel_kind_t kind,
+                                   uint32_t tail_start, uint32_t tail_len,
+                                   const qw_detector_config_t *cfg, uint32_t *cand_idx,
+                                   uint32_t *out_idx, const qw_channel_t **best_ch,
+                                   double *best_sqi) {
+    size_t best_n = 0;
+    *best_ch = NULL;
+    *best_sqi = 0.0;
+    for (uint32_t c = 0; c < rec->n_channels; c++) {
+        const qw_channel_t *ch = &rec->channels[c];
+        if (ch->kind != kind) continue;
+        if (tail_len == 0 || !ch->samples) continue;
+        const float *x = ch->samples + tail_start;
+        size_t n = (kind == QW_CHANNEL_ECG)
+                       ? qw_detect_beats_ecg(x, tail_len, rec->fs, cand_idx, QW_MAX_BEATS)
+                       : qw_detect_pulses(x, tail_len, rec->fs, cand_idx, QW_MAX_BEATS, cfg);
+        double sqi = qw_signal_quality(x, tail_len, rec->fs, cand_idx, n, cfg);
+        if (!*best_ch || sqi > *best_sqi) {
+            memcpy(out_idx, cand_idx, n * sizeof(uint32_t));
+            best_n = n;
+            *best_ch = ch;
+            *best_sqi = sqi;
+        }
+    }
+    return best_n;
 }
 
 int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *rules,
@@ -571,34 +624,25 @@ int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *
     uint32_t *beat_idx = ws->beat_idx;
     uint32_t *pulse_idx = ws->pulse_idx;
 
-    /* Pick the best ECG channel (first one found) for beat detection, and
-     * the best pulsatile channel (first one found) for pulse detection. */
+    /* Only the tail of the record (the suppression window before the alarm)
+     * is analysed; all event indices below are relative to tail_start. */
+    uint32_t window_samples = clamp_window_samples(rules->suppression.window_s, rec->fs, alarm_sample);
+    uint32_t tail_start = (alarm_sample > window_samples) ? (alarm_sample - window_samples) : 0;
+    uint32_t tail_len = alarm_sample - tail_start;
+
     const qw_channel_t *ecg_ch = NULL;
     const qw_channel_t *pulse_ch = NULL;
-    for (uint32_t c = 0; c < rec->n_channels; c++) {
-        if (rec->channels[c].kind == QW_CHANNEL_ECG && !ecg_ch) ecg_ch = &rec->channels[c];
-        if (rec->channels[c].kind == QW_CHANNEL_PULSE && !pulse_ch) pulse_ch = &rec->channels[c];
-    }
-
-    /* All detection and quality scoring operates only on signal up to the
-     * alarm onset -- data after the alarm fired cannot inform whether the
-     * alarm should have been suppressed. */
-    size_t n_beats = 0;
     double ecg_sqi = 0.0;
-    if (ecg_ch) {
-        n_beats = qw_detect_beats_ecg(ecg_ch->samples, alarm_sample, rec->fs, beat_idx, QW_MAX_BEATS);
-        ecg_sqi = qw_signal_quality(ecg_ch->samples, alarm_sample, rec->fs, beat_idx, n_beats, cfg);
-    }
-
-    size_t n_pulses = 0;
     double pulse_sqi = 0.0;
-    if (pulse_ch) {
-        n_pulses = qw_detect_pulses(pulse_ch->samples, alarm_sample, rec->fs, pulse_idx, QW_MAX_BEATS, cfg);
-        pulse_sqi = qw_signal_quality(pulse_ch->samples, alarm_sample, rec->fs, pulse_idx, n_pulses, cfg);
-    }
+    size_t n_beats = select_best_channel(rec, QW_CHANNEL_ECG, tail_start, tail_len, cfg,
+                                         ws->cand_idx, beat_idx, &ecg_ch, &ecg_sqi);
+    size_t n_pulses = select_best_channel(rec, QW_CHANNEL_PULSE, tail_start, tail_len, cfg,
+                                          ws->cand_idx, pulse_idx, &pulse_ch, &pulse_sqi);
 
     double best_sqi = (pulse_sqi > ecg_sqi) ? pulse_sqi : ecg_sqi;
     result->sqi = best_sqi;
+    result->ecg_sqi = ecg_sqi;
+    result->pulse_sqi = pulse_sqi;
 
     int never_suppress = qw_rules_never_suppress(rules, alarm_type);
 
@@ -626,7 +670,7 @@ int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *
         return 0;
     }
 
-    int pulse_present = pulse_present_in_window(pulse_idx, n_pulses, alarm_sample, rec->fs,
+    int pulse_present = pulse_present_in_window(pulse_idx, n_pulses, tail_len, rec->fs,
                                                  rules->suppression.window_s, cfg);
     if (!pulse_present) {
         snprintf(result->reason, QW_REASON_LEN,
@@ -639,8 +683,7 @@ int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *
     /* We have a high-quality pulsatile signal with a regular pulse
      * throughout the suppression window immediately before the alarm.
      * Check whether that pulse contradicts the specific alarm condition. */
-    uint32_t window_samples = (uint32_t)(rules->suppression.window_s * (double)rec->fs);
-    uint32_t window_start = (alarm_sample > window_samples) ? (alarm_sample - window_samples) : 0;
+    uint32_t window_start = (tail_len > window_samples) ? (tail_len - window_samples) : 0;
     size_t first_in_window = n_pulses;
     for (size_t i = 0; i < n_pulses; i++) {
         if (pulse_idx[i] >= window_start) { first_in_window = i; break; }
@@ -661,28 +704,92 @@ int qw_decide(const qw_record_t *rec, const char *alarm_type, const qw_rules_t *
     int hr_trustworthy = (window_cv >= 0.0) && (window_cv <= cfg->max_trusted_interval_cv);
 
     int contradicts = 0;
-    char detail[128];
+    char detail[192];
     detail[0] = '\0';
+    size_t b = (def->has_beats && def->beats >= 2) ? (size_t)def->beats : 2;
 
     if (pulse_hr < 0.0) {
         contradicts = 0;
         snprintf(detail, sizeof(detail), "pulse hr could not be computed");
     } else if (def->has_no_beat_s) {
-        /* Asystole: a present, regular pulse throughout the window directly
-         * contradicts "no QRS for N seconds". */
-        contradicts = 1;
-        snprintf(detail, sizeof(detail), "pulse present throughout %.0fs window contradicts asystole", rules->suppression.window_s);
+        /* Asystole: pulses must be present AND without a long gap in the
+         * trailing no_beat_s + margin seconds before the alarm. */
+        double fs_d = (double)rec->fs;
+        double trail_win_s = def->no_beat_s + cfg->trailing_margin_s;
+        uint32_t trail_len = clamp_window_samples(trail_win_s, rec->fs, tail_len);
+        if (trail_len < 1 && tail_len > 0) trail_len = 1;
+        uint32_t trail_start = tail_len - trail_len;
+
+        size_t trail_count = 0;
+        uint32_t first = 0, last = 0;
+        double max_gap_s = 0.0;
+        for (size_t i = 0; i < n_pulses; i++) {
+            uint32_t p = pulse_idx[i];
+            if (p < trail_start || p > tail_len) continue;
+            if (trail_count == 0) {
+                first = p;
+            } else {
+                double g = (double)(p - last) / fs_d;
+                if (g > max_gap_s) max_gap_s = g;
+            }
+            last = p;
+            trail_count++;
+        }
+        double trailing_gap_s = trail_win_s;
+        if (trail_count > 0) {
+            double leading_gap_s = (double)(first - trail_start) / fs_d;
+            trailing_gap_s = (double)(tail_len - last) / fs_d;
+            if (leading_gap_s > max_gap_s) max_gap_s = leading_gap_s;
+            if (trailing_gap_s > max_gap_s) max_gap_s = trailing_gap_s;
+        } else {
+            max_gap_s = trail_win_s;
+        }
+        double gap_limit_s = def->no_beat_s * cfg->max_trailing_gap_frac;
+        contradicts = (trail_count >= (size_t)cfg->min_trailing_pulses) &&
+                      (trailing_gap_s < gap_limit_s) && (max_gap_s < gap_limit_s);
+        if (contradicts) {
+            snprintf(detail, sizeof(detail),
+                     "pulse present in trailing %.1fs (n=%zu, trailing_gap=%.2fs, max_gap=%.2fs < %.2fs) contradicts asystole",
+                     trail_win_s, trail_count, trailing_gap_s, max_gap_s, gap_limit_s);
+        } else {
+            snprintf(detail, sizeof(detail),
+                     "pulse not continuous in trailing %.1fs (trail_count=%zu, trailing_gap=%.2fs, max_gap=%.2fs, limit %.2fs)",
+                     trail_win_s, trail_count, trailing_gap_s, max_gap_s, gap_limit_s);
+        }
     } else if (!hr_trustworthy) {
         contradicts = 0;
         snprintf(detail, sizeof(detail), "pulse interval cv=%.2f too irregular to trust hr=%.0fbpm estimate", window_cv, pulse_hr);
     } else if (def->has_hr_below_bpm) {
-        /* Bradycardia: contradicted if pulse rate is NOT below threshold. */
-        contradicts = pulse_hr >= def->hr_below_bpm;
-        snprintf(detail, sizeof(detail), "pulse hr=%.0fbpm vs bradycardia threshold <%.0fbpm", pulse_hr, def->hr_below_bpm);
+        /* Bradycardia: contradicted only if the slowest rolling pulse rate
+         * AND (when available) the slowest ECG rolling rate are both NOT
+         * below the threshold. */
+        double pulse_min = rolling_hr_extreme(pulse_idx, n_pulses, rec->fs, b, 0);
+        double ecg_min = (n_beats >= b) ? rolling_hr_extreme(beat_idx, n_beats, rec->fs, b, 0) : -1.0;
+        contradicts = pulse_min > 0.0 && pulse_min >= def->hr_below_bpm &&
+                      (ecg_min < 0.0 || ecg_min >= def->hr_below_bpm);
+        snprintf(detail, sizeof(detail), "pulse min hr=%.0fbpm, ecg min hr=%.0fbpm vs bradycardia threshold <%.0fbpm",
+                 pulse_min, ecg_min, def->hr_below_bpm);
     } else if (def->has_hr_above_bpm) {
-        /* Tachycardia / VT: contradicted if pulse rate is NOT above threshold. */
-        contradicts = pulse_hr <= def->hr_above_bpm;
-        snprintf(detail, sizeof(detail), "pulse hr=%.0fbpm vs threshold >%.0fbpm", pulse_hr, def->hr_above_bpm);
+        /* Tachycardia / VT: contradicted only if BOTH the pulse and the ECG
+         * rolling maxima are at or below the threshold. */
+        double pulse_max = (n_pulses >= b) ? rolling_hr_extreme(pulse_idx, n_pulses, rec->fs, b, 1) : -1.0;
+        double ecg_max = (ecg_ch && n_beats >= b) ? rolling_hr_extreme(beat_idx, n_beats, rec->fs, b, 1) : -1.0;
+        if (!ecg_ch || n_beats < b || ecg_max <= 0.0) {
+            contradicts = 0;
+            snprintf(detail, sizeof(detail), "ECG evidence unavailable (pulse max hr=%.0fbpm vs threshold >%.0fbpm)",
+                     pulse_max, def->hr_above_bpm);
+        } else if (pulse_max <= 0.0) {
+            contradicts = 0;
+            snprintf(detail, sizeof(detail), "pulse max hr could not be computed over %zu beats", b);
+        } else if (ecg_max > def->hr_above_bpm) {
+            contradicts = 0;
+            snprintf(detail, sizeof(detail), "ecg max hr=%.0fbpm exceeds threshold >%.0fbpm (pulse max hr=%.0fbpm)",
+                     ecg_max, def->hr_above_bpm, pulse_max);
+        } else {
+            contradicts = pulse_max <= def->hr_above_bpm;
+            snprintf(detail, sizeof(detail), "pulse max hr=%.0fbpm and ecg max hr=%.0fbpm vs threshold >%.0fbpm",
+                     pulse_max, ecg_max, def->hr_above_bpm);
+        }
     } else if (def->has_duration_s) {
         /* Flutter/Fib handled via never_suppress already; if reached here
          * (future rules change), be conservative and do not contradict. */
