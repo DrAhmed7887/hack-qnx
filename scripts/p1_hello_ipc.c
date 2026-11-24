@@ -47,21 +47,24 @@ static int g_server_rc = 0; /* 0 = server handled one request cleanly */
  * client never hangs forever. */
 static void *server(void *arg) {
     (void)arg;
-    req_t req;
+    struct {
+        req_t req;
+        char pad[16];
+    } rx;
     struct _msg_info info;
-    rcvid_t rcvid = MsgReceive(atomic_load(&g_chid), &req, sizeof req, &info);
+    rcvid_t rcvid = MsgReceive(atomic_load(&g_chid), &rx, sizeof rx, &info);
     if (rcvid <= 0) { /* -1 error, 0 = pulse (none expected here) */
         g_server_rc = 1;
         destroy_channel_once(); /* unblocks a send-blocked client with an error */
         return NULL;
     }
-    /* ChannelCreate(0) is private to main() and does not enable _NTO_CHF_SENDER_LEN; check received msglen. */
-    if (info.msglen < 0 || (size_t)info.msglen != sizeof req) {
+    /* Receive into larger rx so info.msglen catches oversized messages up to sizeof rx even without _NTO_CHF_SENDER_LEN. */
+    if (info.msglen < 0 || (size_t)info.msglen != sizeof(req_t)) {
         MsgError(rcvid, EBADMSG);
         g_server_rc = 2;
         return NULL;
     }
-    rep_t rep = {req.value + 1};
+    rep_t rep = {rx.req.value + 1};
     if (MsgReply(rcvid, EOK, &rep, sizeof rep) == -1) {
         g_server_rc = 3;
         return NULL;
