@@ -233,8 +233,7 @@ int main(int argc, char **argv) {
         }
 
         if (rcvid > 0) {
-            if (info.msglen >= 0 && (size_t)info.msglen == sizeof(qw_msg_decision_t) &&
-                info.srcmsglen == info.msglen) {
+            if (info.msglen >= 0 && (size_t)info.msglen == sizeof(qw_msg_decision_t)) {
                 qw_msg_reply_t reply = {QW_IPC_VERSION, (int32_t)QW_ST_BAD_VERSION, 0};
                 if (m.decision.version == QW_IPC_VERSION) {
                     pthread_mutex_lock(&g_mu);

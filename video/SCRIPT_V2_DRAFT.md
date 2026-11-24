@@ -46,7 +46,7 @@ Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified dat
 
 **Screen:** `docs/workflow.svg`, with the amber fail-open path highlighted last.
 
-**VO:** "Quiet Ward is a second opinion on bedside alarms, built on QNX. One rule: it never silently drops an alarm. The bedside alarm stays. If a second channel contradicts it, the alarm goes to a review queue for a nurse. If the detector stalls, crashes, overflows, loses shared memory or restarts, the answer is always confirm."
+**VO:** "Quiet Ward is a second opinion on bedside alarms, designed for QNX 8.0 with the QNX build pending. One rule: it never silently drops an alarm. The bedside alarm stays. If a second channel contradicts it, the alarm goes to a review queue for a nurse. If the detector stalls, crashes, overflows, loses shared memory or restarts, the answer is always confirm."
 
 **Overlay:** "Raw alarm preserved. Every fault fails open to CONFIRM."
 
@@ -96,7 +96,7 @@ Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified dat
 
 **Screen:** terminal: `make fuzz` (runs `scripts/fuzz_qw.py --count 1000` via `.venv/bin/python` when present, else `python3`) finishing with "1000/1000 passed"; then `make && make gateway-test && make reentrant-test && make demo-verify` running offline; then the first lines of `submission/g3/stress-checklist.md` showing HOST PASS and QEMU PENDING columns.
 
-**VO:** "Bad input fails closed. A thousand seeded mutations of record files and configs: no crashes, every rejection explained. The ring buffer and the alarm queue are tested under load. The matrix says exactly what passed on the host and what still needs the QNX target. Everything builds offline from a fresh clone."
+**VO:** "Bad input fails closed. A thousand seeded mutations of record files and configs: no crashes, every rejection explained. The ring buffer and the alarm queue are tested under load. The matrix says exactly what passed on the host and what still needs the QNX target. The host build and checks run from a fresh export with no network access required."
 
 **Overlay:** "Fuzz: 1000/1000. Stress matrix: host passes and QEMU pending, both shown."
 
@@ -104,8 +104,8 @@ Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified dat
 
 **Screen:** static card, high contrast, readable for 15 s.
 
-> **Data:** PhysioNet/Computing in Cardiology Challenge 2015, real de-identified ICU records, ODC-BY 1.0.
-> Clifford GD, Silva I, Moody B, Li Q, Kella D, Shahin A, Kooistra T, Perry D, Mark RG (2015). Computing in Cardiology 42:273-276. DOI 10.13026/c9fg-a467
+> **Data:** PhysioNet/Computing in Cardiology Challenge 2015 dataset (real de-identified ICU records, ODC-BY 1.0, DOI 10.13026/c9fg-a467).
+> **Paper:** Clifford GD, Silva I, Moody B, Li Q, Kella D, Shahin A, Kooistra T, Perry D, Mark RG (2015). Computing in Cardiology 42:273-276.
 > **Research demo, not a medical device.** Clinical thresholds are pending sign-off.
 > Quiet Ward 2.0 · QNX Global Hackathon · repo, JUDGES.md and DATA_CARD.md in the description.
 
@@ -117,9 +117,9 @@ Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified dat
 
 | Scene | QNX 8.0 / Host Scope Shown | Exact Repo Files & Primitives | Label / Runtime Honesty Rule |
 |---|---|---|---|
-| **S02** | Architecture & QNX 8.0 IPC/process layout (`docs/workflow.svg`) | `src/qnx/qw_acq.c` (`ChannelCreate`, `ConnectAttach`, `MsgSendPulse`, `timer_create`, `shm_open`, `mmap`), `src/qnx/qw_ring.{h,c}` (seqlock ring `/qw_ring_bed%u`), `src/qnx/qw_detector.c` (`MsgReceive`, `MsgSend`, `MsgReply`), `src/qnx/qw_alarm_mgr.c` + `src/qnx/qw_resmgr.c` (`dispatch_create`, `resmgr_attach` on `/dev/quietward`), `src/qnx/qw_log.c` (`slog2_register`, `slog2f`), `src/qnx/qw_supervisor.c` (`posix_spawn`); `QPLMS` planned at P1, not in committed source + `src/qnx/qw_failopen.c` | Present as the QNX 8.0 architecture; note runtime execution waits on P1 (`myQNX SDP 8.0`) unless captured before recording |
+| **S02** | Architecture & QNX 8.0 IPC/process layout (`docs/workflow.svg`) | `src/qnx/qw_acq.c` (`ChannelCreate`, `ConnectAttach`, `MsgSendPulse`, `timer_create`, `shm_open`, `mmap`), `src/qnx/qw_ring.{h,c}` (seqlock ring `/qw_ring_bed%u`), `src/qnx/qw_detector.c` (`MsgReceive`, `MsgSend`, `MsgReply`), `src/qnx/qw_alarm_mgr.c` + `src/qnx/qw_resmgr.c` (`dispatch_create`, `resmgr_attach` on `/dev/quietward`), `src/qnx/qw_log.c` (`slog2_register`, `slog2f`), `src/qnx/qw_supervisor.c` (`posix_spawn`); no `QPLMS` config committed (probe script `scripts/p1_qplms_probe.sh` only; fallback `src/qnx/qw_supervisor.c`) + `src/qnx/qw_failopen.c` | Present as the QNX 8.0 architecture; note runtime execution waits on P1 (`myQNX SDP 8.0`) unless captured before recording |
 | **S05** | Fail-open under fault (QNX / host demo) | **If P1 QNX 8.0 QEMU boot is captured:** `slay -s KILL qw_detector`, `--watchdog-ms` latch, `qw_bedctl 3`, `slog2info -b quietward`, `pidin`. **Otherwise (current host demo):** `make gateway-test` (`qw_gateway_test: 529 checks, 0 failed`, documented in `submission/g3/stress-checklist.md` rows 1, 4, 5, 13 covering deadline expiry, 17th pending `QW_ST_BUSY`, `QW_ST_DETACHED`, and restart journal replay) | Explicitly label `"host-portable C11, not QNX"` unless real QNX 8.0 QEMU footage was recorded (`[PENDING P1: ...]`) |
-| **S07** | Hostile input & offline reproducibility | Offline fresh-clone host suite (`make && make gateway-test && make reentrant-test && make demo-verify && make fuzz` — `make fuzz` runs `scripts/fuzz_qw.py --count 1000` via `.venv/bin/python` when present, else `python3` -> `1000/1000 passed`), `submission/g3/stress-checklist.md` (`HOST PASS` vs `QEMU PENDING`), plus `Makefile` (`make qnx` with `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror -lm -lslog2`) and `scripts/p3_qnx_soak.sh` | Show both `HOST PASS` and `QEMU PENDING` columns clearly; zero fabricated QNX build or soak results |
+| **S07** | Hostile input & offline reproducibility | Offline fresh-export host suite (`make && make gateway-test && make reentrant-test && make demo-verify && make fuzz` — `make fuzz` runs `scripts/fuzz_qw.py --count 1000` via `.venv/bin/python` when present, else `python3` -> `1000/1000 passed`), `submission/g3/stress-checklist.md` (`HOST PASS` vs `QEMU PENDING`), plus `Makefile` (`make qnx` with `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror -lm -lslog2`) and `scripts/p3_qnx_soak.sh` | Show both `HOST PASS` and `QEMU PENDING` columns clearly; zero fabricated QNX build or soak results |
 
 ---
 

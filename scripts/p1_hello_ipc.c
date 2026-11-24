@@ -55,7 +55,8 @@ static void *server(void *arg) {
         destroy_channel_once(); /* unblocks a send-blocked client with an error */
         return NULL;
     }
-    if (info.msglen < 0 || (size_t)info.msglen < sizeof req) {
+    /* ChannelCreate(0) is private to main() and does not enable _NTO_CHF_SENDER_LEN; check received msglen. */
+    if (info.msglen < 0 || (size_t)info.msglen != sizeof req) {
         MsgError(rcvid, EBADMSG);
         g_server_rc = 2;
         return NULL;

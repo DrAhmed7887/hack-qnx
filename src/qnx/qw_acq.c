@@ -149,6 +149,7 @@ int main(int argc, char **argv) {
 
     while (pos < alarm_sample) {
         struct _pulse pulse;
+        /* MsgReceivePulse returns int (0 on pulse, -1 on error), unlike MsgReceive which returns rcvid_t. */
         int rcvid = MsgReceivePulse(chid, &pulse, sizeof pulse, NULL);
         if (rcvid < 0) {
             if (errno == EINTR) continue;

@@ -189,10 +189,11 @@ static int qw_io_read(resmgr_context_t *ctp, io_read_t *msg, RESMGR_OCB_T *ocb) 
     }
 
     size_t off = (size_t)ocb->base.offset;
+    size_t req_bytes = (size_t)_IO_READ_GET_NBYTES(msg);
     size_t nbytes = 0;
     if (ocb->snap != NULL && off < ocb->len) {
         nbytes = ocb->len - off;
-        if (nbytes > (size_t)msg->i.nbytes) nbytes = (size_t)msg->i.nbytes;
+        if (nbytes > req_bytes) nbytes = req_bytes;
     }
     _IO_SET_READ_NBYTES(ctp, (int)nbytes);
     if (nbytes > 0) {
@@ -211,7 +212,7 @@ static int qw_io_write(resmgr_context_t *ctp, io_write_t *msg, RESMGR_OCB_T *ocb
     if (status != EOK) return status;
     if ((msg->i.xtype & _IO_XTYPE_MASK) != _IO_XTYPE_NONE) return ENOSYS;
 
-    size_t nbytes = (size_t)msg->i.nbytes;
+    size_t nbytes = (size_t)_IO_WRITE_GET_NBYTES(msg);
     if (nbytes > QW_ACK_MAX_BYTES) return EMSGSIZE;
     char buf[QW_ACK_MAX_BYTES + 1];
     if (nbytes > 0 && resmgr_msgget(ctp, buf, nbytes, sizeof(msg->i)) != (ssize_t)nbytes) return EIO;

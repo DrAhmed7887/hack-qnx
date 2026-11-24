@@ -10,7 +10,7 @@ A second opinion on bedside alarms that can never silence the first. Quiet Ward 
 
 ## Inspiration
 
-Any bedside alarm system has to answer one question first: what happens when something goes wrong? `[PENDING RE-FETCH into docs/EVIDENCE.md — see CLAIMS.md row 18: re-fetch openFDA MAUDE report 10055677 and insert verified wording before submitting, or omit.]` Our answer is an invariant: an alarm is never silently dropped.
+Any bedside alarm system has to answer one question first: what happens when something goes wrong? In clinical monitoring, silent alarm suppression can hide true patient deterioration behind software faults or dropped messages. Our answer is an invariant: an alarm is never silently dropped.
 
 ## What it does
 
@@ -25,7 +25,7 @@ On six real records (a demonstration, not an accuracy measurement) five are conf
 
 ## How we built it
 
-**Verified on the host (portable C11, verified on host in `submission/g3/host_tests_20261124.log`):**
+**Verified on the host (portable C11, logged in `submission/g3/host_tests_20261124.log`):**
 - The detection and rule core (`qw_core`, `rules`, detector config loader), reentrant.
 - The IPC building blocks as plain C11: the per-bed seqlock ring, the gateway state machine (pending table, review queue, deadline, nurse ACK validation, restart journal), the audit-line formatter and the JSONL log serializer.
 - `make gateway-test`: `qw_gateway_test: 529 checks, 0 failed`; `make reentrant-test`: `320` concurrent `qw_decide()` calls across `8` threads; `make fuzz`: `1000/1000` seeded mutations passed.
@@ -46,7 +46,7 @@ Every primitive below is present in the committed source. Nothing below has been
 | `src/qnx/qw_failopen.c` | decoupled fail-open helper: `open` with `O_NOFOLLOW`, `write` of `CONFIRM_ALL`, `qw_log_emit` at CRIT | [PENDING P1: writes CONFIRM_ALL to /var/run/quietward/alarm_out + CRIT in slog2info -b quietward] | S02, S05 |
 | `src/qnx/qw_supervisor.c` | `posix_spawn`, `waitpid`, `kill`, `sigaction` | [PENDING P1: spawns/restarts qw_alarm_mgr and qw_detector, invokes qw_failopen after >3 restarts, visible in pidin] | S02, S05 |
 | `src/qnx/qw_bedctl.c` | `open("/dev/quietward")`, `devctl(QW_DCMD_BED_STATE)` | [PENDING P1: prints per-bed JSON including failopen_active via devctl] | S05 |
-| `src/qnx/qw_resmgr.c` | `dispatch_create`, `iofunc_func_init`, `iofunc_attr_init`, `resmgr_attach("/dev/quietward")`, `dispatch_context_alloc`, `dispatch_block`, `dispatch_handler`, `iofunc_read_verify`, `iofunc_write_verify`, `iofunc_devctl_default`, `resmgr_msgget`, `_IO_SET_WRITE_NBYTES`, `MsgReply` | [PENDING P1: cat /dev/quietward JSONL stream, write() nurse ACK] | S02, S05 |
+| `src/qnx/qw_resmgr.c` | `dispatch_create`, `iofunc_func_init`, `iofunc_attr_init`, `resmgr_attach("/dev/quietward")`, `dispatch_context_alloc`, `dispatch_block`, `dispatch_handler`, `iofunc_read_verify`, `iofunc_write_verify`, `iofunc_devctl_default`, `resmgr_msgget`, `_IO_READ_GET_NBYTES`, `_IO_WRITE_GET_NBYTES`, `_IO_SET_READ_NBYTES`, `_IO_SET_WRITE_NBYTES`, `MsgReply` | [PENDING P1: cat /dev/quietward JSONL stream, write() nurse ACK] | S02, S05 |
 | `src/qnx/qw_log.c` | `slog2_register`, `slog2f` (`SLOG2_INFO`, `SLOG2_WARNING`, `SLOG2_ERROR`, `SLOG2_CRITICAL`) | [PENDING P1: slog2info -b quietward audit lines] | S05 |
 | `src/qnx/qw_ring.h`, `src/qnx/qw_ring.c` | C11 `_Atomic` seqlock ring over `/qw_ring_bed%u` shared memory (`qw_ring_init`, `qw_ring_write`, `qw_ring_read_tail`; mapped with `shm_open`/`mmap` on QNX) | [PENDING P1: lock-free sample ring between qw_acq and qw_detector over /dev/shmem/qw_ring_bed*] | S02, S05 |
 | `src/qnx/qw_ipc.h` | `QW_DCMD_BED_STATE`, `QW_PULSE_*`, `QW_MSG_DECISION`, `qw_ring_hdr_t` (`_Atomic` ring header) | [PENDING P1: shared IPC contract across all QNX processes] | S02, S05 |
@@ -61,11 +61,12 @@ Every primitive below is present in the committed source. Nothing below has been
 
 ### QNX 8.0 target, toolchain and build/run (full steps in README.md)
 
-- **QNX version:** QNX SDP 8.0 / QNX Neutrino RTOS 8.0. **Target:** QNX 8.0 x86_64 QEMU image (built from SDP 8.0) plus host-portable C11. Cross-build commands here assume an x86_64 Linux host (or `.devcontainer/devcontainer.json` with Ubuntu 24.04 + QEMU); verify exact SDP 8.0 host OS compatibility at P1 bring-up.
+- **QNX version:** QNX SDP 8.0 / QNX Neutrino RTOS 8.0. **Target:** QNX 8.0 x86_64 QEMU image (built from SDP 8.0) plus host-portable C11. Host requirement: GitHub Codespaces (x86_64) or an x86_64 Linux/Windows host; a local arm64 devcontainer on Apple Silicon will not run SDP 8.0 x86_64 host tools natively.
 - **Toolchain:** `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`, `-lm -lslog2`, GNU Make, `source ~/qnx800/qnxsdp-env.sh` on x86_64 Linux, `.devcontainer/devcontainer.json`.
-- **Cross-build** [PENDING P1: not yet run]: `source ~/qnx800/qnxsdp-env.sh`, `make qnx-check`, `make qnx`. Copy binaries, configs, `data/demo/`, and `scripts/p3_qnx_soak.sh` to `/opt/quietward/{bin,rules,config,data/demo,scripts}`.
-- **Target run** [PENDING P1: no output captured yet]: `qw_supervisor`, `qw_acq`, `cat /dev/quietward | head -n 1`, `qw_bedctl`, `slog2info -b quietward`, `sh /opt/quietward/scripts/p3_qnx_soak.sh -o /opt/quietward/out` (then copy `/opt/quietward/out/g3_run_01..10.txt` and `slog2_run_01..10.txt` back to `submission/g3/` via `scp` or QEMU shared directory).
-- **Offline fresh clone (verified, no network, no pip):** `make`, `make gateway-test`, `make reentrant-test`, `make demo-verify`, `make fuzz` (runs `scripts/fuzz_qw.py --count 1000` via `.venv/bin/python` when present, else `python3`), `python3 scripts/host_shift_replay.py`, `python3 scripts/render_demo_plots.py`. Additional host suites: `make test` additionally requires `pytest` and `numpy`; `scripts/fetch_physionet.sh` and full 750-record `make eval` additionally require `wfdb` and `numpy`.
+- **Cross-build** [PENDING P1: not yet run]: `source ~/qnx800/qnxsdp-env.sh`, `make qnx-check`, `make qnx`.
+- **QEMU image boot & `scp` copy** [PENDING P1: not yet run]: build and boot the QNX 8.0 x86_64 QEMU image from SDP 8.0 (e.g., `mkqnximage` / QEMU boot under `.devcontainer/devcontainer.json`; exact SDP 8.0 image-builder flags to be verified at P1), then copy `build/qnx/*`, `rules/alarm_rules.json`, `config/detector.json`, `data/demo/*.qw`, and `scripts/p3_qnx_soak.sh` via `scp` to `/opt/quietward/{bin,rules,config,data/demo,scripts}`.
+- **Target run** [PENDING P1: no output captured yet]: `mkdir -p /var/run/quietward && chmod 0700 /var/run/quietward`, `qw_supervisor`, `qw_acq`, `cat /dev/quietward | head -n 1`, `qw_bedctl`, `slog2info -b quietward`, `sh /opt/quietward/scripts/p3_qnx_soak.sh -o /opt/quietward/out` (then copy `/opt/quietward/out/g3_run_01..10.txt` and `slog2_run_01..10.txt` back to `submission/g3/` via `scp` or QEMU shared directory).
+- **Offline host build & checks (fresh export, no `.git`/`.venv`; offline build; no network access required, no pip):** `make`, `make gateway-test`, `make reentrant-test`, `make demo-verify`, `make fuzz` (runs `scripts/fuzz_qw.py --count 1000` via `.venv/bin/python` when present, else `python3`), `python3 scripts/host_shift_replay.py`, `python3 scripts/render_demo_plots.py`. Additional host suites: `make test` additionally requires `pytest` and `numpy`; `scripts/fetch_physionet.sh` and full 750-record `make eval` additionally require `wfdb` and `numpy`.
 
 ## Challenges we ran into
 
@@ -95,7 +96,7 @@ Fixed true-alarm recall 96.6% (86 of 89), Wilson 95% CI [90.6-98.8]. Kill Rule: 
 
 The PhysioNet/CinC 2015 winners scored 81.39 and 85.04 on a different 500-record hidden test set; our numbers come from a local split and are not comparable.
 
-Also: 529 host gateway checks, 0 failed; 320 concurrent reentrant calls across 8 threads; fuzzer 1000/1000; zero synthetic waveforms; zero paid APIs (`submission/g3/stress-checklist.md` row 14); everything builds offline from a fresh clone.
+Also: 529 host gateway checks, 0 failed; 320 concurrent reentrant calls across 8 threads; fuzzer 1000/1000; zero synthetic waveforms; zero paid APIs (`submission/g3/stress-checklist.md` row 14); the host build and offline checks run from a fresh export (no `.git`/`.venv`), offline build; no network access required (`submission/g3/host_tests_20261124.log`).
 
 ## What's next
 
@@ -112,7 +113,7 @@ C11, POSIX, QNX Neutrino 8.0 (message passing, pulses, resource manager, slog2; 
 
 ## Repository, licence and submission period
 
-`DrAhmed7887/hack-qnx` is a new, non-fork repository; first commit `d1d0bd6` on 22 Nov 2026 (`submission/g3/git_birth_commit.txt`; GitHub creation date / submission-period check pending owner click). Code: Apache License 2.0 (`LICENSE` present; GitHub About detection pending owner click). Data: ODC-BY 1.0 attribution (PhysioNet/CinC Challenge 2015 dataset, DOI 10.13026/c9fg-a467; `NOTICE`, `DATA_CARD.md`, `data/demo/LICENSE-ODC-BY.txt`). Claim-to-file map: `CLAIMS.md`. Rules compliance: `submission/COMPLIANCE_CHECKLIST.md`.
+`DrAhmed7887/hack-qnx` is a new, non-fork repository (pending owner click); first commit `d1d0bd6` on 22 Nov 2026 (`submission/g3/git_birth_commit.txt`; GitHub creation date / submission-period check pending owner click). Code: Apache License 2.0 (`LICENSE` present; GitHub About detection pending owner click). Data: ODC-BY 1.0 attribution (PhysioNet/CinC Challenge 2015 dataset, DOI 10.13026/c9fg-a467; `NOTICE`, `DATA_CARD.md`, `data/demo/LICENSE-ODC-BY.txt`). Claim-to-file map: `CLAIMS.md`. Rules compliance: `submission/COMPLIANCE_CHECKLIST.md`.
 
 ## Data and citations
 

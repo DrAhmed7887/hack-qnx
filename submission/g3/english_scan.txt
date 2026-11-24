@@ -1,18 +1,20 @@
 files_total=104 text_scanned=98 ascii_only_files=79 binary_skipped=6
+excludes_self=submission/g3/english_scan.txt (self-generated scan log listing matched non-ASCII punctuation characters)
 skipped=['data/demo/a109l.qw', 'data/demo/a653l.qw', 'data/demo/f450s.qw', 'data/demo/t106s.qw', 'data/demo/t116s.qw', 'data/demo/v188s.qw']
 ascii_only_sample_check: CLAIMS.md_ascii_only=True README.md_ascii_only=True
 ascii_only_files_list=['.devcontainer/devcontainer.json', '.github/workflows/ci.yml', '.gitignore', '.kiro/agents/qw-builder.json', 'CLAIMS.md', 'LICENSE', 'Makefile', 'README.md', 'config/detector.json', 'data/bin/labels.csv', 'data/demo/MANIFEST.json', 'data/demo/PLAYLIST.json', 'docs/workflow.svg', 'eval/heldout_runs.log', 'eval/report.py', 'eval/results/heldout_fixed.json', 'eval/results/heldout_v0-frozen.json', 'eval/results/train_fixed.json', 'eval/results/train_v0-frozen.json', 'eval/results/train_v0.json', 'eval/run_eval.py', 'eval/split.json', 'rules/alarm_rules.json', 'scripts/check_split_order.sh', 'scripts/convert.py', 'scripts/fetch_physionet.sh', 'scripts/fuzz_qw.py', 'scripts/hooks/guard_signed.py', 'scripts/host_shift_replay.py', 'scripts/make_demo_pack.py', 'scripts/make_split.py', 'scripts/p1_hello_ipc.c', 'scripts/p1_qplms_probe.sh', 'scripts/p1_tcg_jitter.c', 'scripts/p3_qnx_soak.sh', 'src/qnx/qw_acq.c', 'src/qnx/qw_alarm_mgr.c', 'src/qnx/qw_bedctl.c', 'src/qnx/qw_detector.c', 'src/qnx/qw_failopen.c', 'src/qnx/qw_gateway_state.c', 'src/qnx/qw_gateway_state.h', 'src/qnx/qw_gateway_test.c', 'src/qnx/qw_ipc.h', 'src/qnx/qw_log.c', 'src/qnx/qw_log.h', 'src/qnx/qw_resmgr.c', 'src/qnx/qw_resmgr.h', 'src/qnx/qw_ring.c', 'src/qnx/qw_ring.h', 'src/qnx/qw_supervisor.c', 'src/qw_cli.c', 'src/qw_core.c', 'src/qw_core.h', 'src/qw_detector_config.c', 'src/qw_detector_config.h', 'src/qw_detector_config_dump.c', 'src/qw_json_lexer.h', 'src/qw_reentrant_test.c', 'src/qw_rules_dump.c', 'src/rules.c', 'src/rules.h', 'submission/g3/asan_ubsan_20261124.log', 'submission/g3/eval_heldout_report.txt', 'submission/g3/eval_train_report.txt', 'submission/g3/git_birth_commit.txt', 'submission/g3/host_shift_review.json', 'submission/g3/host_shift_review.md', 'submission/g3/host_tests_20261124.log', 'submission/g3/stress-checklist.md', 'tests/helpers.py', 'tests/test_convert.py', 'tests/test_core_fix.py', 'tests/test_detector_config.py', 'tests/test_qw_core_loader.py', 'tests/test_rules.py', 'tests/test_rules_depth_limit.py', 'tests/test_rules_failclosed.py', 'tests/test_suppression.py']
-non_ascii_lines=80
+non_ascii_lines=82
 .kiro/specs/quiet-ward/tasks.md:10: chars=—
 .kiro/steering/rules.md:1: chars=—
 DATA_CARD.md:5: chars=—
 JUDGES.md:1: chars=—
-JUDGES.md:4: chars=§
+JUDGES.md:4: chars=§—
 JUDGES.md:10: chars=–
 JUDGES.md:11: chars=–
 JUDGES.md:12: chars=–
 JUDGES.md:13: chars=–—
 JUDGES.md:20: chars=–
+JUDGES.md:23: chars=—
 JUDGES.md:24: chars=—
 NOTICE:1: chars=—
 data/demo/LICENSE-ODC-BY.txt:22: chars=–“”
@@ -59,8 +61,9 @@ src/qnx/README.md:97: chars=—
 src/qnx/README.md:104: chars=→
 src/qnx/README.md:117: chars=—
 submission/COMPLIANCE_CHECKLIST.md:12: chars=—
+submission/COMPLIANCE_CHECKLIST.md:13: chars=§·–—→
 submission/DEVPOST_DRAFT.md:13: chars=—
-submission/DEVPOST_DRAFT.md:120: chars=—
+submission/DEVPOST_DRAFT.md:121: chars=—
 video/SCRIPT_V2_DRAFT.md:7: chars=—
 video/SCRIPT_V2_DRAFT.md:10: chars=—
 video/SCRIPT_V2_DRAFT.md:14: chars=—

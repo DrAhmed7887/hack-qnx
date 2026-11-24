@@ -170,7 +170,7 @@ one_run() {
 }
 
 mkdir -p "$OUT_DIR" || exit 2
-for tool in qw_acq qw_detector qw_alarm_mgr qw_supervisor qw_bedctl; do
+for tool in qw_acq qw_detector qw_alarm_mgr qw_failopen qw_supervisor qw_bedctl; do
     [ -x "$BIN_DIR/$tool" ] || { echo "missing $BIN_DIR/$tool: run make qnx and copy build/qnx/*"; exit 2; }
 done
 for f in "$RULES" "$DETCFG"; do

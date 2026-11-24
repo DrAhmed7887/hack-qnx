@@ -4,7 +4,7 @@ Research demo, not a medical device. `rules/alarm_rules.json` carries `status: "
 
 Legend: **HOST PASS** = measured on the host-portable C11 code (macOS or Ubuntu), command and result given. **QEMU PENDING** = needs the booted QNX 8.0 target (blocked on P1, myQNX SDP 8.0 licence bring-up). QEMU runs under TCG, so any timing there is logical time, not hardware real time.
 
-Last host run: `submission/g3/host_tests_20261124.log` (all 7 fresh-clone offline commands: `make`, `make gateway-test`, `make reentrant-test`, `make demo-verify`, `python3 scripts/fuzz_qw.py --count 1000`, `python3 scripts/host_shift_replay.py`, `python3 scripts/render_demo_plots.py`) plus `submission/g3/asan_ubsan_20261124.log` (clean ASan+UBSan builds of `qw_gateway_test` and `qw_reentrant_test`, `exit=0`).
+Last host run: `submission/g3/host_tests_20261124.log` (fresh export with no `.git`/`.venv`; offline build, no network access required; all 8 offline commands: `make`, `make gateway-test`, `make reentrant-test`, `make demo-verify`, `make fuzz`, `python3 scripts/fuzz_qw.py --count 1000`, `python3 scripts/host_shift_replay.py`, `python3 scripts/render_demo_plots.py`) plus `submission/g3/asan_ubsan_20261124.log` (clean ASan+UBSan builds of `qw_gateway_test` and `qw_reentrant_test`, `exit=0`).
 
 | # | Area | Check | Host (portable C11) | QNX 8.0 QEMU G3 soak |
 |---|---|---|---|---|
