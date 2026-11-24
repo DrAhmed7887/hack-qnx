@@ -7,3 +7,4 @@
 | Sample baseline approach | same page | BP/PPG quality check, suppress if pulse HR outside alarm range | 2026-11-22 |
 | Licence | same page + mitdb page | Open Data Commons Attribution License v1.0 | 2026-11-22 |
 | No macOS/ARM SDP host; APS discontinued in 8.0 | see Drive SPEC.md (qnx.com 8.0 docs) | — | 2026-11-19 |
+| openFDA MAUDE report 10055677 | `api.fda.gov/device/event.json?search=mdr_report_key:10055677&limit=1` (`date_received=20200514`, `event_type=Malfunction`, `mdr_text_key=191262317`) | "THE CUSTOMER REPORTED THAT THE EXTERNAL ALARM LAMP FOR NICU BED 4 DID NOT LIGHT AND NO ALARM SOUNDED ON THE [bedside patient monitor — model omitted]. THE DEVICE WAS REPORTED TO BE IN USE ON A PATIENT, BUT NO ADVERSE EVENT TO PATIENT OR USER WAS REPORTED." (device brand/model omitted to avoid third-party hardware trademarks; not presented as patient harm) | 2026-11-25 |

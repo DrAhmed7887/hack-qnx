@@ -118,5 +118,5 @@ C11, POSIX, QNX Neutrino 8.0 (message passing, pulses, resource manager, slog2; 
 ## Data and citations
 
 - Data: PhysioNet/Computing in Cardiology Challenge 2015 dataset, real de-identified ICU records, ODC-BY 1.0, DOI 10.13026/c9fg-a467. Paper: Clifford GD, Silva I, Moody B, Li Q, Kella D, Shahin A, Kooistra T, Perry D, Mark RG (2015). The PhysioNet/Computing in Cardiology Challenge 2015: Reducing False Arrhythmia Alarms in the ICU. Computing in Cardiology 42:273-276.
-- openFDA MAUDE report 10055677: omitted from draft pending re-fetch into `docs/EVIDENCE.md` (see `CLAIMS.md` row 18).
+- openFDA MAUDE report `10055677` (`Malfunction` report, received 14 May 2020, `mdr_text_key=191262317`; no adverse event to patient or user reported; verified in `docs/EVIDENCE.md`, device model omitted).
 - Repo documents: README, JUDGES.md, DATA_CARD.md, `submission/g3/stress-checklist.md`.

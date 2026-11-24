@@ -26,21 +26,21 @@ Variant B framing: a review and escalation gateway that never silently drops an 
 | S07 | 2:10-2:40 | 30 s |
 | S08 | 2:40-2:55 | 15 s |
 
-*Fallback if S01 stays blocked:* if openFDA MAUDE report 10055677 is not re-fetched and committed into `docs/EVIDENCE.md` before recording, omit S01 and open directly with S02 ("The one rule"), shifting `S02`–`S08` to a `2:45` total runtime (still `<= 2:55` and `< 3:00`).
+*Fallback if S01 is skipped:* if you prefer not to open on a MAUDE malfunction card, omit S01 and open directly with S02 ("The one rule"), shifting `S02`–`S08` to a `2:45` total runtime (still `<= 2:55` and `< 3:00`).
 
 ---
 
-## S01 · 0:00-0:10 · An alarm that never sounded `[BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]`
+## S01 · 0:00-0:10 · An alarm that never sounded
 
 **Screen:** plain-text card displaying the omitted-model quote below on a neutral slide (no openFDA, PhysioNet, or vendor logos or webpage screenshots), text highlighted, nothing else.
 
-**Draft on-screen quote `[PLACEHOLDER — BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]`:**
-"[Insert verified openFDA MAUDE 10055677 quote from docs/EVIDENCE.md after re-fetch, keeping monitor model omitted as [... — model omitted]]."
-Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified date/type from docs/EVIDENCE.md (model name omitted)."
+**On-screen quote (from `docs/EVIDENCE.md`, `mdr_report_key=10055677`, `mdr_text_key=191262317`, monitor model omitted):**
+"THE CUSTOMER REPORTED THAT THE EXTERNAL ALARM LAMP FOR NICU BED 4 DID NOT LIGHT AND NO ALARM SOUNDED ON THE [bedside patient monitor — model omitted]. THE DEVICE WAS REPORTED TO BE IN USE ON A PATIENT, BUT NO ADVERSE EVENT TO PATIENT OR USER WAS REPORTED."
+Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 2020 (model name omitted)."
 
-**VO (blocked until MAUDE 10055677 re-fetch — see CLAIMS.md row 18):** "[Placeholder — confirm verified openFDA MAUDE 10055677 summary in docs/EVIDENCE.md before recording.] Any alarm system has to answer one question first: what happens when something goes wrong?"
+**VO:** "This is a real device report: an alarm that never sounded. Any alarm system has to answer one question first: what happens when something goes wrong?"
 
-*`[BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]` `CLAIMS.md` row 18 marks openFDA MAUDE report 10055677 as `UNSOURCED IN REPO`, so no quote text or receipt date appears here until re-fetched from openFDA and added verbatim to `docs/EVIDENCE.md`. Keep the third-party hardware brand/model explicitly omitted on screen (`[... — model omitted]` and `"model name omitted"` in the caption) so no third-party product brand/logo is displayed in the public YouTube video, and do not describe this as a patient harm event.*
+*Verified from openFDA (`date_received=20200514`, `mdr_text_key=191262317`) and committed in `docs/EVIDENCE.md` (`CLAIMS.md` row 18 `VERIFIED-REPO`). Keep the third-party hardware brand/model explicitly omitted on screen (`[bedside patient monitor — model omitted]` and `"model name omitted"` in the caption) so no third-party product brand/logo is displayed in the public YouTube video, and do not describe this as a patient harm event.*
 
 ## S02 · 0:10-0:30 · The one rule
 
@@ -137,7 +137,7 @@ Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified dat
 
 ## Recording checklist
 
-- [ ] `[BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]` Re-fetch openFDA report 10055677, add the exact quote to `docs/EVIDENCE.md`, render S01 as a recreated plain-text card (never an unredacted openFDA webpage screenshot), and compare all non-omitted wording word for word, keeping the hardware brand/model explicitly marked `[... — model omitted]` in the quote and `"model name omitted"` in the caption.
+- [x] Re-fetched openFDA report 10055677 (`date_received=20200514`, `mdr_text_key=191262317`) into `docs/EVIDENCE.md`; render S01 as a recreated plain-text card (never an unredacted openFDA webpage screenshot), keeping the hardware brand/model explicitly marked `[bedside patient monitor — model omitted]` in the quote and `"model name omitted"` in the caption.
 - [ ] Re-run `python3 scripts/host_shift_replay.py` and `make gateway-test` on the recording day; if any number changes, update `submission/g3/` and `CLAIMS.md` first before recording.
 - [ ] Held-out table matches `eval/results/` exactly (51.46% rounded to 51.5% in the 1-decimal table, FN 18 to 3).
 - [ ] No on-screen text implies clinical validation, a medical device, or any figure outside the allowed list above.
