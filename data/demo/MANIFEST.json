@@ -1,0 +1,67 @@
+{
+  "dataset": {
+    "name": "PhysioNet/Computing in Cardiology Challenge 2015: Reducing False Arrhythmia Alarms in the ICU",
+    "url": "https://physionet.org/content/challenge-2015/1.0.0/",
+    "doi": "10.13026/c9fg-a467",
+    "license": "ODC-BY 1.0",
+    "license_url": "https://opendatacommons.org/licenses/by/1-0/",
+    "license_file": "LICENSE-ODC-BY.txt",
+    "citation": "Clifford GD, Silva I, Moody B, Li Q, Kella D, Shahin A, Kooistra T, Perry D, Mark RG (2015). The PhysioNet/Computing in Cardiology Challenge 2015: Reducing False Arrhythmia Alarms in the ICU. Computing in Cardiology 42:273-276."
+  },
+  "records": [
+    {
+      "file": "a109l.qw",
+      "record": "a109l",
+      "alarm_type": "Asystole",
+      "true_alarm": 0,
+      "split": "train",
+      "bytes": 1320080,
+      "sha256": "afa053042bd27d1c11935150cc15c9dcc2bee38402474ddfc4438d328263c017"
+    },
+    {
+      "file": "a653l.qw",
+      "record": "a653l",
+      "alarm_type": "Asystole",
+      "true_alarm": 1,
+      "split": "train",
+      "bytes": 1320080,
+      "sha256": "cd956e1041528b89bb2d32d01065bca852fb28318bd7834573a1924b74291f49"
+    },
+    {
+      "file": "f450s.qw",
+      "record": "f450s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": 1,
+      "split": "train",
+      "bytes": 900064,
+      "sha256": "a3b00158cd92d83ad5ed787f6072d84546ce233794173facedd4c492f009435e"
+    },
+    {
+      "file": "t106s.qw",
+      "record": "t106s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 1,
+      "split": "train",
+      "bytes": 900064,
+      "sha256": "4d2c65efa5c04fed7128d48b89fb411382bb505d343e35c6289caba45a97ddb2"
+    },
+    {
+      "file": "t116s.qw",
+      "record": "t116s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": 0,
+      "split": "train",
+      "bytes": 1200080,
+      "sha256": "4c754e86848470171c13889464997f3decda3a3329fb4ee7a2294570b621f3de"
+    },
+    {
+      "file": "v188s.qw",
+      "record": "v188s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": 1,
+      "split": "train",
+      "bytes": 1200080,
+      "sha256": "bd62ac7db3b15bcce626b77a93a19e962b0b7f2841fc20ea61966e7c12d8a0e6"
+    }
+  ]
+}

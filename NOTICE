@@ -1,0 +1,18 @@
+quiet-ward — third-party data notice
+
+The six records in data/demo/ (a109l, a653l, v188s, t116s, t106s, f450s) are
+curated `train`-split records from the PhysioNet/Computing in Cardiology
+Challenge 2015 training set, converted to the .qw binary format. They are
+redistributed under the Open Data Commons Attribution License (ODC-BY) 1.0.
+License text: data/demo/LICENSE-ODC-BY.txt
+Source: https://physionet.org/content/challenge-2015/1.0.0/
+
+Citation:
+  Clifford GD, Silva I, Moody B, Li Q, Kella D, Shahin A, Kooistra T, Perry D,
+  Mark RG (2015). The PhysioNet/Computing in Cardiology Challenge 2015:
+  Reducing False Arrhythmia Alarms in the ICU. Computing in Cardiology
+  42:273-276.
+  PhysioNet DOI: 10.13026/c9fg-a467
+
+Changes: signals were converted from WFDB to the project's .qw format
+(scripts/convert.py). No other data is redistributed in this repository.

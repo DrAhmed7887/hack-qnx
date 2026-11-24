@@ -20,7 +20,7 @@ RULES_DUMP_TARGET = $(BUILD_DIR)/qw_rules_dump
 DETECTOR_CONFIG_DUMP_TARGET = $(BUILD_DIR)/qw_detector_config_dump
 REENTRANT_TEST_TARGET = $(BUILD_DIR)/qw_reentrant_test
 
-.PHONY: all clean test eval convert
+.PHONY: all clean test eval eval-train eval-heldout eval-full demo-pack demo-verify convert
 
 all: $(TARGET)
 
@@ -66,7 +66,24 @@ test: $(TARGET) $(RULES_DUMP_TARGET) $(DETECTOR_CONFIG_DUMP_TARGET) $(REENTRANT_
 	$(PYTHON) -m pytest -q tests
 	./$(REENTRANT_TEST_TARGET)
 
-# Run build/qw over every record in data/bin/ and write
-# eval/results/train_v0.json.
+# Run build/qw over records in data/bin/ and write
+# eval/results/{split}_{version}.json (see eval/run_eval.py --help).
 eval: $(TARGET)
-	$(PYTHON) eval/run_eval.py
+	$(PYTHON) eval/run_eval.py $(EVAL_ARGS)
+
+eval-train: $(TARGET)
+	$(PYTHON) eval/run_eval.py --split train $(EVAL_ARGS)
+
+# Consumes one of the 3 allowed heldout runs (eval/heldout_runs.log).
+eval-heldout: $(TARGET)
+	$(PYTHON) eval/run_eval.py --split heldout $(EVAL_ARGS)
+
+eval-full: $(TARGET)
+	$(PYTHON) eval/run_eval.py --split full $(EVAL_ARGS)
+
+# Build / verify the ODC-BY demo pack in data/demo/.
+demo-pack:
+	$(PYTHON) scripts/make_demo_pack.py
+
+demo-verify:
+	$(PYTHON) scripts/make_demo_pack.py --verify

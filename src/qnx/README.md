@@ -1,24 +1,28 @@
-# Quiet Ward on QNX 8.0 — planned mapping (design doc, no code yet)
+# Quiet Ward on QNX 8.0 — planned mapping (design doc, no QNX code yet)
 
-This document describes how the host-side v0 core (`src/qw_core.c`,
-`src/rules.c`, `src/qw_cli.c`) is planned to map onto QNX Neutrino 8.0
-primitives for an in-ward deployment. Nothing in this directory is built
-or linked today; `make` only builds the host CLI (`build/qw`) from the
-existing `src/*.c` files. Per project rules, any QNX-only code that is
-written later must live behind `#ifdef __QNX__` inside `src/qnx/`, so that
-`src/qw_core.c` keeps building unmodified on macOS for host evaluation.
+This document describes how the host-side C11 core (`src/qw_core.c`,
+`src/rules.c`, `src/qw_cli.c`, `src/qw_detector_config.c`) maps onto QNX
+Neutrino 8.0 primitives for an in-ward review & escalation gateway.
+Per project rules, QNX-only code lives behind `#ifdef __QNX__` inside
+`src/qnx/`, so `src/qw_core.c` keeps building unmodified on macOS for host
+evaluation (`make`, `make test`, `make eval-*`). Simulated/QEMU runs replay
+the committed de-identified PhysioNet/CinC Challenge 2015 `train`-split
+records under `data/demo/` (ODC-BY 1.0, `10.13026/c9fg-a467`).
 
-No performance numbers appear in this document. Per project rules, QEMU
-timing is logical time, not real-time, and no number here is sourced from
-`eval/results/`, so none of it is a claim — it is a plan to validate later.
+No performance numbers appear in this document. QEMU timing is logical
+time (under TCG), not hardware real-time, and no accuracy or runtime
+number here is a claim until measured on a booted QNX 8.0 target and
+backed by `eval/results/`.
 
 ## Why QNX
 
-The core (`qw_core.c`) is already plain C11 + POSIX file I/O with no
-allocation in the per-decision path after `qw_record_load()`, which is
-the property a hard real-time monitoring core needs. The porting work is
-entirely in *how the core is driven* — acquisition, scheduling, IPC, fault
-recovery, logging — not in the decision logic itself.
+The core (`qw_core.c`) is plain C11 + POSIX with no heap allocation in the
+per-decision path (`qw_decide()` uses caller-owned `qw_decide_workspace_t`),
+and zero internal static state (verified reentrant across threads). Quiet
+Ward acts as a secondary review & escalation gateway that never silently
+drops an alarm: the raw bedside alarm stays visible, candidate non-lethal
+false alarms are deferred to `/dev/quietward`, and any fault in the detector,
+shared memory ring, supervisor, or alarm manager fails open to `CONFIRM`.
 
 ## Process / thread layout
 
@@ -89,43 +93,41 @@ other process on the box a normal file-like interface, which is the
 idiomatic QNX way to expose a service without every client needing to
 know the detector's native message format.
 
-## Logging: slog2
+## Logging: `slog2_register()` + `slog2f()`
 
 All decisions (`CONFIRM` and `SUPPRESS_TO_REVIEW`, each with its reason
-string) and all `qw_record_load()`/`qw_rules_load()` failures are logged
-through `slog2_add()`/`slogf()` to a dedicated slog2 buffer
-(`SLOG2_INFO` for routine `CONFIRM`/`SUPPRESS_TO_REVIEW` decisions,
-`SLOG2_WARNING` for signal-quality-driven fallbacks to `CONFIRM`,
-`SLOG2_ERROR` for load/parse failures), separate from the general system
-log buffer, so the full audit trail of "what was suppressed, when, and
-why" survives independently of other system noise and can be pulled with
-`slog2info` for incident review. This is additive to whatever the alarm
-manager writes to `/dev/quietward`'s decision log, not a replacement — the
-resource manager's log is the operational record nurses and audits read;
-slog2 is the systems-level diagnostic trail for engineering and incident
-response.
+string), deadline fail-open latches, and load/parse failures are logged via
+`slog2_register()` (registering a `slog2_buffer_set_config_t` buffer set
+with `<sys/slog2.h>` and `-l slog2` before any log call to avoid `EPERM`)
+and `slog2f()` (`SLOG2_INFO` for routine decisions, `SLOG2_WARNING` for
+signal-quality fallbacks, `SLOG2_CRITICAL` / `SLOG2_ERROR` for fail-open
+latches and load failures; max 512 bytes per formatted log entry). Logs
+are inspected with `slog2info` and remain additive to the `/dev/quietward`
+operational record.
 
-## Fault recovery: HAM
+## Fault recovery & supervision: `QPLMS` (with `qw_supervisor` fallback)
 
-The acquisition thread, detector, and alarm manager are registered as
-QNX **High Availability Manager (HAM)** entities so a crash in any one of
-them triggers an automatic, supervised restart rather than silently
-leaving a bed unmonitored:
+High Availability Manager (`HAM`) is deprecated in QNX 8.0; the QNX 8.0
+replacement is **QNX Process Launch and Monitor Service (`QPLMS`: `plms`,
+`libplms`, dev utility `plmsctrl`)**, configured declaratively via a
+component DAG config file (`depend`, `task "recovery"`, `task "monitor"`,
+`on_fault`) rather than a C registration API (`research/QPLMS_NOTES.md`).
+SDP 8.x removes `aps`, enforces priorities `1-253`, and replaces `runmask`
+with `cluster`.
 
-- The acquisition process is registered with HAM so that if it dies, HAM
-  restarts it immediately; because the ring buffer it feeds has a bounded
-  window, a brief acquisition gap is visible as "no data" rather than
-  stale data, and the detector's own signal-quality check already treats
-  insufficient fresh data as low quality (`qw_signal_quality()` already
-  returns 0 for a flat/absent channel today), so a restart glitch degrades
-  safely toward "confirm the alarm" rather than toward a false suppression.
-- The alarm manager is the most safety-critical process and is registered
-  with the strictest HAM policy available (fastest detection + restart,
-  and if it cannot come back cleanly, HAM's policy should be to fail over
-  to sounding every pending alarm rather than staying silent — "fail open"
-  for alarms, never "fail closed").
-- HAM restart events themselves are logged via slog2 (see above) so a
-  crash-and-recover cycle is part of the audit trail, not invisible.
+- **Acquisition (`qw_acq`)** feeds a per-bed seqlock shared-memory ring and
+  raises `QW_PULSE_ALARM_RAISED` directly to both `qw_detector` and
+  `qw_alarm_mgr` so `qw_acq` never blocks on analysis.
+- **Alarm manager (`qw_alarm_mgr`)** enforces a parameterized decision
+  deadline (`--watchdog-ms`, calibrated from QEMU TCG jitter) and latches
+  `CONFIRM` automatically on timeout or pending-table overflow. Fail-open
+  (`qw_failopen`) is decoupled from process supervision so alarm
+  preservation does not depend on QPLMS staying up.
+- **P1 QSTI verification & fallback:** At QNX 8.0 target bring-up, QPLMS
+  availability in the target image is checked within a 45-minute cap. If
+  `plms` is absent or unsupported in the QSTI image, a ~40-line parent
+  `qw_supervisor` (`posix_spawn()` + `waitpid()` / death pulse) provides
+  honestly labelled process supervision instead of claiming QPLMS.
 
 ## What does NOT change
 
