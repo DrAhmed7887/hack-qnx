@@ -80,6 +80,7 @@ static int parse_alarms_object(qw_lexer_t *lx, qw_rules_t *rules) {
         qw_alarm_def_t *def = &rules->alarms[rules->n_alarms];
         memset(def, 0, sizeof(*def));
         strncpy(def->name, t.text, sizeof(def->name) - 1);
+        def->name[sizeof(def->name) - 1] = '\0';
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (parse_alarm_def_object(lx, def) != 0) return -1;

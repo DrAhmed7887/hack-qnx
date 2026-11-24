@@ -129,8 +129,10 @@ int main(int argc, char **argv) {
     memset(mem, 0, need);
     char names[QW_MAX_CHANNELS][QW_CHANNEL_NAME_LEN];
     memset(names, 0, sizeof names);
-    for (uint32_t c = 0; c < rec.n_channels; c++)
+    for (uint32_t c = 0; c < rec.n_channels; c++) {
         strncpy(names[c], rec.channels[c].name, QW_CHANNEL_NAME_LEN - 1);
+        names[c][QW_CHANNEL_NAME_LEN - 1] = '\0';
+    }
     if (qw_ring_init(mem, need, rec.fs, rec.n_channels, ring_len, names) != QW_ST_OK) goto done;
 
     frame = malloc((size_t)chunk * rec.n_channels * sizeof(float));

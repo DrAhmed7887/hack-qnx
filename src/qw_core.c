@@ -204,9 +204,8 @@ int qw_record_load(const char *path, qw_record_t *rec) {
         char name_z[QW_CHANNEL_NAME_LEN + 1];
         memcpy(name_z, names[c], QW_CHANNEL_NAME_LEN);
         name_z[QW_CHANNEL_NAME_LEN] = '\0';
-        /* names are NUL padded already; strnlen-safe copy */
-        strncpy(rec->channels[c].name, name_z, QW_CHANNEL_NAME_LEN);
-        rec->channels[c].name[QW_CHANNEL_NAME_LEN] = '\0';
+        /* names are NUL padded already; name_z is already NUL-terminated */
+        memcpy(rec->channels[c].name, name_z, QW_CHANNEL_NAME_LEN + 1);
         rec->channels[c].kind = classify_channel(rec->channels[c].name);
         rec->channels[c].samples = buf ? (buf + (size_t)c * n_samples) : NULL;
     }

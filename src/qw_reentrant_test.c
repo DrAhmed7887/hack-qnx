@@ -135,6 +135,7 @@ int main(void) {
      * rules/alarm_rules.json shape. */
     memset(&g_rules, 0, sizeof(g_rules));
     strncpy(g_rules.alarms[0].name, "Bradycardia", QW_NAME_LEN - 1);
+    g_rules.alarms[0].name[QW_NAME_LEN - 1] = '\0';
     g_rules.alarms[0].has_hr_below_bpm = 1;
     g_rules.alarms[0].hr_below_bpm = 40.0;
     g_rules.alarms[0].has_beats = 1;
