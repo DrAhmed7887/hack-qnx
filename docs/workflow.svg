@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" width="1120" height="560" font-family="Helvetica, Arial, sans-serif">
+  <title>Quiet Ward 2.0 architecture</title>
+  <desc>Replayed ICU records flow through acquisition, a seqlock shared-memory ring, the detector and the alarm manager. Every fault path latches CONFIRM.</desc>
+  <defs>
+    <marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f8fafc"/></marker>
+    <marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#22d3ee"/></marker>
+    <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#fbbf24"/></marker>
+  </defs>
+  <rect width="1120" height="560" fill="#0f172a"/>
+  <text x="50" y="30" fill="#f8fafc" font-size="20" font-weight="bold">Quiet Ward 2.0: review and escalation gateway (architecture)</text>
+
+  <!-- dual non-blocking pulses over the top -->
+  <path d="M350 85 V58 H980 V85" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 4"/>
+  <path d="M770 58 V80" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#aa)"/>
+  <path d="M980 58 V80" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#aa)"/>
+  <text x="400" y="50" fill="#fbbf24" font-size="12">dual non-blocking pulses: QW_PULSE_ALARM_RAISED (detector + manager)</text>
+
+  <!-- row 1 -->
+  <g>
+    <rect x="50" y="85" width="180" height="115" rx="10" fill="#1e293b" stroke="#f8fafc" stroke-width="2"/>
+    <text x="140" y="110" fill="#f8fafc" font-size="14" font-weight="bold" text-anchor="middle">data/demo/*.qw</text>
+    <text x="140" y="135" fill="#cbd5e1" font-size="12" text-anchor="middle">6 real ICU records</text>
+    <text x="140" y="153" fill="#cbd5e1" font-size="12" text-anchor="middle">ODC-BY 1.0</text>
+    <text x="140" y="171" fill="#cbd5e1" font-size="12" text-anchor="middle">(CinC 2015 train split)</text>
+  </g>
+  <g>
+    <rect x="260" y="85" width="180" height="115" rx="10" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+    <text x="350" y="110" fill="#22d3ee" font-size="14" font-weight="bold" text-anchor="middle">qw_acq (prio 45)</text>
+    <text x="350" y="135" fill="#cbd5e1" font-size="12" text-anchor="middle">per-bed acquisition</text>
+    <text x="350" y="153" fill="#cbd5e1" font-size="12" text-anchor="middle">writes ring frames</text>
+    <text x="350" y="171" fill="#cbd5e1" font-size="12" text-anchor="middle">raises alarm pulses</text>
+  </g>
+  <g>
+    <rect x="470" y="85" width="180" height="115" rx="10" fill="#1e293b" stroke="#34d399" stroke-width="2"/>
+    <text x="560" y="110" fill="#34d399" font-size="14" font-weight="bold" text-anchor="middle">Seqlock shared memory</text>
+    <text x="560" y="135" fill="#cbd5e1" font-size="12" text-anchor="middle">/qw_ring_bed%u</text>
+    <text x="560" y="153" fill="#cbd5e1" font-size="12" text-anchor="middle">_Atomic uint32_t seq_lock</text>
+    <text x="560" y="171" fill="#cbd5e1" font-size="12" text-anchor="middle">no cross-process mutex</text>
+  </g>
+  <g>
+    <rect x="680" y="85" width="180" height="115" rx="10" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+    <text x="770" y="110" fill="#22d3ee" font-size="14" font-weight="bold" text-anchor="middle">qw_detector (prio 35)</text>
+    <text x="770" y="132" fill="#cbd5e1" font-size="11" text-anchor="middle">qw_decide()</text>
+    <text x="770" y="149" fill="#cbd5e1" font-size="11" text-anchor="middle">trailing_gap</text>
+    <text x="770" y="166" fill="#cbd5e1" font-size="11" text-anchor="middle">ECG+ABP/PLETH best-channel</text>
+    <text x="770" y="183" fill="#cbd5e1" font-size="11" text-anchor="middle">SQI + rolling HR cross-check</text>
+  </g>
+  <g>
+    <rect x="890" y="85" width="180" height="115" rx="10" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+    <text x="980" y="110" fill="#22d3ee" font-size="14" font-weight="bold" text-anchor="middle">qw_alarm_mgr (prio 50)</text>
+    <text x="980" y="135" fill="#cbd5e1" font-size="12" text-anchor="middle">owns all alarm state</text>
+    <text x="980" y="153" fill="#cbd5e1" font-size="12" text-anchor="middle">decision deadline timer</text>
+    <text x="980" y="171" fill="#cbd5e1" font-size="12" text-anchor="middle">(--watchdog-ms)</text>
+  </g>
+
+  <!-- row 1 arrows -->
+  <path d="M230 142 H258" stroke="#f8fafc" stroke-width="2" marker-end="url(#aw)"/>
+  <path d="M440 142 H468" stroke="#f8fafc" stroke-width="2" marker-end="url(#aw)"/>
+  <path d="M650 142 H678" stroke="#34d399" stroke-width="2" marker-end="url(#aw)"/>
+  <path d="M860 142 H888" stroke="#22d3ee" stroke-width="2.5" marker-end="url(#ac)"/>
+  <text x="875" y="222" fill="#22d3ee" font-size="12" text-anchor="middle">synchronous MsgSend (QW_MSG_DECISION)</text>
+
+  <!-- fail-open path -->
+  <path d="M930 200 V250 H615 V283" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#aa)"/>
+  <text x="772" y="268" fill="#fbbf24" font-size="12" text-anchor="middle">deadline expiry, silence, fault</text>
+  <path d="M1050 200 V283" fill="none" stroke="#f8fafc" stroke-width="2" marker-end="url(#aw)"/>
+  <text x="1040" y="232" fill="#cbd5e1" font-size="11" text-anchor="end">SUPPRESS_TO_REVIEW</text>
+
+  <!-- row 2 -->
+  <g>
+    <rect x="490" y="285" width="250" height="200" rx="10" fill="#1e293b" stroke="#fbbf24" stroke-width="3"/>
+    <text x="615" y="312" fill="#fbbf24" font-size="15" font-weight="bold" text-anchor="middle">Fail-Open CONFIRM Latch</text>
+    <text x="615" y="340" fill="#cbd5e1" font-size="12" text-anchor="middle">--watchdog-ms deadline expiry</text>
+    <text x="615" y="360" fill="#cbd5e1" font-size="12" text-anchor="middle">stalled or crashed detector</text>
+    <text x="615" y="380" fill="#cbd5e1" font-size="12" text-anchor="middle">17th pending alarm overflow</text>
+    <text x="615" y="400" fill="#cbd5e1" font-size="12" text-anchor="middle">detached shared memory</text>
+    <text x="615" y="420" fill="#cbd5e1" font-size="12" text-anchor="middle">process restart</text>
+    <text x="615" y="450" fill="#fbbf24" font-size="13" font-weight="bold" text-anchor="middle">result: latched CONFIRM</text>
+    <text x="615" y="469" fill="#cbd5e1" font-size="12" text-anchor="middle">raw bedside alarm never silenced</text>
+  </g>
+  <g>
+    <rect x="770" y="285" width="300" height="200" rx="10" fill="#1e293b" stroke="#34d399" stroke-width="2"/>
+    <text x="920" y="312" fill="#34d399" font-size="15" font-weight="bold" text-anchor="middle">Review Queue and logs</text>
+    <text x="920" y="340" fill="#cbd5e1" font-size="12" text-anchor="middle">/dev/quietward (resmgr_attach)</text>
+    <text x="920" y="360" fill="#cbd5e1" font-size="12" text-anchor="middle">nurse ACK via write() (JSON)</text>
+    <text x="920" y="380" fill="#cbd5e1" font-size="12" text-anchor="middle">timeout escalation to CONFIRM</text>
+    <text x="920" y="400" fill="#cbd5e1" font-size="12" text-anchor="middle">slog2_register / slog2f</text>
+    <text x="920" y="420" fill="#cbd5e1" font-size="12" text-anchor="middle">Restart Journal</text>
+    <text x="920" y="440" fill="#cbd5e1" font-size="12" text-anchor="middle">(replay on restart fails open)</text>
+  </g>
+
+  <!-- supervisor + helper -->
+  <g>
+    <rect x="50" y="285" width="400" height="90" rx="10" fill="#1e293b" stroke="#f8fafc" stroke-width="2"/>
+    <text x="250" y="312" fill="#f8fafc" font-size="14" font-weight="bold" text-anchor="middle">QPLMS (or qw_supervisor fallback, post-P1)</text>
+    <text x="250" y="337" fill="#cbd5e1" font-size="12" text-anchor="middle">watches detector and manager liveness</text>
+    <text x="250" y="355" fill="#cbd5e1" font-size="12" text-anchor="middle">QNX runtime pending myQNX SDP 8.0 bring-up</text>
+  </g>
+  <g>
+    <rect x="50" y="395" width="400" height="90" rx="10" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+    <text x="250" y="422" fill="#fbbf24" font-size="14" font-weight="bold" text-anchor="middle">qw_failopen helper (decoupled process)</text>
+    <text x="250" y="447" fill="#cbd5e1" font-size="12" text-anchor="middle">latches CONFIRM when the manager or the</text>
+    <text x="250" y="465" fill="#cbd5e1" font-size="12" text-anchor="middle">supervisor is absent</text>
+  </g>
+  <path d="M450 330 H488" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ac)"/>
+  <path d="M450 440 H488" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#aa)"/>
+
+  <text x="50" y="525" fill="#f8fafc" font-size="13" font-weight="bold">Research demo, not a medical device.</text>
+  <text x="50" y="545" fill="#cbd5e1" font-size="12">Never silently drops an alarm: the raw bedside alarm is preserved and every fault path latches CONFIRM. Thresholds are pending_signoff engineering defaults.</text>
+</svg>

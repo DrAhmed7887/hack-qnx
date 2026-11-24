@@ -6,5 +6,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
-      - run: make || echo "no Makefile yet"
+      # Stdlib Python only: no pip installs, so no network flake.
+      - name: Build, C tests, demo pack, parser fuzz
+        run: |
+          make
+          make gateway-test
+          make reentrant-test
+          make demo-verify
+          python3 scripts/fuzz_qw.py --count 200
       - run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo -v --redact

@@ -1,0 +1,70 @@
+{
+  "label": "Real PhysioNet/CinC 2015 train-split ICU records; ODC-BY 1.0 (DOI 10.13026/c9fg-a467)",
+  "rules_status": "pending_signoff",
+  "rules_file": "rules/alarm_rules.json",
+  "detector_config": "config/detector.json",
+  "aggregate": {
+    "records": 6,
+    "CONFIRM": 5,
+    "SUPPRESS_TO_REVIEW": 1,
+    "queued_for_nurse_review": 1,
+    "true_alarms_in_review_queue": 0,
+    "false_alarms_confirmed": 1
+  },
+  "records": [
+    {
+      "record": "a109l",
+      "alarm_type": "Asystole",
+      "true_alarm": false,
+      "decision": "SUPPRESS_TO_REVIEW",
+      "ecg_sqi": 0.9108,
+      "pulse_sqi": 0.978,
+      "reason": "SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.12s, max_gap=1.02s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)"
+    },
+    {
+      "record": "a653l",
+      "alarm_type": "Asystole",
+      "true_alarm": true,
+      "decision": "CONFIRM",
+      "ecg_sqi": 0.9469,
+      "pulse_sqi": 0.9699,
+      "reason": "pulse does not contradict Asystole (pulse not continuous in trailing 5.0s (trail_count=3, trailing_gap=3.41s, max_gap=3.41s, limit 3.20s)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "t116s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": false,
+      "decision": "CONFIRM",
+      "ecg_sqi": 0.8864,
+      "pulse_sqi": 0.965,
+      "reason": "pulse does not contradict Tachycardia (ecg max hr=160bpm exceeds threshold >140bpm (pulse max hr=71bpm)); confirming (sqi=0.97)"
+    },
+    {
+      "record": "t106s",
+      "alarm_type": "Tachycardia",
+      "true_alarm": true,
+      "decision": "CONFIRM",
+      "ecg_sqi": 0.9572,
+      "pulse_sqi": 0.8457,
+      "reason": "pulsatile channel sqi=0.85 below min_signal_quality=0.90; confirming Tachycardia"
+    },
+    {
+      "record": "v188s",
+      "alarm_type": "Ventricular_Tachycardia",
+      "true_alarm": true,
+      "decision": "CONFIRM",
+      "ecg_sqi": 0.9673,
+      "pulse_sqi": 0.9597,
+      "reason": "pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=69bpm)); confirming (sqi=0.96)"
+    },
+    {
+      "record": "f450s",
+      "alarm_type": "Ventricular_Flutter_Fib",
+      "true_alarm": true,
+      "decision": "CONFIRM",
+      "ecg_sqi": 0.9163,
+      "pulse_sqi": 0.06,
+      "reason": "Ventricular_Flutter_Fib is in suppression.never_suppress; confirming unconditionally (sqi=0.92)"
+    }
+  ]
+}
