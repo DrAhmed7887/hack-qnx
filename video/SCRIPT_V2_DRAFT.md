@@ -6,7 +6,7 @@
 - **YouTube visibility:** Public
 - **Audio:** original voiceover only — zero copyrighted music (no BGM/soundtrack)
 - **Language:** 100% English (on-screen text, captions, overlays, and narration)
-- **Third-party product brands/logos:** none (monitor model omitted in S01; standard attribution for openFDA/PhysioNet)
+- **Third-party product brands/logos:** none (monitor model omitted in S01; plain-text citations only for openFDA/PhysioNet — no openFDA, PhysioNet, or vendor logos on screen)
 - **S01 evidence status:** `[BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]` (do not display quote or date on screen until the re-fetched exact text is recorded in `docs/EVIDENCE.md`)
 
 Variant B framing: a review and escalation gateway that never silently drops an alarm, with honest held-out results.
@@ -32,7 +32,7 @@ Variant B framing: a review and escalation gateway that never silently drops an 
 
 ## S01 · 0:00-0:10 · An alarm that never sounded `[BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]`
 
-**Screen:** plain-text card displaying the omitted-model quote placeholder below, text highlighted, nothing else (do not show unredacted openFDA webpage screenshots).
+**Screen:** plain-text card displaying the omitted-model quote below on a neutral slide (no openFDA, PhysioNet, or vendor logos or webpage screenshots), text highlighted, nothing else.
 
 **Draft on-screen quote `[PLACEHOLDER — BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]`:**
 "[Insert verified openFDA MAUDE 10055677 quote from docs/EVIDENCE.md after re-fetch, keeping monitor model omitted as [... — model omitted]]."

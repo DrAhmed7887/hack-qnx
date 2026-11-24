@@ -10,7 +10,7 @@ A second opinion on bedside alarms that can never silence the first. Quiet Ward 
 
 ## Inspiration
 
-Any bedside alarm system has to answer one question first: what happens when something goes wrong? In clinical monitoring, silent alarm suppression can hide true patient deterioration behind software faults or dropped messages. Our answer is an invariant: an alarm is never silently dropped.
+Any bedside alarm system has to answer one question first: what happens when something goes wrong? Quiet Ward enforces a single architectural design invariant: an alarm is never silently dropped.
 
 ## What it does
 
@@ -42,7 +42,7 @@ Every primitive below is present in the committed source. Nothing below has been
 |---|---|---|---|
 | `src/qnx/qw_acq.c` | `shm_open`, `mmap`, `ChannelCreate`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceivePulse`, `name_open`, `MsgSendPulse`, `name_close` | [PENDING P1: replay .qw ring + QW_PULSE_ALARM_RAISED pulse, visible in pidin] | S02, S05 |
 | `src/qnx/qw_detector.c` | `name_attach`, `name_open`, `name_close`, `shm_open`, `mmap`, `MsgReceive`, `MsgReply`, `MsgError`, `TimerTimeout`, `MsgSend`, `ConnectDetach` | [PENDING P1: reads seqlock ring, sends QW_MSG_DECISION via MsgSend, restarted/killed in soak] | S02, S05 |
-| `src/qnx/qw_alarm_mgr.c` | `name_attach`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceive`, `MsgReply`, `MsgError`, `pthread_create`, `pthread_detach` | [PENDING P1: 50 ms watchdog tick, deadline latch CONFIRM, journal + /dev/quietward thread, visible in pidin] | S02, S05 |
+| `src/qnx/qw_alarm_mgr.c` | `name_attach`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceive`, `MsgReply`, `MsgError` (`sigval.sival_ptr`->`rcvid_t` cast to confirm under `qcc` at P1), `pthread_create`, `pthread_detach` | [PENDING P1: 50 ms watchdog tick, deadline latch CONFIRM, journal + /dev/quietward thread, visible in pidin] | S02, S05 |
 | `src/qnx/qw_failopen.c` | decoupled fail-open helper: `open` with `O_NOFOLLOW`, `write` of `CONFIRM_ALL`, `qw_log_emit` at CRIT | [PENDING P1: writes CONFIRM_ALL to /var/run/quietward/alarm_out + CRIT in slog2info -b quietward] | S02, S05 |
 | `src/qnx/qw_supervisor.c` | `posix_spawn`, `waitpid`, `kill`, `sigaction` | [PENDING P1: spawns/restarts qw_alarm_mgr and qw_detector, invokes qw_failopen after >3 restarts, visible in pidin] | S02, S05 |
 | `src/qnx/qw_bedctl.c` | `open("/dev/quietward")`, `devctl(QW_DCMD_BED_STATE)` | [PENDING P1: prints per-bed JSON including failopen_active via devctl] | S05 |
@@ -61,7 +61,7 @@ Every primitive below is present in the committed source. Nothing below has been
 
 ### QNX 8.0 target, toolchain and build/run (full steps in README.md)
 
-- **QNX version:** QNX SDP 8.0 / QNX Neutrino RTOS 8.0. **Target:** QNX 8.0 x86_64 QEMU image (built from SDP 8.0) plus host-portable C11. Host requirement: GitHub Codespaces (x86_64) or an x86_64 Linux/Windows host; a local arm64 devcontainer on Apple Silicon will not run SDP 8.0 x86_64 host tools natively.
+- **QNX version:** QNX SDP 8.0 / QNX Neutrino RTOS 8.0. **Target:** QNX 8.0 x86_64 QEMU image (built from SDP 8.0) plus host-portable C11. Host requirement: GitHub Codespaces (x86_64) or an x86_64 Linux host (commands use `bash`/`sh` and `~/qnx800/qnxsdp-env.sh`); a local arm64 container on Apple Silicon is not expected to run SDP 8.0 x86_64 host tools natively (expected, verify at P1).
 - **Toolchain:** `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`, `-lm -lslog2`, GNU Make, `source ~/qnx800/qnxsdp-env.sh` on x86_64 Linux, `.devcontainer/devcontainer.json`.
 - **Cross-build** [PENDING P1: not yet run]: `source ~/qnx800/qnxsdp-env.sh`, `make qnx-check`, `make qnx`.
 - **QEMU image boot & `scp` copy** [PENDING P1: not yet run]: build and boot the QNX 8.0 x86_64 QEMU image from SDP 8.0 (e.g., `mkqnximage` / QEMU boot under `.devcontainer/devcontainer.json`; exact SDP 8.0 image-builder flags to be verified at P1), then copy `build/qnx/*`, `rules/alarm_rules.json`, `config/detector.json`, `data/demo/*.qw`, and `scripts/p3_qnx_soak.sh` via `scp` to `/opt/quietward/{bin,rules,config,data/demo,scripts}`.
@@ -118,5 +118,5 @@ C11, POSIX, QNX Neutrino 8.0 (message passing, pulses, resource manager, slog2; 
 ## Data and citations
 
 - Data: PhysioNet/Computing in Cardiology Challenge 2015 dataset, real de-identified ICU records, ODC-BY 1.0, DOI 10.13026/c9fg-a467. Paper: Clifford GD, Silva I, Moody B, Li Q, Kella D, Shahin A, Kooistra T, Perry D, Mark RG (2015). The PhysioNet/Computing in Cardiology Challenge 2015: Reducing False Arrhythmia Alarms in the ICU. Computing in Cardiology 42:273-276.
-- openFDA MAUDE report 10055677: `[PENDING RE-FETCH into docs/EVIDENCE.md — see CLAIMS.md row 18]`.
+- openFDA MAUDE report 10055677: omitted from draft pending re-fetch into `docs/EVIDENCE.md` (see `CLAIMS.md` row 18).
 - Repo documents: README, JUDGES.md, DATA_CARD.md, `submission/g3/stress-checklist.md`.

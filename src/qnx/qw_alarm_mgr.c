@@ -257,7 +257,8 @@ int main(int argc, char **argv) {
             continue;
         }
         if (m.pulse.code == _PULSE_CODE_UNBLOCK) {
-            MsgError((rcvid_t)m.pulse.value.sival_long, EINTR);
+            /* Standard POSIX sigval.sival_ptr avoids assuming QNX-specific sival_long; confirm under qcc at P1. */
+            MsgError((rcvid_t)(intptr_t)m.pulse.value.sival_ptr, EINTR);
             continue;
         }
 

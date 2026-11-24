@@ -27,7 +27,7 @@ Every primitive below is present in the committed source (paths as listed). None
 |---|---|---|---|
 | `src/qnx/qw_acq.c` | `shm_open`, `mmap`, `ChannelCreate`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceivePulse`, `name_open`, `MsgSendPulse`, `name_close` | [PENDING P1: replay .qw ring + QW_PULSE_ALARM_RAISED pulse, visible in pidin] | S02, S05 |
 | `src/qnx/qw_detector.c` | `name_attach`, `name_open`, `name_close`, `shm_open`, `mmap`, `MsgReceive`, `MsgReply`, `MsgError`, `TimerTimeout`, `MsgSend`, `ConnectDetach` | [PENDING P1: reads seqlock ring, sends QW_MSG_DECISION via MsgSend, restarted/killed in soak] | S02, S05 |
-| `src/qnx/qw_alarm_mgr.c` | `name_attach`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceive`, `MsgReply`, `MsgError`, `pthread_create`, `pthread_detach` | [PENDING P1: 50 ms watchdog tick, deadline latch CONFIRM, journal + /dev/quietward thread, visible in pidin] | S02, S05 |
+| `src/qnx/qw_alarm_mgr.c` | `name_attach`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceive`, `MsgReply`, `MsgError` (`sigval.sival_ptr`->`rcvid_t` cast to confirm under `qcc` at P1), `pthread_create`, `pthread_detach` | [PENDING P1: 50 ms watchdog tick, deadline latch CONFIRM, journal + /dev/quietward thread, visible in pidin] | S02, S05 |
 | `src/qnx/qw_failopen.c` | decoupled fail-open helper: `open` with `O_NOFOLLOW`, `write` of `CONFIRM_ALL`, `qw_log_emit` at CRIT | [PENDING P1: writes CONFIRM_ALL to /var/run/quietward/alarm_out + CRIT in slog2info -b quietward] | S02, S05 |
 | `src/qnx/qw_supervisor.c` | `posix_spawn`, `waitpid`, `kill`, `sigaction` | [PENDING P1: spawns/restarts qw_alarm_mgr and qw_detector, invokes qw_failopen after >3 restarts, visible in pidin] | S02, S05 |
 | `src/qnx/qw_bedctl.c` | `open("/dev/quietward")`, `devctl(QW_DCMD_BED_STATE)` | [PENDING P1: prints per-bed JSON including failopen_active via devctl] | S05 |
@@ -49,7 +49,7 @@ The host-portable parts (`qw_ring`, `qw_gateway_state`, `qw_log` formatter, `qw_
 ## QNX 8.0 Target, Toolchain & Build/Run Instructions
 
 - **QNX version:** QNX SDP 8.0 / QNX Neutrino RTOS 8.0.
-- **Host requirement:** GitHub Codespaces (x86_64) or an x86_64 Linux/Windows host; a local arm64 devcontainer on Apple Silicon will not run SDP 8.0 x86_64 host tools natively (commands here assume an x86_64 Linux environment).
+- **Host requirement:** GitHub Codespaces (x86_64) or an x86_64 Linux host (commands use `bash`/`sh` and `~/qnx800/qnxsdp-env.sh`); a local arm64 container on Apple Silicon is not expected to run SDP 8.0 x86_64 host tools natively (expected, verify at P1).
 - **Target:** QNX 8.0 x86_64 QEMU image (built from SDP 8.0), plus host-portable C11 for the offline checks.
 - **Toolchain:** `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`, linked with `-lm -lslog2`; GNU Make; `source ~/qnx800/qnxsdp-env.sh` on an x86_64 Linux host; `.devcontainer/devcontainer.json` (Ubuntu 24.04, QEMU, build-essential) for an x86_64 Codespace or container.
 
