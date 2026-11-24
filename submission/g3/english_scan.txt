@@ -1,4 +1,4 @@
-files_total=104 text_scanned=98 ascii_only_files=80 binary_skipped=6
+files_total=104 text_scanned=98 ascii_only_files=80 binary_skipped=6 base_commit=b45125bc66b77b4ac2d2d9e2758dbc0b17614e4c
 reviewer=docs-sub,verifier date=2026-11-24
 excludes_self=submission/g3/english_scan.txt (self-generated scan log listing matched non-ASCII punctuation characters)
 skipped=['data/demo/a109l.qw', 'data/demo/a653l.qw', 'data/demo/f450s.qw', 'data/demo/t106s.qw', 'data/demo/t116s.qw', 'data/demo/v188s.qw']
