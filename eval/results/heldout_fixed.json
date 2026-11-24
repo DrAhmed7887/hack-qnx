@@ -1,0 +1,110 @@
+{
+  "split": "heldout",
+  "split_sha256": "859456c8f10ac4007d651d5ba7c742f7387d8513c6890416112eab7ea8e43d76",
+  "version": "fixed",
+  "rules_status": "pending_signoff",
+  "n_records": 227,
+  "overall": {
+    "TP": 86,
+    "TN": 37,
+    "FP": 101,
+    "FN": 3,
+    "challenge_score": 0.5146443514644351,
+    "score_pct": 51.46
+  },
+  "per_alarm_type": {
+    "Asystole": {
+      "TP": 6,
+      "TN": 23,
+      "FP": 7,
+      "FN": 1,
+      "challenge_score": 0.7073170731707317,
+      "score_pct": 70.73
+    },
+    "Bradycardia": {
+      "TP": 13,
+      "TN": 9,
+      "FP": 4,
+      "FN": 1,
+      "challenge_score": 0.7096774193548387,
+      "score_pct": 70.97
+    },
+    "Tachycardia": {
+      "TP": 38,
+      "TN": 1,
+      "FP": 2,
+      "FN": 1,
+      "challenge_score": 0.8478260869565217,
+      "score_pct": 84.78
+    },
+    "Ventricular_Tachycardia": {
+      "TP": 27,
+      "TN": 4,
+      "FP": 72,
+      "FN": 0,
+      "challenge_score": 0.30097087378640774,
+      "score_pct": 30.1
+    },
+    "Ventricular_Flutter_Fib": {
+      "TP": 2,
+      "TN": 0,
+      "FP": 16,
+      "FN": 0,
+      "challenge_score": 0.1111111111111111,
+      "score_pct": 11.11
+    }
+  },
+  "true_alarms_suppressed_count": 3,
+  "baseline_no_suppression": {
+    "overall": {
+      "TP": 89,
+      "TN": 0,
+      "FP": 138,
+      "FN": 0,
+      "challenge_score": 0.3920704845814978,
+      "score_pct": 39.21
+    },
+    "per_alarm_type": {
+      "Asystole": {
+        "TP": 7,
+        "TN": 0,
+        "FP": 30,
+        "FN": 0,
+        "challenge_score": 0.1891891891891892,
+        "score_pct": 18.92
+      },
+      "Bradycardia": {
+        "TP": 14,
+        "TN": 0,
+        "FP": 13,
+        "FN": 0,
+        "challenge_score": 0.5185185185185185,
+        "score_pct": 51.85
+      },
+      "Tachycardia": {
+        "TP": 39,
+        "TN": 0,
+        "FP": 3,
+        "FN": 0,
+        "challenge_score": 0.9285714285714286,
+        "score_pct": 92.86
+      },
+      "Ventricular_Tachycardia": {
+        "TP": 27,
+        "TN": 0,
+        "FP": 76,
+        "FN": 0,
+        "challenge_score": 0.2621359223300971,
+        "score_pct": 26.21
+      },
+      "Ventricular_Flutter_Fib": {
+        "TP": 2,
+        "TN": 0,
+        "FP": 16,
+        "FN": 0,
+        "challenge_score": 0.1111111111111111,
+        "score_pct": 11.11
+      }
+    }
+  }
+}
