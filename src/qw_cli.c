@@ -21,6 +21,14 @@
 
 #define QW_DEFAULT_DETECTOR_CONFIG "config/detector.json"
 
+static void copy_str(char *dst, size_t cap, const char *src) {
+    if (cap == 0) return;
+    size_t n = strlen(src);
+    if (n >= cap) n = cap - 1;
+    memcpy(dst, src, n);
+    dst[n] = '\0';
+}
+
 static void print_json_string(FILE *out, const char *s) {
     fputc('"', out);
     for (const char *p = s; *p; p++) {
@@ -89,8 +97,7 @@ int main(int argc, char **argv) {
     const char *decision_str = (result.decision == QW_DECISION_CONFIRM) ? "CONFIRM" : "SUPPRESS_TO_REVIEW";
 
     char record_name[512];
-    strncpy(record_name, record_basename(record_path), sizeof(record_name) - 1);
-    record_name[sizeof(record_name) - 1] = '\0';
+    copy_str(record_name, sizeof(record_name), record_basename(record_path));
     /* strip a trailing .qw extension for a cleaner record id */
     size_t len = strlen(record_name);
     if (len > 3 && strcmp(record_name + len - 3, ".qw") == 0) {

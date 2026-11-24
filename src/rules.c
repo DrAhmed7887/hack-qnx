@@ -36,8 +36,7 @@ static int parse_alarm_def_object(qw_lexer_t *lx, qw_alarm_def_t *def) {
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[QW_NAME_LEN];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (qw_lex_next(lx, &t) != 0) return -1;
@@ -79,8 +78,7 @@ static int parse_alarms_object(qw_lexer_t *lx, qw_rules_t *rules) {
         if (rules->n_alarms >= sizeof(rules->alarms) / sizeof(rules->alarms[0])) return -1;
         qw_alarm_def_t *def = &rules->alarms[rules->n_alarms];
         memset(def, 0, sizeof(*def));
-        strncpy(def->name, t.text, sizeof(def->name) - 1);
-        def->name[sizeof(def->name) - 1] = '\0';
+        qw_copy_str(def->name, sizeof(def->name), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (parse_alarm_def_object(lx, def) != 0) return -1;
@@ -102,8 +100,7 @@ static int parse_string_array(qw_lexer_t *lx, char out[][QW_NAME_LEN], size_t ma
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         if (*n_out < max) {
-            strncpy(out[*n_out], t.text, QW_NAME_LEN - 1);
-            out[*n_out][QW_NAME_LEN - 1] = '\0';
+            qw_copy_str(out[*n_out], QW_NAME_LEN, t.text);
             (*n_out)++;
         }
         if (qw_lex_next(lx, &t) != 0) return -1;
@@ -121,8 +118,7 @@ static int parse_suppression_object(qw_lexer_t *lx, qw_suppression_t *supp) {
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[QW_NAME_LEN];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
 
@@ -160,16 +156,14 @@ static int parse_root(qw_lexer_t *lx, qw_rules_t *rules) {
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[QW_NAME_LEN];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
 
         if (strcmp(key, "status") == 0) {
             if (qw_lex_next(lx, &t) != 0) return -1;
             if (t.kind == QW_TOK_STRING) {
-                strncpy(rules->status, t.text, sizeof(rules->status) - 1);
-                rules->status[sizeof(rules->status) - 1] = '\0';
+                qw_copy_str(rules->status, sizeof(rules->status), t.text);
             } else if (qw_skip_value_depth(lx, &t, 0) != 0) {
                 return -1;
             }

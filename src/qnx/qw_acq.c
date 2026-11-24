@@ -130,8 +130,10 @@ int main(int argc, char **argv) {
     char names[QW_MAX_CHANNELS][QW_CHANNEL_NAME_LEN];
     memset(names, 0, sizeof names);
     for (uint32_t c = 0; c < rec.n_channels; c++) {
-        strncpy(names[c], rec.channels[c].name, QW_CHANNEL_NAME_LEN - 1);
-        names[c][QW_CHANNEL_NAME_LEN - 1] = '\0';
+        size_t n = strlen(rec.channels[c].name);
+        if (n >= QW_CHANNEL_NAME_LEN) n = QW_CHANNEL_NAME_LEN - 1;
+        memcpy(names[c], rec.channels[c].name, n);
+        names[c][n] = '\0';
     }
     if (qw_ring_init(mem, need, rec.fs, rec.n_channels, ring_len, names) != QW_ST_OK) goto done;
 

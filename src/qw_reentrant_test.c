@@ -31,6 +31,14 @@
 
 #define FS 250u
 #define ALARM_OFFSET_S 300.0
+
+static void copy_str(char *dst, size_t cap, const char *src) {
+    if (cap == 0) return;
+    size_t n = strlen(src);
+    if (n >= cap) n = cap - 1;
+    memcpy(dst, src, n);
+    dst[n] = '\0';
+}
 #define N_SAMPLES (FS * 300u) /* FS * (uint32_t)ALARM_OFFSET_S, as an integer constant expression */
 #define N_THREADS 8
 #define N_ITERS_PER_THREAD 40
@@ -73,11 +81,11 @@ static void build_record_from_arrays(qw_record_t *rec, const float *ecg, const f
     rec->n_samples = N_SAMPLES;
     rec->sample_buf = NULL; /* not heap-owned in this test; channels point at statics */
 
-    strncpy(rec->channels[0].name, "II", QW_CHANNEL_NAME_LEN);
+    copy_str(rec->channels[0].name, sizeof(rec->channels[0].name), "II");
     rec->channels[0].kind = QW_CHANNEL_ECG;
     rec->channels[0].samples = ecg;
 
-    strncpy(rec->channels[1].name, "ABP", QW_CHANNEL_NAME_LEN);
+    copy_str(rec->channels[1].name, sizeof(rec->channels[1].name), "ABP");
     rec->channels[1].kind = QW_CHANNEL_PULSE;
     rec->channels[1].samples = abp;
 }
@@ -134,8 +142,7 @@ int main(void) {
      * 40bpm, not in never_suppress -- matches the shipped
      * rules/alarm_rules.json shape. */
     memset(&g_rules, 0, sizeof(g_rules));
-    strncpy(g_rules.alarms[0].name, "Bradycardia", QW_NAME_LEN - 1);
-    g_rules.alarms[0].name[QW_NAME_LEN - 1] = '\0';
+    copy_str(g_rules.alarms[0].name, sizeof(g_rules.alarms[0].name), "Bradycardia");
     g_rules.alarms[0].has_hr_below_bpm = 1;
     g_rules.alarms[0].hr_below_bpm = 40.0;
     g_rules.alarms[0].has_beats = 1;

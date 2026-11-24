@@ -41,8 +41,7 @@ static int parse_pulse_detector_object(qw_lexer_t *lx, qw_detector_config_raw_t 
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[64];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (qw_lex_next(lx, &t) != 0) return -1;
@@ -72,8 +71,7 @@ static int parse_signal_quality_object(qw_lexer_t *lx, qw_detector_config_raw_t 
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[64];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (qw_lex_next(lx, &t) != 0) return -1;
@@ -103,8 +101,7 @@ static int parse_pulse_presence_object(qw_lexer_t *lx, qw_detector_config_raw_t 
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[64];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (qw_lex_next(lx, &t) != 0) return -1;
@@ -134,8 +131,7 @@ static int parse_suppression_contradiction_object(qw_lexer_t *lx, qw_detector_co
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[64];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (qw_lex_next(lx, &t) != 0) return -1;
@@ -162,8 +158,7 @@ static int parse_asystole_trailing_object(qw_lexer_t *lx, qw_detector_config_raw
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[64];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (qw_lex_next(lx, &t) != 0) return -1;
@@ -196,8 +191,7 @@ static int parse_root(qw_lexer_t *lx, qw_detector_config_raw_t *raw) {
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[64];
-        strncpy(key, t.text, sizeof(key) - 1);
-        key[sizeof(key) - 1] = '\0';
+        qw_copy_str(key, sizeof(key), t.text);
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
 

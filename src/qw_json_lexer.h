@@ -17,6 +17,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Bounded C11 string copy (always NUL-terminates when cap > 0; avoids
+ * GCC -Werror=stringop-truncation when copying from larger buffers). */
+static inline void qw_copy_str(char *dst, size_t cap, const char *src) {
+    if (cap == 0) return;
+    size_t n = strlen(src);
+    if (n >= cap) n = cap - 1;
+    memcpy(dst, src, n);
+    dst[n] = '\0';
+}
+
 typedef enum {
     QW_TOK_EOF,
     QW_TOK_LBRACE,   /* { */
