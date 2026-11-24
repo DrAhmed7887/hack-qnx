@@ -96,7 +96,7 @@ Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified dat
 
 **Screen:** terminal: `make fuzz` (runs `scripts/fuzz_qw.py --count 1000` via `.venv/bin/python` when present, else `python3`) finishing with "1000/1000 passed"; then `make && make gateway-test && make reentrant-test && make demo-verify` running offline; then the first lines of `submission/g3/stress-checklist.md` showing HOST PASS and QEMU PENDING columns.
 
-**VO:** "Bad input fails closed. A thousand seeded mutations of record files and configs: no crashes, every rejection explained. The ring buffer and the alarm queue are tested under load. The matrix says exactly what passed on the host and what still needs the QNX target. The host build and checks run from a fresh export with no network access required."
+**VO:** "Bad input fails closed. A thousand seeded mutations of record files and configs: no crashes, every rejection explained. The ring buffer and the alarm queue are tested under load. The matrix says exactly what passed on the host and what still needs the QNX target. The host build and checks run from a clean git archive export without .git or .venv, with no network-using commands."
 
 **Overlay:** "Fuzz: 1000/1000. Stress matrix: host passes and QEMU pending, both shown."
 
