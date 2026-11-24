@@ -5,7 +5,7 @@
 
 Quiet Ward is a **secondary review and escalation gateway** for bedside monitor alarms, built for the QNX Global Hackathon (Robotics & Medical). It looks at the signals behind an arrhythmia alarm and, when a second channel clearly contradicts it, queues that alarm for a nurse to review instead of treating it as urgent. It never removes the bedside alarm.
 
-**Status of the QNX runtime.** The target runtime is QNX 8.0 (IPC processes under `src/qnx/`, QEMU boot). Today that layer is validated as host-portable C11: the seqlock ring (`qw_ring`), the gateway state machine (`qw_gateway_state`) and its test (`qw_gateway_test`). The QNX processes and the QEMU boot are pending P1, the myQNX SDP 8.0 licence bring-up. Nothing in this repository claims a result measured on QNX.
+**Status of the QNX runtime.** The target runtime is QNX 8.0 (IPC processes under `src/qnx/`, QEMU boot). Today the verified part is host-portable C11: the seqlock ring (`qw_ring`), the gateway state machine (`qw_gateway_state`), logging and the resource-manager helpers, tested by `qw_gateway_test` (`make gateway-test`: 529 checks, 0 failed). The six process sources under `src/qnx/` (acquisition, detector, alarm manager, fail-open helper, supervisor, bed control) are written behind `#ifdef __QNX__` but have **not** been compiled with `qcc` or run on QEMU: that is pending P1, the myQNX SDP 8.0 licence bring-up. Nothing in this repository claims a result measured on QNX.
 
 ## Architecture and safety invariant
 
@@ -51,6 +51,10 @@ Fixed true-alarm recall: 96.6% (86 of 89), 95% CI [90.6-98.8]. Ventricular tachy
 
 Regenerate with `python3 scripts/host_shift_replay.py` (writes `submission/g3/host_shift_review.{json,md}`). Six records is a demonstration, not an accuracy measurement.
 
+![Real PhysioNet 2015 Demo Waveforms](docs/plots/demo_overview.svg)
+
+Overview: [`docs/plots/demo_overview.svg`](docs/plots/demo_overview.svg) (one SVG per record sits beside it). Each plot shows the 16 s before the alarm at 300 s, an ECG lead and the pulse channel with their quality indices, and the exact `build/qw` reason. They are generated offline with `python3 scripts/render_demo_plots.py` (stdlib Python only) from the real ODC-BY 1.0 `train`-split records: zero synthetic data.
+
 | Record | Alarm | Truth | Decision | Why |
 |---|---|---|---|---|
 | a109l | Asystole | false | SUPPRESS_TO_REVIEW | pulse present in the trailing 5 s, so the asystole alarm is contradicted; queued for nurse review |
@@ -73,7 +77,12 @@ make reentrant-test  # concurrent qw_decide() calls, no shared state
 make demo-verify     # checks data/demo/ against MANIFEST.json hashes
 make fuzz            # 1000 seeded parser mutations (stdlib Python)
 python3 scripts/host_shift_replay.py   # six-record replay report
+python3 scripts/render_demo_plots.py   # docs/plots/*.svg from the six real records
 ```
+
+`make gateway-test` currently reports `qw_gateway_test: 529 checks, 0 failed`.
+
+**`make qnx` (not run yet).** On an x86_64 Linux host with the QNX SDP 8.0 environment sourced, `make qnx` cross-builds the `#ifdef __QNX__` processes under `src/qnx/` with `qcc`; `make qnx-check` only verifies that `qcc` is on the path. These targets are uncompiled and untested on the host until SDP 8.0 P1 bring-up, so no QNX build or QEMU result is claimed.
 
 `make test` additionally runs the pytest suite (needs `pytest` and `numpy`).
 

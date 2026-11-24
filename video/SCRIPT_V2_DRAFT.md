@@ -61,11 +61,11 @@ Caption: "openFDA MAUDE, report 10055677, manufacturer malfunction report, recei
 
 **Screen (use what exists on recording day, and label it):**
 - If the QNX 8.0 QEMU boot is working: kill the detector process, show the alarm manager latch CONFIRM at the deadline, then `slog2info` lines.
-- Otherwise (current state): the host test output, labelled "host-portable C11, not QNX": `make gateway-test` -> "475 checks, 0 failed", with the deadline-expiry and queue-overflow cases highlighted.
+- Otherwise (current state): the host test output, labelled "host-portable C11, not QNX": `make gateway-test` -> "529 checks, 0 failed", with the deadline-expiry and queue-overflow cases highlighted.
 
 **VO (host version):** "The gateway logic is tested on its own. No decision within the deadline: latched confirm. The seventeenth pending alarm: confirm and a busy status. Detached shared memory: reported as detached, never as fresh data. The QNX processes themselves are the next step; this part runs on the host today."
 
-**Overlay:** "Host test: 475 checks, 0 failed. QNX runtime pending SDK bring-up." Do not show a QEMU clip unless it was actually recorded.
+**Overlay:** "Host test: 529 checks, 0 failed. QNX runtime pending SDK bring-up." Do not show a QEMU clip unless it was actually recorded.
 
 ## S06 · 1:40-2:10 · Honest results
 

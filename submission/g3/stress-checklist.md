@@ -22,13 +22,14 @@ Last host run: `make gateway-test`, `make reentrant-test`, `python3 scripts/fuzz
 | 12 | Hostile input | Hostile nurse ACK JSON (oversize, trailing garbage, duplicate keys, negative or fractional ack, control characters, wrong types) all rejected | HOST PASS: `test_hostile_ack` (22 hostile strings, embedded NUL bytes, plus edge cases) | QEMU PENDING: via `write()` on `/dev/quietward` |
 | 13 | Limits | Restart journal replay: unacked raises and unacked reviews come back as latched `CONFIRM`; acked or confirmed ones stay clear. A corrupt, empty, over-long or NUL-bearing line, a bad number (negative, overflow, bed or alarm out of range), a torn final `A`/`C` line, table overflow, or a symlinked journal (`O_NOFOLLOW`) fails open across all beds (every bed latched `CONFIRM`, return = `QW_MAX_BEDS`). A torn final `R`/`Q` line that still parses keeps its bed latched | HOST PASS: `test_journal` | QEMU PENDING: kill and restart `qw_alarm_mgr` |
 | 14 | Spend | 0 paid APIs, 0 cloud inference, offline build and tests | HOST PASS: `make`, `make gateway-test`, `make reentrant-test`, `make demo-verify`, fuzz all run offline | Codespaces and QEMU use free tiers only |
-| 15 | Afterwards | 0 leaks, ASan+UBSan clean | HOST PASS: one-off ASan+UBSan builds of `qw_gateway_test` (475 checks, 0 failed) and `qw_reentrant_test` ran with no sanitizer report | QEMU PENDING: same flags on the QNX toolchain if supported |
+| 15 | Afterwards | 0 leaks, ASan+UBSan clean | HOST PASS: one-off ASan+UBSan builds of `qw_gateway_test` (529 checks, 0 failed) and `qw_reentrant_test` ran with no sanitizer report | QEMU PENDING: same flags on the QNX toolchain if supported |
+| 16 | Audit trail | Audit log line format (`qw_log_format_line`: one line, control characters replaced, at most 511 bytes for the slog2 limit) and the `/dev/quietward` JSONL serializer (`qw_gw_format_log_jsonl`: only whole lines, NUL-terminated, null and zero-size arguments rejected) | HOST PASS: `test_log_format` and `test_resmgr_jsonl` in `qw_gateway_test` (formatting only) | QEMU PENDING: real `slog2f` output and `slog2info` capture, `read()` on `/dev/quietward` |
 
 ## Totals
 
-- Host column: 13 of 15 rows HOST PASS, row 3 partial (threads only, no 8-client resmgr path on host), row 7 pending (helper process not built yet). Many HOST PASS rows still have a QEMU leg listed in the last column.
+- Host column: 14 of 16 rows HOST PASS, row 3 partial (threads only, no 8-client resmgr path on host), row 7 pending (helper process not built yet). Many HOST PASS rows still have a QEMU leg listed in the last column.
 - Whole matrix is **not** complete until the QEMU G3 soak runs. No QNX result is claimed here.
-- `qw_gateway_test`: 475 checks, 0 failed. `qw_reentrant_test`: 320 concurrent `qw_decide()` calls across 8 threads, all consistent.
+- `qw_gateway_test`: 529 checks, 0 failed. `qw_reentrant_test`: 320 concurrent `qw_decide()` calls across 8 threads, all consistent.
 
 ## Observation from fuzzing (not a defect fix)
 
