@@ -96,7 +96,7 @@ Fixed true-alarm recall 96.6% (86 of 89), Wilson 95% CI [90.6-98.8]. Kill Rule: 
 
 The PhysioNet/CinC 2015 winners scored 81.39 and 85.04 on a different 500-record hidden test set; our numbers come from a local split and are not comparable.
 
-Also: 529 host gateway checks, 0 failed; 320 concurrent reentrant calls across 8 threads; fuzzer 1000/1000; zero synthetic waveforms; zero paid APIs (`submission/g3/stress-checklist.md` row 14); the host build and checks run from a clean `git archive HEAD` export without `.git`/`.venv` and the suite contains no network-using commands (`submission/g3/host_tests_20261124.log`).
+Also: 529 host gateway checks, 0 failed; 320 concurrent reentrant calls across 8 threads; fuzzer 1000/1000; zero synthetic waveforms; zero paid APIs (`submission/g3/stress-checklist.md` row 14); the host build and checks run from a clean `git archive HEAD` export without `.git`/`.venv`/`.pytest_cache` and the suite contains no network-using commands (`submission/g3/host_tests_20261124.log`).
 
 ## What's next
 

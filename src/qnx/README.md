@@ -161,7 +161,7 @@ We plan to use **QNX Process Launch and Monitor Service (`QPLMS`: `plms`, dev ut
 - **Alarm manager (`qw_alarm_mgr`)** enforces a parameterized decision
   deadline (`--watchdog-ms`, calibrated from QEMU TCG jitter) and latches
   `CONFIRM` automatically on timeout or pending-table overflow. Fail-open
-  (`qw_failopen`, a standalone fail-open binary invoked by `qw_supervisor` after >3 restarts or manually; needs no running supervisor/IPC to write `CONFIRM_ALL`) so alarm
+  (`qw_failopen`, a standalone fail-open binary invoked by `qw_supervisor` after >3 restarts or manually; needs no running supervisor/IPC to write `CONFIRM_ALL`) is decoupled from process supervision so alarm
   preservation does not depend on QPLMS staying up.
 - **P1 QEMU target verification & fallback:** At QNX 8.0 target bring-up, QPLMS
   availability in the target image is checked within a 45-minute cap. If
