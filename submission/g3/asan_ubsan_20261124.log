@@ -1,7 +1,12 @@
-$ cc -std=c11 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -Isrc -Isrc/qnx -o /tmp/qw-asan-94362/qw_gateway_test src/qnx/qw_ring.c src/qnx/qw_gateway_state.c src/qnx/qw_log.c src/qnx/qw_resmgr.c src/qnx/qw_gateway_test.c -lm -lpthread
-$ /tmp/qw-asan-94362/qw_gateway_test
-ring stress: 10000 frames, 4 readers, ok=25999 busy=37766 torn=0
+# ASan + UBSan build and test log (macOS arm64 host; leak_detection=not_run_on_macOS)
+$ cc -std=c11 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -Isrc -Isrc/qnx -o /tmp/qw-asan-127/qw_gateway_test src/qnx/qw_ring.c src/qnx/qw_gateway_state.c src/qnx/qw_log.c src/qnx/qw_resmgr.c src/qnx/qw_gateway_test.c -lm -lpthread
+exit=0
+$ /tmp/qw-asan-127/qw_gateway_test
+ring stress: 10000 frames, 4 readers, ok=7601 busy=25135 torn=0
 qw_gateway_test: 529 checks, 0 failed
-$ cc -std=c11 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -Isrc -o /tmp/qw-asan-94362/qw_reentrant_test src/qw_core.c src/rules.c src/qw_detector_config.c src/qw_reentrant_test.c -lm -lpthread
-$ /tmp/qw-asan-94362/qw_reentrant_test
+exit=0
+$ cc -std=c11 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -Isrc -o /tmp/qw-asan-127/qw_reentrant_test src/qw_core.c src/rules.c src/qw_detector_config.c src/qw_reentrant_test.c -lm -lpthread
+exit=0
+$ /tmp/qw-asan-127/qw_reentrant_test
 ok: 320 concurrent qw_decide() calls across 8 threads, all consistent with their own record
+exit=0

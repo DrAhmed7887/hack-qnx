@@ -2,7 +2,7 @@
 
 ## Compliance Header
 
-- **Target length:** `<= 2:55` (175 s, verified with `ffprobe`; Devpost hard limit `< 3:00`; eight strictly sequential scenes, no overlap)
+- **Target length:** `<= 2:55` (175 s, to be verified with `ffprobe`; Devpost hard limit `< 3:00`; eight strictly sequential scenes, no overlap)
 - **YouTube visibility:** Public
 - **Audio:** original voiceover only — zero copyrighted music (no BGM/soundtrack)
 - **Language:** 100% English (on-screen text, captions, overlays, and narration)
@@ -142,5 +142,5 @@ Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified dat
 - [ ] Held-out table matches `eval/results/` exactly (51.5%, FN 18 to 3).
 - [ ] No on-screen text implies clinical validation, a medical device, or any figure outside the allowed list above.
 - [ ] S05 shows only footage that exists. Label host versus QNX.
-- [ ] Target length `<= 2:55` (175 s, verified with `ffprobe`; Devpost hard limit `< 3:00`); YouTube visibility set to Public; 100% English; zero music; zero third-party product brands/logos.
+- [ ] Target length `<= 2:55` (175 s, to be verified with `ffprobe`; Devpost hard limit `< 3:00`); YouTube visibility set to Public; 100% English; zero music; zero third-party product brands/logos.
 - [ ] `[PLANNED FOR VIDEO PRODUCTION]` Verify eight strictly sequential scene blocks (`S01`–`S08`) with zero overlap and run `ffmpeg` `blackdetect`, `silencedetect`, `volumedetect` checks before upload.

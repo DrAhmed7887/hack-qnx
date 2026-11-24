@@ -4,7 +4,7 @@ Research demo, not a medical device. `rules/alarm_rules.json` carries `status: "
 
 Legend: **HOST PASS** = measured on the host-portable C11 code (macOS or Ubuntu), command and result given. **QEMU PENDING** = needs the booted QNX 8.0 target (blocked on P1, myQNX SDP 8.0 licence bring-up). QEMU runs under TCG, so any timing there is logical time, not hardware real time.
 
-Last host run: `make gateway-test`, `make reentrant-test`, `python3 scripts/fuzz_qw.py --count 1000`, `python3 scripts/host_shift_replay.py`, plus a one-off ASan+UBSan build of both C test binaries.
+Last host run: `submission/g3/host_tests_20261124.log` (all 7 fresh-clone offline commands: `make`, `make gateway-test`, `make reentrant-test`, `make demo-verify`, `python3 scripts/fuzz_qw.py --count 1000`, `python3 scripts/host_shift_replay.py`, `python3 scripts/render_demo_plots.py`) plus `submission/g3/asan_ubsan_20261124.log` (clean ASan+UBSan builds of `qw_gateway_test` and `qw_reentrant_test`, `exit=0`).
 
 | # | Area | Check | Host (portable C11) | QNX 8.0 QEMU G3 soak |
 |---|---|---|---|---|
@@ -22,7 +22,7 @@ Last host run: `make gateway-test`, `make reentrant-test`, `python3 scripts/fuzz
 | 12 | Hostile input | Hostile nurse ACK JSON (oversize, trailing garbage, duplicate keys, negative or fractional ack, control characters, wrong types) all rejected | HOST PASS: `test_hostile_ack` (22 hostile strings, embedded NUL bytes, plus edge cases) | QEMU PENDING: via `write()` on `/dev/quietward` |
 | 13 | Limits | Restart journal replay: unacked raises and unacked reviews come back as latched `CONFIRM`; acked or confirmed ones stay clear. A corrupt, empty, over-long or NUL-bearing line, a bad number (negative, overflow, bed or alarm out of range), a torn final `A`/`C` line, table overflow, or a symlinked journal (`O_NOFOLLOW`) fails open across all beds (every bed latched `CONFIRM`, return = `QW_MAX_BEDS`). A torn final `R`/`Q` line that still parses keeps its bed latched | HOST PASS: `test_journal` | QEMU PENDING: kill and restart `qw_alarm_mgr` |
 | 14 | Spend | 0 paid APIs, 0 cloud inference, offline build and tests | HOST PASS: `make`, `make gateway-test`, `make reentrant-test`, `make demo-verify`, fuzz all run offline | Codespaces and QEMU use free tiers only |
-| 15 | Afterwards | 0 leaks, ASan+UBSan clean | HOST PASS: one-off ASan+UBSan builds of `qw_gateway_test` (529 checks, 0 failed) and `qw_reentrant_test` ran with no sanitizer report | QEMU PENDING: same flags on the QNX toolchain if supported |
+| 15 | Afterwards | ASan+UBSan runtime checks clean (`exit=0`, `2>&1` captured in `submission/g3/asan_ubsan_20261124.log`; leak detection not run on macOS) | HOST PASS: ASan+UBSan builds of `qw_gateway_test` (529 checks, 0 failed) and `qw_reentrant_test` (320 calls) ran with `exit=0` and 0 diagnostics (`submission/g3/asan_ubsan_20261124.log`; leak detection not run on macOS) | QEMU PENDING: same flags on the QNX toolchain if supported |
 | 16 | Audit trail | Audit log line format (`qw_log_format_line`: one line, control characters replaced, at most 511 bytes for the slog2 limit) and the `/dev/quietward` JSONL serializer (`qw_gw_format_log_jsonl`: only whole lines, NUL-terminated, null and zero-size arguments rejected) | HOST PASS: `test_log_format` and `test_resmgr_jsonl` in `qw_gateway_test` (formatting only) | QEMU PENDING: real `slog2f` output and `slog2info` capture, `read()` on `/dev/quietward` |
 
 ## Totals

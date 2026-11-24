@@ -68,7 +68,7 @@ make qnx                        # -> build/qnx/{qw_acq,qw_detector,qw_alarm_mgr,
 ```sh
 /opt/quietward/bin/qw_supervisor /opt/quietward/rules/alarm_rules.json /opt/quietward/config/detector.json --bin-dir /opt/quietward/bin &
 /opt/quietward/bin/qw_acq /opt/quietward/data/demo/a109l.qw Asystole --bed 0 --seq 101 --rate-ms 100
-cat /dev/quietward                       # JSONL decision stream
+cat /dev/quietward | head -n 1            # JSONL decision stream (non-blocking)
 /opt/quietward/bin/qw_bedctl 0           # per-bed JSON via devctl
 slog2info -b quietward                   # audit lines
 sh /opt/quietward/scripts/p3_qnx_soak.sh -o /opt/quietward/out  # 10-run soak -> /opt/quietward/out/g3_run_01..10.txt + slog2_run_01..10.txt
