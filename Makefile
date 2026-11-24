@@ -21,9 +21,9 @@ DETECTOR_CONFIG_DUMP_TARGET = $(BUILD_DIR)/qw_detector_config_dump
 REENTRANT_TEST_TARGET = $(BUILD_DIR)/qw_reentrant_test
 GATEWAY_TEST_TARGET = $(BUILD_DIR)/qw_gateway_test
 QNX_DIR = $(SRC_DIR)/qnx
-QNX_HDRS = $(QNX_DIR)/qw_ipc.h $(QNX_DIR)/qw_ring.h $(QNX_DIR)/qw_gateway_state.h
+QNX_HDRS = $(QNX_DIR)/qw_ipc.h $(QNX_DIR)/qw_ring.h $(QNX_DIR)/qw_gateway_state.h $(QNX_DIR)/qw_log.h $(QNX_DIR)/qw_resmgr.h
 
-.PHONY: all clean test gateway-test reentrant-test fuzz eval eval-train eval-heldout eval-full demo-pack demo-verify convert
+.PHONY: all clean test qnx qnx-build qnx-check qnx-clean gateway-test reentrant-test fuzz eval eval-train eval-heldout eval-full demo-pack demo-verify convert
 
 all: $(TARGET)
 
@@ -52,7 +52,7 @@ $(REENTRANT_TEST_TARGET): $(BUILD_DIR)/qw_core.o $(BUILD_DIR)/rules.o $(BUILD_DI
 
 # Gateway subsystems (portable C11 under src/qnx/). Deliberately NOT linked
 # into build/qw. Host test binary only; the QNX resource manager wraps these.
-GATEWAY_OBJS = $(BUILD_DIR)/qw_ring.o $(BUILD_DIR)/qw_gateway_state.o $(BUILD_DIR)/qw_gateway_test.o
+GATEWAY_OBJS = $(BUILD_DIR)/qw_ring.o $(BUILD_DIR)/qw_gateway_state.o $(BUILD_DIR)/qw_log.o $(BUILD_DIR)/qw_resmgr.o $(BUILD_DIR)/qw_gateway_test.o
 
 $(BUILD_DIR)/%.o: $(QNX_DIR)/%.c $(QNX_HDRS) $(SRC_DIR)/qw_core.h $(SRC_DIR)/rules.h $(SRC_DIR)/qw_json_lexer.h
 	@mkdir -p $(BUILD_DIR)
@@ -67,6 +67,61 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_DIR)/qw_core.h $(SRC_DIR)/rules.h $(SRC_D
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+# ---- QNX 8.0 multi-process build (additive; never part of `make`, `make test`
+# or build/qw). Cross-compile on x86_64 Linux with the SDP environment sourced
+# (qnxsdp-env.sh). The six process sources under src/qnx/ compile to a host
+# stub on other systems, so this section only matters on the QNX build host.
+QCC ?= qcc
+QNX_VARIANT ?= gcc_ntox86_64
+QNX_BUILD_DIR = build/qnx
+QNX_CFLAGS = -V$(QNX_VARIANT) -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror
+QNX_LDLIBS = -lm -lslog2
+
+QNX_OBJ_CORE = $(addprefix $(QNX_BUILD_DIR)/,qw_core.o rules.o qw_detector_config.o)
+QNX_OBJ_RING = $(QNX_BUILD_DIR)/qw_ring.o
+QNX_OBJ_STATE = $(QNX_BUILD_DIR)/qw_gateway_state.o
+QNX_OBJ_LOG = $(QNX_BUILD_DIR)/qw_log.o
+QNX_OBJ_RESMGR = $(QNX_BUILD_DIR)/qw_resmgr.o
+QNX_BINS = $(addprefix $(QNX_BUILD_DIR)/,qw_acq qw_detector qw_alarm_mgr qw_failopen qw_supervisor qw_bedctl)
+
+qnx-check:
+	@command -v $(QCC) >/dev/null || { echo "qcc not found: source qnxsdp-env.sh (SDP 8.0 on x86_64 Linux)"; exit 1; }
+
+# qnx-check runs first (recipe order), then the real build.
+qnx: qnx-check
+	@$(MAKE) --no-print-directory qnx-build
+
+qnx-build: $(QNX_BINS)
+
+$(QNX_BUILD_DIR)/%.o: $(QNX_DIR)/%.c $(QNX_HDRS) $(SRC_DIR)/qw_core.h $(SRC_DIR)/rules.h $(SRC_DIR)/qw_detector_config.h $(SRC_DIR)/qw_json_lexer.h
+	@mkdir -p $(QNX_BUILD_DIR)
+	$(QCC) $(QNX_CFLAGS) -I$(SRC_DIR) -I$(QNX_DIR) -c -o $@ $<
+
+$(QNX_BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(QNX_HDRS) $(SRC_DIR)/qw_core.h $(SRC_DIR)/rules.h $(SRC_DIR)/qw_detector_config.h $(SRC_DIR)/qw_json_lexer.h
+	@mkdir -p $(QNX_BUILD_DIR)
+	$(QCC) $(QNX_CFLAGS) -I$(SRC_DIR) -I$(QNX_DIR) -c -o $@ $<
+
+$(QNX_BUILD_DIR)/qw_acq: $(QNX_BUILD_DIR)/qw_acq.o $(QNX_OBJ_CORE) $(QNX_OBJ_RING) $(QNX_OBJ_STATE) $(QNX_OBJ_LOG)
+	$(QCC) $(QNX_CFLAGS) -o $@ $^ $(QNX_LDLIBS)
+
+$(QNX_BUILD_DIR)/qw_detector: $(QNX_BUILD_DIR)/qw_detector.o $(QNX_OBJ_CORE) $(QNX_OBJ_RING) $(QNX_OBJ_LOG)
+	$(QCC) $(QNX_CFLAGS) -o $@ $^ $(QNX_LDLIBS)
+
+$(QNX_BUILD_DIR)/qw_alarm_mgr: $(QNX_BUILD_DIR)/qw_alarm_mgr.o $(QNX_OBJ_STATE) $(QNX_OBJ_LOG) $(QNX_OBJ_RESMGR)
+	$(QCC) $(QNX_CFLAGS) -o $@ $^ $(QNX_LDLIBS)
+
+$(QNX_BUILD_DIR)/qw_failopen: $(QNX_BUILD_DIR)/qw_failopen.o $(QNX_OBJ_STATE) $(QNX_OBJ_LOG)
+	$(QCC) $(QNX_CFLAGS) -o $@ $^ $(QNX_LDLIBS)
+
+$(QNX_BUILD_DIR)/qw_supervisor: $(QNX_BUILD_DIR)/qw_supervisor.o $(QNX_OBJ_LOG)
+	$(QCC) $(QNX_CFLAGS) -o $@ $^ $(QNX_LDLIBS)
+
+$(QNX_BUILD_DIR)/qw_bedctl: $(QNX_BUILD_DIR)/qw_bedctl.o
+	$(QCC) $(QNX_CFLAGS) -o $@ $^ $(QNX_LDLIBS)
+
+qnx-clean:
+	rm -rf $(QNX_BUILD_DIR)
 
 # Convert raw WFDB records in data/raw/training/ into data/bin/*.qw + labels.csv.
 convert:

@@ -1,4 +1,23 @@
-# Quiet Ward on QNX 8.0 — planned mapping (design doc, no QNX code yet)
+# Quiet Ward on QNX 8.0 — mapping and status
+
+## Status (24 Nov 2026)
+
+Host-verified (portable C11, builds on macOS and Linux, no QNX headers):
+
+- `qw_ipc.h` (message, pulse and shared-memory layouts)
+- `qw_ring.{h,c}` (per-bed seqlock ring)
+- `qw_gateway_state.{h,c}` (pending/review state machine, deadline, journal replay)
+- `qw_log.{h,c}` (audit line formatter, 511-byte slog2 limit; slog2 calls only behind `__QNX__`)
+- `qw_resmgr.{h,c}` (`/dev/quietward` JSONL log serializer; the resource manager itself only behind `__QNX__`)
+- `qw_gateway_test.c`: `make gateway-test` -> `qw_gateway_test: 529 checks, 0 failed`
+
+Written, **not compiled with `qcc` and not run on QEMU** (the `#ifdef __QNX__` bodies are unverified; on other hosts they build to a stub):
+
+- `qw_acq.c`, `qw_detector.c`, `qw_alarm_mgr.c`, `qw_failopen.c`, `qw_supervisor.c`, `qw_bedctl.c`
+
+Build entry points: `make qnx` (cross-build with `qcc`) and `make qnx-check` (is `qcc` available). Both wait on P1, the myQNX SDP 8.0 licence. The sections below describe the intended mapping; every QNX primitive named there is a plan until it has been built and booted on 8.0.
+
+## Planned mapping
 
 This document describes how the host-side C11 core (`src/qw_core.c`,
 `src/rules.c`, `src/qw_cli.c`, `src/qw_detector_config.c`) maps onto QNX
@@ -109,7 +128,7 @@ operational record.
 
 High Availability Manager (`HAM`) is deprecated in QNX 8.0; the QNX 8.0
 replacement is **QNX Process Launch and Monitor Service (`QPLMS`: `plms`,
-`libplms`, dev utility `plmsctrl`)**, configured declaratively via a
+dev utility `plmsctrl`)**, configured declaratively via a
 component DAG config file (`depend`, `task "recovery"`, `task "monitor"`,
 `on_fault`) rather than a C registration API (`research/QPLMS_NOTES.md`).
 SDP 8.x removes `aps`, enforces priorities `1-253`, and replaces `runmask`

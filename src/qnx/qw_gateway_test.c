@@ -12,6 +12,8 @@
 #include <unistd.h>
 
 #include "qw_gateway_state.h"
+#include "qw_log.h"
+#include "qw_resmgr.h"
 #include "qw_ring.h"
 
 static int g_fail = 0;
@@ -772,6 +774,187 @@ static void test_journal(void) {
     CHECK(stat(fresh, &sb) == 0 && (sb.st_mode & 0777) == 0600);
 }
 
+/* ---- logging ---- */
+
+static int has_ctrl(const char *s) {
+    for (; *s; s++)
+        if ((unsigned char)*s < 0x20 || (unsigned char)*s == 0x7f) return 1;
+    return 0;
+}
+
+static void test_log_format(void) {
+    char out[1024];
+
+    CHECK(qw_log_format_line(NULL, 100, QW_LOG_INFO, 0, 0, "a", "b", "c") == -1);
+    CHECK(qw_log_format_line(out, 0, QW_LOG_INFO, 0, 0, "a", "b", "c") == -1);
+    CHECK(qw_log_format_line(out, 1, QW_LOG_INFO, 0, 0, "a", "b", "c") == -1);
+    CHECK(qw_log_format_line(out, 2, QW_LOG_INFO, 0, 0, "a", "b", "c") == 1 && out[1] == '\0' &&
+          out[0] == 's');
+
+    int n = qw_log_format_line(out, sizeof out, QW_LOG_WARN, 1, 42, "Asystole", "CONFIRM", "ok");
+    CHECK(n == (int)strlen(out));
+    CHECK(strcmp(out, "sev=WARN bed=1 seq=42 alarm=Asystole decision=CONFIRM reason=ok") == 0);
+    qw_log_format_line(out, sizeof out, QW_LOG_CRIT, 3, 4294967295u, "x", "y", "z");
+    CHECK(strcmp(out, "sev=CRIT bed=3 seq=4294967295 alarm=x decision=y reason=z") == 0);
+    qw_log_format_line(out, sizeof out, QW_LOG_INFO, 0, 0, "x", "y", "z");
+    CHECK(strncmp(out, "sev=INFO bed=0 seq=0 ", 21) == 0);
+    qw_log_format_line(out, sizeof out, QW_LOG_ERROR, 0, 0, "x", "y", "z");
+    CHECK(strncmp(out, "sev=ERROR ", 10) == 0);
+    qw_log_format_line(out, sizeof out, QW_LOG_INFO, 0, 0, NULL, NULL, NULL);
+    CHECK(strcmp(out, "sev=INFO bed=0 seq=0 alarm= decision= reason=") == 0);
+
+    /* CR, LF, tab, other control chars and DEL become spaces in all three strings */
+    n = qw_log_format_line(out, sizeof out, QW_LOG_INFO, 0, 1, "A\nB", "C\rD", "r1\r\nr2\tr3\x01r4\x7f");
+    CHECK(n == (int)strlen(out) && !has_ctrl(out));
+    CHECK(strcmp(out, "sev=INFO bed=0 seq=1 alarm=A B decision=C D reason=r1  r2 r3 r4 ") == 0);
+
+    /* long reason: capped at exactly 511 bytes, NUL-terminated, never more */
+    char big[600];
+    memset(big, 'x', sizeof big);
+    big[300] = '\0';
+    n = qw_log_format_line(out, sizeof out, QW_LOG_INFO, 0, 1, "Ventricular_Flutter_Fib",
+                           "SUPPRESS_TO_REVIEW", big);
+    CHECK(n == 300 + (int)strlen("sev=INFO bed=0 seq=1 alarm=Ventricular_Flutter_Fib "
+                                 "decision=SUPPRESS_TO_REVIEW reason="));
+    CHECK(n <= QW_SLOG_MAX_LEN && out[n] == '\0');
+    memset(big, 'y', 599);
+    big[599] = '\0';
+    n = qw_log_format_line(out, sizeof out, QW_LOG_INFO, 0, 1, "Asystole", "CONFIRM", big);
+    CHECK(n == QW_SLOG_MAX_LEN && strlen(out) == (size_t)QW_SLOG_MAX_LEN);
+    /* a larger buffer does not raise the cap; control chars in a huge reason stay sanitised */
+    memset(big, '\n', 599);
+    n = qw_log_format_line(out, sizeof out, QW_LOG_INFO, 0, 1, "Asystole", "CONFIRM", big);
+    CHECK(n == QW_SLOG_MAX_LEN && !has_ctrl(out));
+
+    /* every small cap truncates safely and is a prefix of the full line */
+    char full[1024];
+    int fn = qw_log_format_line(full, sizeof full, QW_LOG_WARN, 2, 7, "Bradycardia", "CONFIRM", "slow rate");
+    int prefix_ok = 1, len_ok = 1;
+    for (size_t cap = 2; cap <= (size_t)fn + 3; cap++) {
+        memset(out, '#', sizeof out);
+        int w = qw_log_format_line(out, cap, QW_LOG_WARN, 2, 7, "Bradycardia", "CONFIRM", "slow rate");
+        size_t want = (cap - 1 < (size_t)fn) ? cap - 1 : (size_t)fn;
+        if (w != (int)want || out[w] != '\0' || strncmp(out, full, want) != 0) prefix_ok = 0;
+        if ((size_t)w > cap - 1) len_ok = 0;
+    }
+    CHECK(prefix_ok && len_ok);
+}
+
+/* Append a hand-built entry to the state's log ring. */
+static void push_entry(qw_gw_state_t *st, uint32_t seq, uint32_t bed, uint32_t alarm,
+                       qw_log_state_t state, const char *reason, uint64_t t) {
+    qw_log_entry_t *e = &st->log[st->log_total % QW_LOG_RING];
+    memset(e, 0, sizeof *e);
+    e->seq = seq;
+    e->bed_id = bed;
+    e->alarm_id = alarm;
+    e->state = state;
+    e->t_ms = t;
+    snprintf(e->reason, sizeof e->reason, "%s", reason);
+    st->log_total++;
+}
+
+static size_t count_char(const char *s, char c) {
+    size_t n = 0;
+    for (; *s; s++) n += (*s == c);
+    return n;
+}
+
+static void test_resmgr_jsonl(void) {
+    static qw_gw_state_t st;
+    char *buf = malloc(128 * 1024);
+    size_t len = 99;
+    if (buf == NULL) exit(2);
+
+    CHECK(qw_gw_format_log_jsonl(NULL, buf, 100, &len) == -1);
+    qw_gw_init(&st, QW_DECISION_DEADLINE_MS, QW_REVIEW_ESCALATE_MS);
+    CHECK(qw_gw_format_log_jsonl(&st, NULL, 100, &len) == -1);
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 0, &len) == -1);
+
+    /* empty log */
+    memset(buf, 'x', 16);
+    len = 99;
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 16, &len) == 0 && len == 0 && buf[0] == '\0');
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 1, &len) == 0 && len == 0 && buf[0] == '\0');
+
+    /* real state machine: latched (deadline), suppressed to review, then acked */
+    int fo;
+    qw_msg_decision_t m;
+    CHECK(qw_gw_raise_alarm(&st, 0, QW_ALARM_ASYSTOLE, 1, 1000, &fo) == QW_ST_OK);
+    CHECK(qw_gw_check_deadlines(&st, 1000 + QW_DECISION_DEADLINE_MS) == 1);
+    CHECK(qw_gw_raise_alarm(&st, 2, QW_ALARM_TACHYCARDIA, 2, 2000, &fo) == QW_ST_OK);
+    m = mk(2, QW_ALARM_TACHYCARDIA, 2, QW_DECISION_SUPPRESS_TO_REVIEW);
+    CHECK(qw_gw_apply_decision(&st, &m, 2100, NULL) == QW_ST_OK);
+    CHECK(qw_gw_ack_review(&st, 2, "rn1", 2200) == QW_ST_OK);
+    CHECK(st.log_total == 3);
+
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 128 * 1024, &len) == 0);
+    CHECK(len == strlen(buf) && len > 0 && buf[len - 1] == '\n');
+    CHECK(count_char(buf, '\n') == 3);
+    const char *l1 = buf;
+    const char *l2 = strchr(l1, '\n') + 1;
+    const char *l3 = strchr(l2, '\n') + 1;
+    CHECK(strncmp(l1, "{\"seq\":1,\"bed\":0,\"alarm\":\"Asystole\",\"decision\":\"CONFIRM\"", 55) == 0);
+    CHECK(strstr(l1, "\"state\":\"latched\",\"ts_ms\":1500}\n") != NULL);
+    CHECK(strncmp(l2, "{\"seq\":2,\"bed\":2,\"alarm\":\"Tachycardia\",\"decision\":\"SUPPRESS_TO_REVIEW\"", 70) == 0);
+    CHECK(strstr(l2, "\"state\":\"review\",\"ts_ms\":2100}\n") != NULL);
+    CHECK(strstr(l3, "\"seq\":2,\"bed\":2") == l3 + 1);
+    CHECK(strstr(l3, "\"decision\":\"ACK\"") != NULL && strstr(l3, "\"state\":\"acked\",\"ts_ms\":2200}\n") != NULL);
+    CHECK(strstr(l1, "no decision within deadline") != NULL);
+    CHECK(l2 < l3 && l1 < l2);
+
+    /* escaping: quote, backslash, newline, tab, CR, BS, FF, 0x01 and 0x1f */
+    qw_gw_init(&st, QW_DECISION_DEADLINE_MS, QW_REVIEW_ESCALATE_MS);
+    push_entry(&st, 5, 1, QW_ALARM_VT, QW_LOG_LATCHED, "a\"b\\c\nd\te\rf\bg\fh\x01i\x1f" "j", 7);
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 4096, &len) == 0);
+    CHECK(strstr(buf, "\"reason\":\"a\\\"b\\\\c\\nd\\te\\rf\\bg\\fh\\u0001i\\u001fj\"") != NULL);
+    CHECK(count_char(buf, '\n') == 1 && buf[len - 1] == '\n');
+    CHECK(!has_ctrl(buf) || count_char(buf, '\n') == 1); /* only the line separator is a control char */
+    {
+        int raw_ctrl = 0;
+        for (size_t i = 0; i + 1 < len; i++)
+            if ((unsigned char)buf[i] < 0x20) raw_ctrl = 1;
+        CHECK(raw_ctrl == 0);
+    }
+    push_entry(&st, 6, 9, 77, QW_LOG_REVIEW, "", 8); /* out-of-range ids degrade, never crash */
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 4096, &len) == 0);
+    CHECK(strstr(buf, "\"alarm\":\"unknown\"") != NULL && strstr(buf, "\"reason\":\"\"") != NULL);
+
+    /* small cap: complete lines only, always NUL-terminated, prefix of the full output */
+    qw_gw_init(&st, QW_DECISION_DEADLINE_MS, QW_REVIEW_ESCALATE_MS);
+    for (uint32_t i = 0; i < 4; i++)
+        push_entry(&st, 10 + i, i, (uint32_t)(i % QW_ALARM_COUNT), (qw_log_state_t)(i % 3), "reason \"q\"", 100 + i);
+    char *full = malloc(8192);
+    size_t flen = 0;
+    if (full == NULL) exit(2);
+    CHECK(qw_gw_format_log_jsonl(&st, full, 8192, &flen) == 0 && count_char(full, '\n') == 4);
+    int bad = 0;
+    for (size_t cap = 1; cap <= flen + 2; cap++) {
+        memset(buf, '#', 512);
+        size_t olen = 12345;
+        if (qw_gw_format_log_jsonl(&st, buf, cap, &olen) != 0) bad++;
+        if (olen > cap - 1 || buf[olen] != '\0' || strlen(buf) != olen) bad++;
+        if (strncmp(buf, full, olen) != 0) bad++;
+        if (olen > 0 && buf[olen - 1] != '\n') bad++; /* never half a line */
+        if (cap >= flen + 1 && olen != flen) bad++;
+        if (cap == flen && olen == flen) bad++;       /* no room for the NUL: last line must drop */
+    }
+    CHECK(bad == 0);
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 20, &len) == 0 && len == 0 && buf[0] == '\0'); /* first line alone is bigger */
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 4096, NULL) == 0); /* out_len is optional */
+    free(full);
+
+    /* ring wrap: only the newest QW_LOG_RING entries, oldest first */
+    qw_gw_init(&st, QW_DECISION_DEADLINE_MS, QW_REVIEW_ESCALATE_MS);
+    for (uint32_t i = 0; i < QW_LOG_RING + 44; i++)
+        push_entry(&st, i, i % QW_MAX_BEDS, QW_ALARM_ASYSTOLE, QW_LOG_LATCHED, "wrap", i);
+    CHECK(qw_gw_format_log_jsonl(&st, buf, 128 * 1024, &len) == 0);
+    CHECK(count_char(buf, '\n') == QW_LOG_RING);
+    CHECK(strncmp(buf, "{\"seq\":44,", 10) == 0);
+    CHECK(strstr(buf, "{\"seq\":299,") != NULL && strstr(buf, "{\"seq\":43,") == NULL);
+    free(buf);
+}
+
 int main(void) {
     test_pulse();
     test_ring_basic();
@@ -784,6 +967,8 @@ int main(void) {
     test_review_and_ack();
     test_hostile_ack();
     test_journal();
+    test_log_format();
+    test_resmgr_jsonl();
     printf("qw_gateway_test: %d checks, %d failed\n", g_checks, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
