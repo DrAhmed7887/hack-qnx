@@ -1,32 +1,31 @@
-# Offline fresh export (no .git/.venv) host verification (stdlib python3; commands ran from export without .git/.venv; no network-using commands in suite)
-# timestamp_utc=2026-11-24T22:46:47Z base_commit=87c023f1594934cd2e86fe76842e95457d5c4324 working_tree_src_scripts_diff_sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+# Offline clean git-archive export (no .git/.venv/.pytest_cache; stdlib python3; suite contains no network-using commands)
+# timestamp_utc=2026-11-24T22:49:27Z committed_head=ae9bbd5516ce5e0754fb719470a1b2b07671f3c3
 === export check ===
-NO_GIT_NO_VENV_OK
+NO_GIT_NO_VENV_NO_CACHE_OK
 total 136
-drwxr-xr-x@ 24 ahmedzayed  staff    768 Nov 24 23:44 .
-drwxrwxrwt  41 root        wheel   1312 Nov 24 23:46 ..
-drwxr-xr-x@  3 ahmedzayed  staff     96 Nov 24 13:35 .devcontainer
-drwxr-xr-x@  3 ahmedzayed  staff     96 Nov 22 18:24 .github
--rw-r--r--@  1 ahmedzayed  staff     61 Nov 22 19:23 .gitignore
-drwxr-xr-x@  5 ahmedzayed  staff    160 Nov 22 18:25 .kiro
-drwxr-xr-x@  6 ahmedzayed  staff    192 Nov 22 18:56 .pytest_cache
--rw-r--r--@  1 ahmedzayed  staff   5734 Nov 24 23:46 CLAIMS.md
--rw-r--r--@  1 ahmedzayed  staff   1254 Nov 24 12:53 DATA_CARD.md
--rw-r--r--@  1 ahmedzayed  staff   6281 Nov 24 23:39 JUDGES.md
--rw-r--r--@  1 ahmedzayed  staff  11358 Nov 22 18:24 LICENSE
--rw-r--r--@  1 ahmedzayed  staff   7205 Nov 24 16:37 Makefile
--rw-r--r--@  1 ahmedzayed  staff    870 Nov 24 12:53 NOTICE
--rw-r--r--@  1 ahmedzayed  staff  17269 Nov 24 23:46 README.md
-drwxr-xr-x@  3 ahmedzayed  staff     96 Nov 22 19:23 config
-drwxr-xr-x@  3 ahmedzayed  staff     96 Nov 24 12:52 data
-drwxr-xr-x@  5 ahmedzayed  staff    160 Nov 24 16:40 docs
-drwxr-xr-x@  7 ahmedzayed  staff    224 Nov 24 13:07 eval
-drwxr-xr-x@  3 ahmedzayed  staff     96 Nov 22 18:24 rules
-drwxr-xr-x@ 15 ahmedzayed  staff    480 Nov 24 22:29 scripts
-drwxr-xr-x@ 14 ahmedzayed  staff    448 Nov 22 19:23 src
-drwxr-xr-x@  5 ahmedzayed  staff    160 Nov 24 22:32 submission
-drwxr-xr-x@ 11 ahmedzayed  staff    352 Nov 24 12:59 tests
-drwxr-xr-x@  3 ahmedzayed  staff     96 Nov 24 13:56 video
+drwxr-xr-x@ 23 ahmedzayed  wheel    736 Nov 24 23:49 .
+drwxrwxrwt  40 root        wheel   1280 Nov 24 23:49 ..
+drwxr-xr-x@  3 ahmedzayed  wheel     96 Nov 24 23:49 .devcontainer
+drwxr-xr-x@  3 ahmedzayed  wheel     96 Nov 24 23:49 .github
+-rw-r--r--@  1 ahmedzayed  wheel     61 Nov 24 23:49 .gitignore
+drwxr-xr-x@  5 ahmedzayed  wheel    160 Nov 24 23:49 .kiro
+-rw-r--r--@  1 ahmedzayed  wheel   5785 Nov 24 23:49 CLAIMS.md
+-rw-r--r--@  1 ahmedzayed  wheel   1254 Nov 24 23:49 DATA_CARD.md
+-rw-r--r--@  1 ahmedzayed  wheel   6319 Nov 24 23:49 JUDGES.md
+-rw-r--r--@  1 ahmedzayed  wheel  11358 Nov 24 23:49 LICENSE
+-rw-r--r--@  1 ahmedzayed  wheel   7205 Nov 24 23:49 Makefile
+-rw-r--r--@  1 ahmedzayed  wheel    870 Nov 24 23:49 NOTICE
+-rw-r--r--@  1 ahmedzayed  wheel  17415 Nov 24 23:49 README.md
+drwxr-xr-x@  3 ahmedzayed  wheel     96 Nov 24 23:49 config
+drwxr-xr-x@  4 ahmedzayed  wheel    128 Nov 24 23:49 data
+drwxr-xr-x@  5 ahmedzayed  wheel    160 Nov 24 23:49 docs
+drwxr-xr-x@  7 ahmedzayed  wheel    224 Nov 24 23:49 eval
+drwxr-xr-x@  3 ahmedzayed  wheel     96 Nov 24 23:49 rules
+drwxr-xr-x@ 15 ahmedzayed  wheel    480 Nov 24 23:49 scripts
+drwxr-xr-x@ 14 ahmedzayed  wheel    448 Nov 24 23:49 src
+drwxr-xr-x@  5 ahmedzayed  wheel    160 Nov 24 23:49 submission
+drwxr-xr-x@ 11 ahmedzayed  wheel    352 Nov 24 23:49 tests
+drwxr-xr-x@  3 ahmedzayed  wheel     96 Nov 24 23:49 video
 === make ===
 cc -std=c11 -O2 -Wall -Wextra -Werror -Isrc -c -o build/qw_core.o src/qw_core.c
 cc -std=c11 -O2 -Wall -Wextra -Werror -Isrc -c -o build/rules.o src/rules.c
@@ -42,7 +41,7 @@ cc -std=c11 -O2 -Wall -Wextra -Werror -Isrc -Isrc/qnx -c -o build/qw_resmgr.o sr
 cc -std=c11 -O2 -Wall -Wextra -Werror -Isrc -Isrc/qnx -c -o build/qw_gateway_test.o src/qnx/qw_gateway_test.c
 cc -std=c11 -O2 -Wall -Wextra -Werror  -o build/qw_gateway_test build/qw_ring.o build/qw_gateway_state.o build/qw_log.o build/qw_resmgr.o build/qw_gateway_test.o -lm -lpthread
 ./build/qw_gateway_test
-ring stress: 10000 frames, 4 readers, ok=16768 busy=45533 torn=0
+ring stress: 10000 frames, 4 readers, ok=4499 busy=34146 torn=0
 qw_gateway_test: 529 checks, 0 failed
 exit=0
 === make reentrant-test ===
@@ -57,10 +56,10 @@ demo pack OK
 exit=0
 === make fuzz ===
 python3 scripts/fuzz_qw.py --count 1000
-fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 6.6s; 0 failure(s)
+fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 5.4s; 0 failure(s)
 exit=0
 === python3 scripts/fuzz_qw.py --count 1000 ===
-fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 7.5s; 0 failure(s)
+fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 4.2s; 0 failure(s)
 exit=0
 === python3 scripts/host_shift_replay.py ===
 host_shift_replay: 6 records, CONFIRM=5, SUPPRESS_TO_REVIEW=1

@@ -1,5 +1,5 @@
-files_total=104 text_scanned=98 ascii_only_files=80 binary_skipped=6
-reviewer=docs-sub,verifier date=2026-11-24
+# timestamp_utc=2026-11-24T22:49:27Z committed_head=ae9bbd5516ce5e0754fb719470a1b2b07671f3c3
+files_total=105 text_scanned=98 ascii_only_files=80 binary_skipped=6
 excludes_self=submission/g3/english_scan.txt (self-generated scan log listing matched non-ASCII punctuation characters)
 skipped=['data/demo/a109l.qw', 'data/demo/a653l.qw', 'data/demo/f450s.qw', 'data/demo/t106s.qw', 'data/demo/t116s.qw', 'data/demo/v188s.qw']
 ascii_only_sample_check: CLAIMS.md_ascii_only=True README.md_ascii_only=True
@@ -18,24 +18,24 @@ JUDGES.md:20: chars=–
 JUDGES.md:23: chars=—
 JUDGES.md:24: chars=—
 NOTICE:1: chars=—
-data/demo/LICENSE-ODC-BY.txt:22: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:26: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:32: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:36: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:39: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:42: chars=–“”
+data/demo/LICENSE-ODC-BY.txt:22: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:26: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:32: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:36: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:39: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:42: chars=“”–
 data/demo/LICENSE-ODC-BY.txt:43: chars=”
-data/demo/LICENSE-ODC-BY.txt:47: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:53: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:56: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:58: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:60: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:62: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:66: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:69: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:72: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:76: chars=–“”
-data/demo/LICENSE-ODC-BY.txt:82: chars=–“”
+data/demo/LICENSE-ODC-BY.txt:47: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:53: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:56: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:58: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:60: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:62: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:66: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:69: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:72: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:76: chars=“”–
+data/demo/LICENSE-ODC-BY.txt:82: chars=“”–
 data/demo/LICENSE-ODC-BY.txt:200: chars=“”
 data/demo/LICENSE-ODC-BY.txt:203: chars=’
 data/demo/LICENSE-ODC-BY.txt:218: chars=’
@@ -62,7 +62,7 @@ src/qnx/README.md:97: chars=—
 src/qnx/README.md:104: chars=→
 src/qnx/README.md:117: chars=—
 submission/COMPLIANCE_CHECKLIST.md:12: chars=—
-submission/COMPLIANCE_CHECKLIST.md:13: chars=§·–—→
+submission/COMPLIANCE_CHECKLIST.md:13: chars=—–§·→
 submission/COMPLIANCE_CHECKLIST.md:31: chars=—
 video/SCRIPT_V2_DRAFT.md:7: chars=—
 video/SCRIPT_V2_DRAFT.md:9: chars=—
