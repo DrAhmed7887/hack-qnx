@@ -139,7 +139,7 @@ Caption `[PLACEHOLDER]`: "openFDA MAUDE, report 10055677 — insert verified dat
 
 - [ ] `[BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]` Re-fetch openFDA report 10055677, add the exact quote to `docs/EVIDENCE.md`, render S01 as a recreated plain-text card (never an unredacted openFDA webpage screenshot), and compare all non-omitted wording word for word, keeping the hardware brand/model explicitly marked `[... — model omitted]` in the quote and `"model name omitted"` in the caption.
 - [ ] Re-run `python3 scripts/host_shift_replay.py` and `make gateway-test` on the recording day; if any number changes, update `submission/g3/` and `CLAIMS.md` first before recording.
-- [ ] Held-out table matches `eval/results/` exactly (51.5%, FN 18 to 3).
+- [ ] Held-out table matches `eval/results/` exactly (51.46% rounded to 51.5% in the 1-decimal table, FN 18 to 3).
 - [ ] No on-screen text implies clinical validation, a medical device, or any figure outside the allowed list above.
 - [ ] S05 shows only footage that exists. Label host versus QNX.
 - [ ] Target length `<= 2:55` (175 s, to be verified with `ffprobe`; Devpost hard limit `< 3:00`); YouTube visibility set to Public; 100% English; zero music; zero third-party product brands/logos.

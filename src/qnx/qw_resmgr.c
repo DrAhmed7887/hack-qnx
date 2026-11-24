@@ -305,7 +305,8 @@ int qw_resmgr_run(qw_resmgr_ctx_t *ctx) {
         .funcs = &ocb_funcs,
     };
     iofunc_attr_t ioattr;
-    iofunc_attr_init(&ioattr, S_IFCHR | 0660, NULL, &mount); /* nurse-station group, not world */
+    iofunc_attr_init(&ioattr, S_IFCHR | 0660, NULL, NULL); /* nurse-station group, not world */
+    ioattr.mount = &mount;
 
     if (resmgr_attach(dpp, &rattr, QW_DEV_PATH, _FTYPE_ANY, 0, &cfuncs, &ifuncs, &ioattr) == -1) {
         qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "resmgr_attach /dev/quietward failed");
