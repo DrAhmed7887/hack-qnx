@@ -1,5 +1,5 @@
 # Offline clean git-archive export (no .git/.venv/.pytest_cache; stdlib python3; suite contains no network-using commands)
-# timestamp_utc=2026-11-24T23:33:29Z committed_head=188642cbf0ba95af67f45e3dde04d578434bb737
+# timestamp_utc=2026-11-24T23:36:49Z committed_head=d3fcaac4d93cb14b2b87bb22ea537d49fd5da792
 === export check ===
 NO_GIT_NO_VENV_NO_CACHE_OK
 === make ===
@@ -17,7 +17,7 @@ cc -std=c11 -O2 -Wall -Wextra -Werror -Isrc -Isrc/qnx -c -o build/qw_resmgr.o sr
 cc -std=c11 -O2 -Wall -Wextra -Werror -Isrc -Isrc/qnx -c -o build/qw_gateway_test.o src/qnx/qw_gateway_test.c
 cc -std=c11 -O2 -Wall -Wextra -Werror  -o build/qw_gateway_test build/qw_ring.o build/qw_gateway_state.o build/qw_log.o build/qw_resmgr.o build/qw_gateway_test.o -lm -lpthread
 ./build/qw_gateway_test
-ring stress: 10000 frames, 4 readers, ok=60161 busy=58585 torn=0
+ring stress: 10000 frames, 4 readers, ok=37304 busy=36307 torn=0
 qw_gateway_test: 529 checks, 0 failed
 exit=0
 === make reentrant-test ===
@@ -32,10 +32,10 @@ demo pack OK
 exit=0
 === make fuzz ===
 python3 scripts/fuzz_qw.py --count 1000
-fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 4.7s; 0 failure(s)
+fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 4.5s; 0 failure(s)
 exit=0
 === python3 scripts/fuzz_qw.py --count 1000 ===
-fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 4.8s; 0 failure(s)
+fuzz: 1000/1000 passed (500 qw, 250 rules, 250 detector; seed 20261124) in 4.1s; 0 failure(s)
 exit=0
 === python3 scripts/host_shift_replay.py ===
 host_shift_replay: 6 records, CONFIRM=5, SUPPRESS_TO_REVIEW=1
