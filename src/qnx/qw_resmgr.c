@@ -263,11 +263,17 @@ static int qw_io_write(resmgr_context_t *ctp, io_write_t *msg, RESMGR_OCB_T *ocb
     pthread_mutex_unlock(g_ctx->mu);
 
     if (st == QW_ST_OK) {
+        int jrc = 0;
         if (found) {
             if (g_ctx->ack_journal_fn != NULL)
-                g_ctx->ack_journal_fn(seq, bed, alarm, nurse);
+                jrc = g_ctx->ack_journal_fn(seq, bed, alarm, nurse);
             else if (g_ctx->journal_path != NULL)
-                qw_gw_journal_append(g_ctx->journal_path, 'A', seq, bed, alarm, nurse);
+                jrc = qw_gw_journal_append(g_ctx->journal_path, 'A', seq, bed, alarm, nurse);
+        }
+        if (jrc != 0) {
+            qw_log_emit(QW_LOG_CRIT, bed, seq, qw_alarm_name((qw_alarm_id_t)alarm), "CONFIRM",
+                        "ACK journal persistence failed; returning EIO");
+            return EIO;
         }
         qw_log_emit(QW_LOG_INFO, bed, seq, qw_alarm_name((qw_alarm_id_t)alarm), "ACK", "nurse acknowledged");
         return _RESMGR_NPARTS(0); /* status = nbytes from _IO_SET_WRITE_NBYTES */

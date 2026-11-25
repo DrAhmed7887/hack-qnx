@@ -34,27 +34,34 @@ int main(void) {
     if (mkdir(QW_STATE_DIR, 0700) != 0 && errno != EEXIST)
         qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "cannot create state dir; trying anyway");
 
+    /* Assert CONFIRM_ALL output BEFORE scanning a potentially unbounded journal, and
+     * validate regular-file/ownership/link-count BEFORE truncating. */
+    int fd = open(apath, O_WRONLY | O_CREAT | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK, 0600);
+    static const char msg[] = "CONFIRM_ALL\n";
+    int ok = 0;
+    if (fd >= 0) {
+        struct stat sb;
+        ok = fstat(fd, &sb) == 0 && S_ISREG(sb.st_mode) && sb.st_uid == geteuid() &&
+             sb.st_nlink == 1 && ftruncate(fd, 0) == 0 && lseek(fd, 0, SEEK_SET) == 0 &&
+             write(fd, msg, sizeof msg - 1) == (ssize_t)(sizeof msg - 1);
+        if (ok && fsync(fd) != 0) ok = 0;
+        if (close(fd) != 0) ok = 0;
+    }
+    if (!ok) {
+        for (uint32_t b = 0; b < QW_MAX_BEDS; b++)
+            qw_log_emit(QW_LOG_CRIT, b, 0, NULL, "CONFIRM", "fail-open requested but alarm_out write FAILED");
+        return 1;
+    }
+
     static qw_gw_state_t st; /* large; keep off the stack */
     qw_gw_init(&st, QW_DECISION_DEADLINE_MS, QW_REVIEW_ESCALATE_MS);
     int unresolved = qw_gw_journal_replay(jpath, &st);
     char note[QW_LOG_REASON_LEN];
     snprintf(note, sizeof note, "fail-open: all beds CONFIRM; %d unresolved journal alarms", unresolved);
 
-    int fd = open(apath, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK, 0600);
-    static const char msg[] = "CONFIRM_ALL\n";
-    int ok = 0;
-    if (fd >= 0) {
-        struct stat sb;
-        ok = fstat(fd, &sb) == 0 && S_ISREG(sb.st_mode) && sb.st_uid == geteuid() &&
-             sb.st_nlink == 1 &&
-             write(fd, msg, sizeof msg - 1) == (ssize_t)(sizeof msg - 1);
-        if (ok && fsync(fd) != 0) ok = 0;
-        if (close(fd) != 0) ok = 0;
-    }
-
     for (uint32_t b = 0; b < QW_MAX_BEDS; b++)
-        qw_log_emit(QW_LOG_CRIT, b, 0, NULL, "CONFIRM", ok ? note : "fail-open requested but alarm_out write FAILED");
-    return ok ? 0 : 1;
+        qw_log_emit(QW_LOG_CRIT, b, 0, NULL, "CONFIRM", note);
+    return 0;
 }
 
 #else /* !__QNX__ */

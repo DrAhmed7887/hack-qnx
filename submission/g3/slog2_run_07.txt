@@ -1,34 +1,34 @@
-Nov 25 12:05:28.167              quietward.4554777                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=suppressed to nurse review
-Nov 25 12:05:30.577              quietward.4554777                audit      0  sev=CRIT bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=detector decision: CONFIRM
-Nov 25 12:05:32.981              quietward.4554777                audit      0  sev=CRIT bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=detector decision: CONFIRM
-Nov 25 12:05:35.000              quietward.4554777                audit      0  sev=INFO bed=0 seq=101 alarm=Asystole decision=ACK reason=nurse acknowledged
-Nov 25 12:05:35.419              quietward.4546583                audit*     0  sev=ERROR bed=0 seq=0 alarm= decision= reason=qw_detector exited
-Nov 25 12:05:36.736              quietward.4554777                audit      0  sev=CRIT bed=3 seq=104 alarm=Asystole decision=CONFIRM reason=no decision within deadline (fail-open)
-Nov 25 12:05:48.985              quietward.5177368                audit*     0  sev=INFO bed=0 seq=101 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
-Nov 25 12:05:48.995              quietward.5124122                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.12s, max_gap=1.02s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)
-Nov 25 12:05:49.002              quietward.5124121                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=suppressed to nurse review
-Nov 25 12:05:51.405              quietward.5210136                audit*     0  sev=INFO bed=1 seq=102 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
-Nov 25 12:05:51.413              quietward.5124122                audit      0  sev=INFO bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=pulse does not contradict Asystole (pulse not continuous in trailing 5.0s (trail_count=3, trailing_gap=3.41s, max_gap=3.41s, limit 3.20s)); confirming (sqi=0.97)
-Nov 25 12:05:51.419              quietward.5124121                audit      0  sev=CRIT bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=detector decision: CONFIRM
-Nov 25 12:05:53.806              quietward.5242904                audit*     0  sev=INFO bed=2 seq=103 alarm=Ventricular_Tachycardia decision=RAISED reason=alarm raised at end of replay
-Nov 25 12:05:53.809              quietward.5124122                audit      0  sev=INFO bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=69bpm)); confirming (sqi=0.96)
-Nov 25 12:05:53.813              quietward.5124121                audit      0  sev=CRIT bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=detector decision: CONFIRM
-Nov 25 12:05:55.785              quietward.5124121                audit      0  sev=INFO bed=0 seq=101 alarm=Asystole decision=ACK reason=nurse acknowledged
-Nov 25 12:05:56.201              quietward.5115927                audit*     0  sev=ERROR bed=0 seq=0 alarm= decision= reason=qw_detector exited
-Nov 25 12:05:56.962              quietward.5427224                audit*     0  sev=WARN bed=0 seq=0 alarm= decision= reason=name_open failed; peer not running
-Nov 25 12:05:56.963              quietward.5427224                audit      0  sev=INFO bed=3 seq=104 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
-Nov 25 12:05:57.505              quietward.5124121                audit      0  sev=CRIT bed=3 seq=104 alarm=Asystole decision=CONFIRM reason=no decision within deadline (fail-open)
-Nov 25 12:06:09.731              quietward.5746712                audit*     0  sev=INFO bed=0 seq=101 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
-Nov 25 12:06:09.742              quietward.5693466                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.12s, max_gap=1.02s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)
-Nov 25 12:06:09.749              quietward.5693465                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=suppressed to nurse review
-Nov 25 12:06:12.139              quietward.5779480                audit*     0  sev=INFO bed=1 seq=102 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
-Nov 25 12:06:12.141              quietward.5693466                audit      0  sev=INFO bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=pulse does not contradict Asystole (pulse not continuous in trailing 5.0s (trail_count=3, trailing_gap=3.41s, max_gap=3.41s, limit 3.20s)); confirming (sqi=0.97)
-Nov 25 12:06:12.145              quietward.5693465                audit      0  sev=CRIT bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=detector decision: CONFIRM
-Nov 25 12:06:14.544              quietward.5812248                audit*     0  sev=INFO bed=2 seq=103 alarm=Ventricular_Tachycardia decision=RAISED reason=alarm raised at end of replay
-Nov 25 12:06:14.546              quietward.5693466                audit      0  sev=INFO bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=69bpm)); confirming (sqi=0.96)
-Nov 25 12:06:14.551              quietward.5693465                audit      0  sev=CRIT bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=detector decision: CONFIRM
-Nov 25 12:06:16.539              quietward.5693465                audit      0  sev=INFO bed=0 seq=101 alarm=Asystole decision=ACK reason=nurse acknowledged
-Nov 25 12:06:16.957              quietward.5685271                audit*     0  sev=ERROR bed=0 seq=0 alarm= decision= reason=qw_detector exited
-Nov 25 12:06:17.717              quietward.5996568                audit*     0  sev=WARN bed=0 seq=0 alarm= decision= reason=name_open failed; peer not running
-Nov 25 12:06:17.717              quietward.5996568                audit      0  sev=INFO bed=3 seq=104 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
-Nov 25 12:06:18.224              quietward.5693465                audit      0  sev=CRIT bed=3 seq=104 alarm=Asystole decision=CONFIRM reason=no decision within deadline (fail-open)
+Nov 25 12:33:49.554              quietward.3407897                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=suppressed to nurse review
+Nov 25 12:33:51.959              quietward.3407897                audit      0  sev=CRIT bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=detector decision: CONFIRM
+Nov 25 12:33:54.365              quietward.3407897                audit      0  sev=CRIT bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=detector decision: CONFIRM
+Nov 25 12:33:56.337              quietward.3407897                audit      0  sev=INFO bed=0 seq=101 alarm=Asystole decision=ACK reason=nurse acknowledged
+Nov 25 12:33:56.766              quietward.3399703                audit*     0  sev=ERROR bed=0 seq=0 alarm= decision= reason=qw_detector exited
+Nov 25 12:33:58.071              quietward.3407897                audit      0  sev=CRIT bed=3 seq=104 alarm=Asystole decision=CONFIRM reason=no decision within deadline (fail-open)
+Nov 25 12:34:10.374              quietward.4030488                audit*     0  sev=INFO bed=0 seq=101 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
+Nov 25 12:34:10.386              quietward.3977242                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.12s, max_gap=1.02s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)
+Nov 25 12:34:10.394              quietward.3977241                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=suppressed to nurse review
+Nov 25 12:34:12.790              quietward.4063256                audit*     0  sev=INFO bed=1 seq=102 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
+Nov 25 12:34:12.793              quietward.3977242                audit      0  sev=INFO bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=pulse does not contradict Asystole (pulse not continuous in trailing 5.0s (trail_count=3, trailing_gap=3.41s, max_gap=3.41s, limit 3.20s)); confirming (sqi=0.97)
+Nov 25 12:34:12.798              quietward.3977241                audit      0  sev=CRIT bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=detector decision: CONFIRM
+Nov 25 12:34:15.202              quietward.4096024                audit*     0  sev=INFO bed=2 seq=103 alarm=Ventricular_Tachycardia decision=RAISED reason=alarm raised at end of replay
+Nov 25 12:34:15.204              quietward.3977242                audit      0  sev=INFO bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=69bpm)); confirming (sqi=0.96)
+Nov 25 12:34:15.209              quietward.3977241                audit      0  sev=CRIT bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=detector decision: CONFIRM
+Nov 25 12:34:17.211              quietward.3977241                audit      0  sev=INFO bed=0 seq=101 alarm=Asystole decision=ACK reason=nurse acknowledged
+Nov 25 12:34:17.612              quietward.3969047                audit*     0  sev=ERROR bed=0 seq=0 alarm= decision= reason=qw_detector exited
+Nov 25 12:34:18.373              quietward.4280344                audit*     0  sev=WARN bed=0 seq=0 alarm= decision= reason=name_open failed; peer not running
+Nov 25 12:34:18.373              quietward.4280344                audit      0  sev=INFO bed=3 seq=104 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
+Nov 25 12:34:18.926              quietward.3977241                audit      0  sev=CRIT bed=3 seq=104 alarm=Asystole decision=CONFIRM reason=no decision within deadline (fail-open)
+Nov 25 12:34:31.574              quietward.4599832                audit*     0  sev=INFO bed=0 seq=101 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
+Nov 25 12:34:31.584              quietward.4546586                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=SUPPRESS_TO_REVIEW: pulse present in trailing 5.0s (n=5, trailing_gap=0.12s, max_gap=1.02s < 3.20s) contradicts asystole; sqi=0.98, logged for nurse review (never discarded)
+Nov 25 12:34:31.594              quietward.4546585                audit*     0  sev=WARN bed=0 seq=101 alarm=Asystole decision=SUPPRESS_TO_REVIEW reason=suppressed to nurse review
+Nov 25 12:34:33.977              quietward.4632600                audit*     0  sev=INFO bed=1 seq=102 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
+Nov 25 12:34:33.979              quietward.4546586                audit      0  sev=INFO bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=pulse does not contradict Asystole (pulse not continuous in trailing 5.0s (trail_count=3, trailing_gap=3.41s, max_gap=3.41s, limit 3.20s)); confirming (sqi=0.97)
+Nov 25 12:34:33.984              quietward.4546585                audit      0  sev=CRIT bed=1 seq=102 alarm=Asystole decision=CONFIRM reason=detector decision: CONFIRM
+Nov 25 12:34:36.382              quietward.4665368                audit*     0  sev=INFO bed=2 seq=103 alarm=Ventricular_Tachycardia decision=RAISED reason=alarm raised at end of replay
+Nov 25 12:34:36.385              quietward.4546586                audit      0  sev=INFO bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=pulse does not contradict Ventricular_Tachycardia (ecg max hr=242bpm exceeds threshold >100bpm (pulse max hr=69bpm)); confirming (sqi=0.96)
+Nov 25 12:34:36.390              quietward.4546585                audit      0  sev=CRIT bed=2 seq=103 alarm=Ventricular_Tachycardia decision=CONFIRM reason=detector decision: CONFIRM
+Nov 25 12:34:38.351              quietward.4546585                audit      0  sev=INFO bed=0 seq=101 alarm=Asystole decision=ACK reason=nurse acknowledged
+Nov 25 12:34:38.754              quietward.4538391                audit*     0  sev=ERROR bed=0 seq=0 alarm= decision= reason=qw_detector exited
+Nov 25 12:34:39.514              quietward.4849688                audit*     0  sev=WARN bed=0 seq=0 alarm= decision= reason=name_open failed; peer not running
+Nov 25 12:34:39.514              quietward.4849688                audit      0  sev=INFO bed=3 seq=104 alarm=Asystole decision=RAISED reason=alarm raised at end of replay
+Nov 25 12:34:40.027              quietward.4546585                audit      0  sev=CRIT bed=3 seq=104 alarm=Asystole decision=CONFIRM reason=no decision within deadline (fail-open)

@@ -153,12 +153,21 @@ static void send_decision(int *coid, uint32_t bed, uint32_t aid, uint32_t seq, q
         qw_msg_decision_t msg = {QW_IPC_VERSION, bed, aid, seq, (uint32_t)d};
         qw_msg_reply_t reply;
         uint64_t timeout = DET_SEND_TIMEOUT_NS;
-        TimerTimeout(CLOCK_MONOTONIC, _NTO_TIMEOUT_SEND | _NTO_TIMEOUT_REPLY, NULL, &timeout, NULL);
+        if (TimerTimeout(CLOCK_MONOTONIC, _NTO_TIMEOUT_SEND | _NTO_TIMEOUT_REPLY, NULL, &timeout, NULL) == -1) {
+            qw_log_emit(QW_LOG_ERROR, bed, seq, alarm, NULL,
+                        "TimerTimeout setup failed; skipping send so alarm manager fails open");
+            return;
+        }
         if (MsgSend(*coid, &msg, sizeof msg, &reply, sizeof reply) == -1) {
             qw_log_emit(QW_LOG_ERROR, bed, seq, alarm, NULL,
                         "decision send failed; alarm manager deadline will latch CONFIRM");
             name_close(*coid);
             *coid = -1;
+            return;
+        }
+        if (reply.version != QW_IPC_VERSION) {
+            qw_log_emit(QW_LOG_ERROR, bed, seq, alarm, NULL,
+                        "decision reply version mismatch; alarm manager will fail open");
             return;
         }
         if (reply.status == (int32_t)QW_ST_OK) return;

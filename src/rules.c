@@ -20,6 +20,7 @@
  */
 #include "rules.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,18 +43,26 @@ static int parse_alarm_def_object(qw_lexer_t *lx, qw_alarm_def_t *def) {
         if (qw_lex_next(lx, &t) != 0) return -1;
 
         if (strcmp(key, "no_beat_s") == 0 && t.kind == QW_TOK_NUMBER) {
+            if (def->has_no_beat_s) return -1;
             def->has_no_beat_s = 1;
             def->no_beat_s = t.num;
         } else if (strcmp(key, "hr_below_bpm") == 0 && t.kind == QW_TOK_NUMBER) {
+            if (def->has_hr_below_bpm) return -1;
             def->has_hr_below_bpm = 1;
             def->hr_below_bpm = t.num;
         } else if (strcmp(key, "hr_above_bpm") == 0 && t.kind == QW_TOK_NUMBER) {
+            if (def->has_hr_above_bpm) return -1;
             def->has_hr_above_bpm = 1;
             def->hr_above_bpm = t.num;
         } else if (strcmp(key, "beats") == 0 && t.kind == QW_TOK_NUMBER) {
+            if (def->has_beats) return -1;
+            if (!isfinite(t.num) || floor(t.num) != t.num || t.num < 0.0 || t.num > 1000000.0) {
+                return -1;
+            }
             def->has_beats = 1;
             def->beats = (long)t.num;
         } else if (strcmp(key, "duration_s") == 0 && t.kind == QW_TOK_NUMBER) {
+            if (def->has_duration_s) return -1;
             def->has_duration_s = 1;
             def->duration_s = t.num;
         } else {
@@ -79,6 +88,7 @@ static int parse_alarms_object(qw_lexer_t *lx, qw_rules_t *rules) {
         qw_alarm_def_t *def = &rules->alarms[rules->n_alarms];
         memset(def, 0, sizeof(*def));
         qw_copy_str(def->name, sizeof(def->name), t.text);
+        if (qw_rules_find_alarm(rules, def->name) != NULL) return -1;
 
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
         if (parse_alarm_def_object(lx, def) != 0) return -1;
@@ -122,14 +132,17 @@ static int parse_suppression_object(qw_lexer_t *lx, qw_suppression_t *supp) {
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_COLON) return -1;
 
         if (strcmp(key, "window_s") == 0) {
+            if (supp->has_window_s) return -1;
             if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_NUMBER) return -1;
             supp->window_s = t.num;
             supp->has_window_s = 1;
         } else if (strcmp(key, "min_signal_quality") == 0) {
+            if (supp->has_min_signal_quality) return -1;
             if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_NUMBER) return -1;
             supp->min_signal_quality = t.num;
             supp->has_min_signal_quality = 1;
         } else if (strcmp(key, "never_suppress") == 0) {
+            if (supp->has_never_suppress) return -1;
             if (parse_string_array(lx, supp->never_suppress, QW_MAX_NEVER_SUPPRESS,
                                     &supp->n_never_suppress) != 0) {
                 return -1;
@@ -155,6 +168,8 @@ static int parse_root(qw_lexer_t *lx, qw_rules_t *rules) {
         if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_EOF) return -1;
         return 0;
     }
+    int has_alarms = 0;
+    int has_supp = 0;
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[QW_NAME_LEN];
@@ -170,9 +185,13 @@ static int parse_root(qw_lexer_t *lx, qw_rules_t *rules) {
                 return -1;
             }
         } else if (strcmp(key, "alarms") == 0) {
+            if (has_alarms) return -1;
             if (parse_alarms_object(lx, rules) != 0) return -1;
+            has_alarms = 1;
         } else if (strcmp(key, "suppression") == 0) {
+            if (has_supp) return -1;
             if (parse_suppression_object(lx, &rules->suppression) != 0) return -1;
+            has_supp = 1;
         } else {
             if (qw_lex_next(lx, &t) != 0) return -1;
             if (qw_skip_value_depth(lx, &t, 0) != 0) return -1;
@@ -212,7 +231,7 @@ static int validate_rules(const qw_rules_t *rules, const char *path) {
     for (size_t i = 0; i < rules->n_alarms; i++) {
         const qw_alarm_def_t *a = &rules->alarms[i];
         if (a->has_no_beat_s) {
-            if (!(a->no_beat_s > 0.0)) {
+            if (!isfinite(a->no_beat_s) || !(a->no_beat_s > 0.0)) {
                 fprintf(stderr, "rules error: %s: alarm '%s' no_beat_s=%g must be > 0\n",
                         path, a->name, a->no_beat_s);
                 return -1;
@@ -228,7 +247,7 @@ static int validate_rules(const qw_rules_t *rules, const char *path) {
             }
         }
         if (a->has_hr_below_bpm) {
-            if (!(a->hr_below_bpm > 0.0)) {
+            if (!isfinite(a->hr_below_bpm) || !(a->hr_below_bpm > 0.0)) {
                 fprintf(stderr, "rules error: %s: alarm '%s' hr_below_bpm=%g must be > 0\n",
                         path, a->name, a->hr_below_bpm);
                 return -1;
@@ -237,13 +256,21 @@ static int validate_rules(const qw_rules_t *rules, const char *path) {
             if (w > min_required_window_s) min_required_window_s = w;
         }
         if (a->has_hr_above_bpm) {
-            if (!(a->hr_above_bpm > 0.0)) {
+            if (!isfinite(a->hr_above_bpm) || !(a->hr_above_bpm > 0.0)) {
                 fprintf(stderr, "rules error: %s: alarm '%s' hr_above_bpm=%g must be > 0\n",
                         path, a->name, a->hr_above_bpm);
                 return -1;
             }
             double w = (double)(a->beats - 1) * 60.0 / a->hr_above_bpm;
             if (w > min_required_window_s) min_required_window_s = w;
+        }
+        if (a->has_duration_s) {
+            if (!isfinite(a->duration_s) || !(a->duration_s > 0.0)) {
+                fprintf(stderr, "rules error: %s: alarm '%s' duration_s=%g must be > 0\n",
+                        path, a->name, a->duration_s);
+                return -1;
+            }
+            if (a->duration_s > min_required_window_s) min_required_window_s = a->duration_s;
         }
     }
 
@@ -252,7 +279,7 @@ static int validate_rules(const qw_rules_t *rules, const char *path) {
         fprintf(stderr, "rules error: %s: suppression.window_s is missing\n", path);
         return -1;
     }
-    if (s->window_s <= 0.0) {
+    if (!isfinite(s->window_s) || s->window_s <= 0.0) {
         fprintf(stderr, "rules error: %s: suppression.window_s=%g must be > 0\n", path, s->window_s);
         return -1;
     }
@@ -267,7 +294,8 @@ static int validate_rules(const qw_rules_t *rules, const char *path) {
         fprintf(stderr, "rules error: %s: suppression.min_signal_quality is missing\n", path);
         return -1;
     }
-    if (s->min_signal_quality <= 0.0 || s->min_signal_quality > 1.0) {
+    if (!isfinite(s->min_signal_quality) || s->min_signal_quality <= 0.0 ||
+        s->min_signal_quality > 1.0) {
         fprintf(stderr,
                 "rules error: %s: suppression.min_signal_quality=%g must be in (0, 1]\n",
                 path, s->min_signal_quality);

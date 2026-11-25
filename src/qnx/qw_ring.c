@@ -6,6 +6,9 @@
 
 #define HDR_BYTES ((sizeof(qw_ring_hdr_t) + 15u) & ~(size_t)15u)
 
+_Static_assert(sizeof(_Atomic uint32_t) == sizeof(uint32_t), "atomic slot size mismatch");
+_Static_assert(sizeof(float) == sizeof(uint32_t), "float must be 32-bit");
+
 static _Atomic uint32_t *slots(void *mem) {
     return (_Atomic uint32_t *)((unsigned char *)mem + HDR_BYTES);
 }
@@ -144,6 +147,7 @@ qw_status_t qw_ring_read_tail(const void *mem, size_t mem_bytes, uint32_t tail_s
                               uint32_t *out_n_samples, char out_names[][QW_CHANNEL_NAME_LEN],
                               uint32_t max_retries) {
     if (mem == NULL) return QW_ST_BAD_ARGS;
+    if (((uintptr_t)mem & 7u) != 0) return QW_ST_BAD_ARGS;
     if (mem_bytes < sizeof(qw_ring_hdr_t)) return QW_ST_DETACHED; /* before touching hdr */
     if (out_channel_major == NULL || tail_samples == 0) return QW_ST_BAD_ARGS;
     const qw_ring_hdr_t *h = (const qw_ring_hdr_t *)mem;
@@ -152,7 +156,7 @@ qw_status_t qw_ring_read_tail(const void *mem, size_t mem_bytes, uint32_t tail_s
     uint32_t nch, len;
     if (check_header(h, mem_bytes, &nch, &len) != QW_ST_OK) return QW_ST_DETACHED;
 
-    for (uint32_t attempt = 0; attempt <= max_retries; attempt++) {
+    for (uint32_t attempt = 0;; attempt++) {
         /* Dead or corrupt ring wins over "busy": a writer that died mid-update
          * leaves seq_lock odd forever. */
         if (atomic_load_explicit(&h->writer_alive, memory_order_acquire) != 1u) {
@@ -160,6 +164,7 @@ qw_status_t qw_ring_read_tail(const void *mem, size_t mem_bytes, uint32_t tail_s
         }
         uint32_t s1 = atomic_load_explicit(&h->seq_lock, memory_order_acquire);
         if (s1 & 1u) {
+            if (attempt >= max_retries) break;
             continue;
         }
         uint32_t c2, l2;
@@ -192,6 +197,7 @@ qw_status_t qw_ring_read_tail(const void *mem, size_t mem_bytes, uint32_t tail_s
         atomic_thread_fence(memory_order_acquire);
         uint32_t s2 = atomic_load_explicit(&h->seq_lock, memory_order_acquire);
         if (s2 != s1) {
+            if (attempt >= max_retries) break;
             continue;
         }
         if (atomic_load_explicit(&h->writer_alive, memory_order_acquire) != 1u ||

@@ -37,8 +37,8 @@ typedef struct {
     const char *journal_path;  /* nurse ACKs are appended here as 'A' */
     uint64_t (*now_ms_fn)(void); /* monotonic milliseconds; NULL = CLOCK_MONOTONIC */
     /* Optional causal-order ACK hook: flushes prior log entries (Q/C) to disk
-     * before appending 'A' without holding mu across fsync. */
-    void (*ack_journal_fn)(uint32_t seq, uint32_t bed, uint32_t alarm, const char *nurse);
+     * before appending 'A' without holding mu across fsync. Returns 0 on success. */
+    int (*ack_journal_fn)(uint32_t seq, uint32_t bed, uint32_t alarm, const char *nurse);
 } qw_resmgr_ctx_t;
 
 #ifdef __QNX__

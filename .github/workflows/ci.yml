@@ -15,3 +15,21 @@ jobs:
           make demo-verify
           python3 scripts/fuzz_qw.py --count 1000
       - run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo -v --redact
+  pytest-and-sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install host test dependencies
+        run: python -m pip install --no-cache-dir pytest numpy
+      - name: Run full host test suite (pytest + C harnesses)
+        run: make test PYTHON=python
+      - name: Run ASan+UBSan runtime checks
+        run: |
+          mkdir -p build/asan
+          cc -std=c11 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -Isrc -Isrc/qnx src/qw_core.c src/rules.c src/qw_detector_config.c src/qw_reentrant_test.c -lm -lpthread -o build/asan/qw_reentrant_test
+          cc -std=c11 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -Isrc -Isrc/qnx src/qnx/qw_ring.c src/qnx/qw_gateway_state.c src/qnx/qw_log.c src/qnx/qw_resmgr.c src/qnx/qw_gateway_test.c -lm -lpthread -o build/asan/qw_gateway_test
+          ./build/asan/qw_reentrant_test
+          ./build/asan/qw_gateway_test

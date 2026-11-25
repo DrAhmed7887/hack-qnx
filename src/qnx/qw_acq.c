@@ -47,14 +47,19 @@ static int parse_u32(const char *s, uint32_t max, uint32_t *out) {
     return 0;
 }
 
-static void notify(const char *name, int code, int value) {
+static int notify(const char *name, int code, int value) {
     int coid = name_open(name, 0);
     if (coid < 0) {
         qw_log_emit(QW_LOG_WARN, 0, 0, NULL, NULL, "name_open failed; peer not running");
-        return;
+        return -1;
     }
-    MsgSendPulse(coid, -1, code, value); /* -1 = inherit sender priority; pulses never block */
+    int rc = MsgSendPulse(coid, -1, code, value); /* -1 = inherit sender priority; pulses never block */
     name_close(coid);
+    if (rc != 0) {
+        qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "MsgSendPulse failed");
+        return -1;
+    }
+    return 0;
 }
 
 int main(int argc, char **argv) {
@@ -175,11 +180,15 @@ int main(int argc, char **argv) {
      * is registered before a fast decision arrives. */
     const char *jpath = getenv("QW_JOURNAL_PATH");
     if (jpath == NULL || jpath[0] == '\0') jpath = QW_JOURNAL_PATH;
-    if (qw_gw_journal_append(jpath, 'R', seq, bed, (uint32_t)aid, "acq raise") != 0)
-        qw_log_emit(QW_LOG_WARN, bed, seq, argv[2], NULL, "journal append failed");
+    int jrc = qw_gw_journal_append(jpath, 'R', seq, bed, (uint32_t)aid, "acq raise");
     int pv = QW_PULSE_VAL(bed, aid, seq);
-    notify(QW_NAME_ALARM_MGR, QW_PULSE_ALARM_RAISED, pv);
-    notify(QW_NAME_DETECTOR, QW_PULSE_ALARM_RAISED, pv);
+    int mrc = notify(QW_NAME_ALARM_MGR, QW_PULSE_ALARM_RAISED, pv);
+    if (jrc != 0 || mrc != 0) {
+        qw_log_emit(QW_LOG_CRIT, bed, seq, argv[2], "CONFIRM",
+                    "alarm admission or durable journal failed; skipping detector suppression path");
+        goto done;
+    }
+    (void)notify(QW_NAME_DETECTOR, QW_PULSE_ALARM_RAISED, pv);
     qw_log_emit(QW_LOG_INFO, bed, seq, argv[2], "RAISED", "alarm raised at end of replay");
 
     struct timespec hold = {ACQ_HOLD_MS / 1000u, (long)(ACQ_HOLD_MS % 1000u) * 1000000L};

@@ -180,3 +180,80 @@ def test_rules_trailing_tokens_fails_closed(tmp_path):
 
     assert proc.returncode != 0
     assert "load_failed" in proc.stderr
+
+
+@pytest.mark.parametrize("bad_beats", [1e100, 5.5, -1, 1])
+def test_invalid_beats_fails_closed(tmp_path, bad_beats):
+    """Non-finite/out-of-range/fractional beats or beats < 2 must fail closed without float->long UB."""
+    import json
+
+    rules_path = tmp_path / "rules.json"
+    rules = {
+        "status": "pending_signoff",
+        "alarms": {"Bradycardia": {"hr_below_bpm": 40, "beats": bad_beats}},
+        "suppression": {
+            "window_s": 16,
+            "min_signal_quality": 0.9,
+            "never_suppress": ["Ventricular_Flutter_Fib"],
+        },
+    }
+    with open(rules_path, "w") as f:
+        json.dump(rules, f)
+
+    proc = dump_rules_raw(rules_path)
+
+    assert proc.returncode != 0
+    assert "load_failed" in proc.stderr
+
+
+@pytest.mark.parametrize("bad_dur", [0, -2.0])
+def test_non_positive_duration_s_fails_closed(tmp_path, bad_dur):
+    """duration_s <= 0 must fail closed instead of bypassing validation."""
+    import json
+
+    rules_path = tmp_path / "rules.json"
+    rules = {
+        "status": "pending_signoff",
+        "alarms": {"Ventricular_Flutter_Fib": {"duration_s": bad_dur}},
+        "suppression": {
+            "window_s": 16,
+            "min_signal_quality": 0.9,
+            "never_suppress": ["Ventricular_Flutter_Fib"],
+        },
+    }
+    with open(rules_path, "w") as f:
+        json.dump(rules, f)
+
+    proc = dump_rules_raw(rules_path)
+
+    assert proc.returncode != 0
+    assert "load_failed" in proc.stderr
+
+
+def test_duplicate_alarm_name_fails_closed(tmp_path):
+    """Duplicate alarm names in 'alarms' must fail closed rather than aliasing silently."""
+    rules_path = tmp_path / "rules.json"
+    rules_path.write_text(
+        '{"status":"pending_signoff","alarms":{"Asystole":{"no_beat_s":4},'
+        '"Asystole":{"no_beat_s":8}},'
+        '"suppression":{"window_s":16,"min_signal_quality":0.9,"never_suppress":[]}}'
+    )
+
+    proc = dump_rules_raw(rules_path)
+
+    assert proc.returncode != 0
+    assert "load_failed" in proc.stderr
+
+
+def test_duplicate_suppression_key_fails_closed(tmp_path):
+    """Duplicate suppression keys must fail closed rather than silently overwriting."""
+    rules_path = tmp_path / "rules.json"
+    rules_path.write_text(
+        '{"status":"pending_signoff","alarms":{"Asystole":{"no_beat_s":4}},'
+        '"suppression":{"window_s":16,"window_s":20,"min_signal_quality":0.9,"never_suppress":[]}}'
+    )
+
+    proc = dump_rules_raw(rules_path)
+
+    assert proc.returncode != 0
+    assert "load_failed" in proc.stderr

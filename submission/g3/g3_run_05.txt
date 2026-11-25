@@ -1,4 +1,4 @@
-=== run 5 of 10: Wed Nov 25 12:05:23 UTC 2026 ===
+=== run 5 of 10: Wed Nov 25 12:33:45 UTC 2026 ===
 PASS  pidin: qw_supervisor running
 PASS  pidin: qw_alarm_mgr running
 PASS  pidin: qw_detector running
@@ -21,7 +21,7 @@ PASS  qw_bedctl 9 (bad bed) fails
 PASS  fail-open: C 104 journalled with no detector
 PASS  fail-open: bedctl 3 shows failopen_active
 PASS  supervisor restarted qw_detector
-PASS  restarted detector has a new pid (was 4554778)
+PASS  restarted detector has a new pid (was 3407898)
 PASS  slog2info captured quietward audit lines
 PASS  slog2info shows the fail-open latch (CRIT)
 === run 5 done ===

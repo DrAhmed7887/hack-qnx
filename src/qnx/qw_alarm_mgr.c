@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <signal.h>
+#include <stdatomic.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +46,7 @@ static pthread_cond_t g_journal_cv = PTHREAD_COND_INITIALIZER;
 static uint64_t g_jnotify_seq = 0;
 static int g_jnotify_stop = 0;
 static int g_journal_degraded = 0; /* sticky latch under g_journal_mu: withhold A after any write failure */
+static _Atomic int g_suppress_disabled = 0; /* fail-open latch if resmgr stops or journal degrades */
 static const char *g_journal = QW_JOURNAL_PATH;
 static uint64_t g_seen; /* log entries already journalled and logged; guarded by g_journal_mu -> g_mu */
 static volatile sig_atomic_t g_stop;
@@ -60,16 +62,13 @@ static uint64_t now_ms(void) {
     return (uint64_t)ts.tv_sec * 1000u + (uint64_t)ts.tv_nsec / 1000000u;
 }
 
-static void *resmgr_thread(void *arg) {
-    qw_resmgr_run((qw_resmgr_ctx_t *)arg);
-    /* Fail-open: the alarm path keeps running without /dev/quietward. */
-    qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "/dev/quietward resource manager stopped");
-    return NULL;
-}
-
 /* Copy unseen log-ring entries under g_mu; flush disk fsync + slog2 outside g_mu. */
-static size_t collect_log_batch(qw_log_entry_t *out, size_t cap) {
-    if (g_st.log_total - g_seen > QW_LOG_RING) g_seen = g_st.log_total - QW_LOG_RING;
+static size_t collect_log_batch(qw_log_entry_t *out, size_t cap, size_t *dropped_out) {
+    *dropped_out = 0;
+    if (g_st.log_total - g_seen > QW_LOG_RING) {
+        *dropped_out = (size_t)((g_st.log_total - g_seen) - QW_LOG_RING);
+        g_seen = g_st.log_total - QW_LOG_RING;
+    }
     size_t n = 0;
     for (; g_seen < g_st.log_total && n < cap; g_seen++) {
         out[n++] = g_st.log[g_seen % QW_LOG_RING];
@@ -85,12 +84,14 @@ static int flush_log_batch(const qw_log_entry_t *batch, size_t n) {
         if (e->state == QW_LOG_LATCHED) {
             if (qw_gw_journal_append(g_journal, 'C', e->seq, e->bed_id, e->alarm_id, "latched") != 0) {
                 g_journal_degraded = 1;
+                atomic_store(&g_suppress_disabled, 1);
                 rc = -1;
             }
             qw_log_emit(QW_LOG_CRIT, e->bed_id, e->seq, alarm, "CONFIRM", e->reason);
         } else if (e->state == QW_LOG_REVIEW) {
             if (qw_gw_journal_append(g_journal, 'Q', e->seq, e->bed_id, e->alarm_id, "review") != 0) {
                 g_journal_degraded = 1;
+                atomic_store(&g_suppress_disabled, 1);
                 rc = -1;
             }
             qw_log_emit(QW_LOG_WARN, e->bed_id, e->seq, alarm, "SUPPRESS_TO_REVIEW", e->reason);
@@ -103,10 +104,18 @@ static int flush_log_batch(const qw_log_entry_t *batch, size_t n) {
 /* Caller must hold g_journal_mu and must NOT hold g_mu. */
 static int flush_pending_journal_locked(void) {
     qw_log_entry_t batch[QW_LOG_RING];
+    size_t dropped = 0;
     pthread_mutex_lock(&g_mu);
-    size_t n = collect_log_batch(batch, QW_LOG_RING);
+    size_t n = collect_log_batch(batch, QW_LOG_RING, &dropped);
     pthread_mutex_unlock(&g_mu);
-    if (flush_log_batch(batch, n) != 0) g_journal_degraded = 1;
+    if (dropped > 0) {
+        qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL,
+                    "audit log ring wrapped; unseen entries dropped before flush");
+    }
+    if (flush_log_batch(batch, n) != 0) {
+        g_journal_degraded = 1;
+        atomic_store(&g_suppress_disabled, 1);
+    }
     return g_journal_degraded ? -1 : 0;
 }
 
@@ -121,6 +130,22 @@ static void wake_journal_thread(void) {
     g_jnotify_seq++;
     pthread_cond_signal(&g_journal_cv);
     pthread_mutex_unlock(&g_jnotify_mu);
+}
+
+static void disable_suppression_failopen(const char *reason) {
+    atomic_store(&g_suppress_disabled, 1);
+    pthread_mutex_lock(&g_mu);
+    qw_gw_check_escalations(&g_st, now_ms() + (uint64_t)g_st.escalate_ms + 1u);
+    pthread_mutex_unlock(&g_mu);
+    wake_journal_thread();
+    qw_log_emit(QW_LOG_CRIT, 0, 0, NULL, "CONFIRM", reason);
+}
+
+static void *resmgr_thread(void *arg) {
+    qw_resmgr_run((qw_resmgr_ctx_t *)arg);
+    /* Fail-open: disable suppression and confirm all queued reviews if /dev/quietward stops. */
+    disable_suppression_failopen("/dev/quietward stopped; suppression disabled, queued reviews confirmed");
+    return NULL;
 }
 
 static void *journal_thread(void *arg) {
@@ -141,28 +166,33 @@ static void *journal_thread(void *arg) {
     return NULL;
 }
 
-static void journal_ack_ordered(uint32_t seq, uint32_t bed, uint32_t alarm, const char *nurse) {
+static int journal_ack_ordered(uint32_t seq, uint32_t bed, uint32_t alarm, const char *nurse) {
+    int rc = 0;
     pthread_mutex_lock(&g_journal_mu);
     if (flush_pending_journal_locked() != 0) {
+        rc = -1;
         qw_log_emit(QW_LOG_CRIT, bed, seq, qw_alarm_name((qw_alarm_id_t)alarm), "CONFIRM",
                     "prior journal flush failed; withholding A so replay fails open");
     } else if (qw_gw_journal_append(g_journal, 'A', seq, bed, alarm, nurse) != 0) {
         g_journal_degraded = 1;
+        atomic_store(&g_suppress_disabled, 1);
+        rc = -1;
         qw_log_emit(QW_LOG_CRIT, bed, seq, qw_alarm_name((qw_alarm_id_t)alarm), "CONFIRM",
                     "journal A append failed; marking journal degraded");
     }
     pthread_mutex_unlock(&g_journal_mu);
+    return rc;
 }
 
 static int write_alarm_out_failopen(void) {
     const char *apath = getenv("QW_ALARM_OUT_PATH");
     if (apath == NULL || apath[0] == '\0') apath = QW_ALARM_OUT_PATH;
-    int fd = open(apath, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK, 0600);
+    int fd = open(apath, O_WRONLY | O_CREAT | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK, 0600);
     if (fd < 0) return -1;
     static const char msg[] = "CONFIRM_ALL\n";
     struct stat sb;
     int ok = fstat(fd, &sb) == 0 && S_ISREG(sb.st_mode) && sb.st_uid == geteuid() &&
-             sb.st_nlink == 1 &&
+             sb.st_nlink == 1 && ftruncate(fd, 0) == 0 && lseek(fd, 0, SEEK_SET) == 0 &&
              write(fd, msg, sizeof msg - 1) == (ssize_t)(sizeof msg - 1);
     if (ok && fsync(fd) != 0) ok = 0;
     if (close(fd) != 0) ok = 0;
@@ -222,10 +252,11 @@ int main(int argc, char **argv) {
     ctx.now_ms_fn = now_ms;
     ctx.ack_journal_fn = journal_ack_ordered;
     pthread_t rt, jt;
-    if (pthread_create(&rt, NULL, resmgr_thread, &ctx) != 0)
-        qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "cannot start resource manager thread");
-    else
+    if (pthread_create(&rt, NULL, resmgr_thread, &ctx) != 0) {
+        disable_suppression_failopen("cannot start /dev/quietward thread; suppression disabled");
+    } else {
         pthread_detach(rt);
+    }
     int have_jt = pthread_create(&jt, NULL, journal_thread, NULL) == 0;
     if (!have_jt)
         qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "cannot start journal thread; synchronous fallback");
@@ -257,6 +288,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    int exit_rc = 0;
     while (!g_stop) {
         union {
             struct _pulse pulse;
@@ -269,6 +301,10 @@ int main(int argc, char **argv) {
         rcvid_t rcvid = MsgReceive(att->chid, &m, sizeof m, &info);
         if (rcvid == -1) {
             if (errno == EINTR) continue;
+            exit_rc = 1;
+            qw_log_emit(QW_LOG_CRIT, 0, 0, NULL, "CONFIRM", "MsgReceive failed; failing open");
+            if (write_alarm_out_failopen() != 0)
+                qw_log_emit(QW_LOG_CRIT, 0, 0, NULL, "CONFIRM", "alarm_out fail-open write FAILED");
             break;
         }
 
@@ -276,6 +312,13 @@ int main(int argc, char **argv) {
             if (info.msglen >= 0 && (size_t)info.msglen == sizeof(qw_msg_decision_t)) {
                 qw_msg_reply_t reply = {QW_IPC_VERSION, (int32_t)QW_ST_BAD_VERSION, 0};
                 if (m.decision.version == QW_IPC_VERSION) {
+                    if (m.decision.decision == (uint32_t)QW_DECISION_SUPPRESS_TO_REVIEW &&
+                        atomic_load(&g_suppress_disabled) != 0) {
+                        m.decision.decision = (uint32_t)QW_DECISION_CONFIRM;
+                        qw_log_emit(QW_LOG_CRIT, m.decision.bed_id, m.decision.seq,
+                                    qw_alarm_name((qw_alarm_id_t)m.decision.alarm_id), "CONFIRM",
+                                    "suppression disabled (resmgr/journal degraded); forcing CONFIRM");
+                    }
                     pthread_mutex_lock(&g_mu);
                     qw_gw_apply_decision(&g_st, &m.decision, now_ms(), &reply);
                     pthread_mutex_unlock(&g_mu);
@@ -349,7 +392,7 @@ int main(int argc, char **argv) {
     if (have_timer) timer_delete(tid);
     if (tick_coid >= 0) ConnectDetach(tick_coid);
     name_detach(att, 0);
-    return 0;
+    return exit_rc;
 }
 
 #else /* !__QNX__ */
