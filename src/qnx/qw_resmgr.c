@@ -125,8 +125,9 @@ int qw_gw_format_log_jsonl(const qw_gw_state_t *st, char *buf, size_t cap, size_
 struct qw_ocb;
 typedef struct qw_ocb qw_ocb_t;
 #define IOFUNC_OCB_T qw_ocb_t
-#include <sys/dispatch.h>
+#define RESMGR_OCB_T qw_ocb_t
 #include <sys/iofunc.h>
+#include <sys/dispatch.h>
 #include <sys/resmgr.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -168,7 +169,7 @@ static uint64_t ctx_now_ms(const qw_resmgr_ctx_t *c) {
 /* cat /dev/quietward: snapshot ONCE on first read at offset 0 so concurrent
  * ticks/decisions never shift byte offsets mid-read. */
 static int qw_io_read(resmgr_context_t *ctp, io_read_t *msg, RESMGR_OCB_T *ocb) {
-    int status = iofunc_read_verify(ctp, msg, ocb, NULL);
+    int status = iofunc_read_verify(ctp, msg, &ocb->base, NULL);
     if (status != EOK) return status;
     if ((msg->i.xtype & _IO_XTYPE_MASK) != _IO_XTYPE_NONE) return ENOSYS;
     if (ocb->base.offset < 0) return EINVAL;
@@ -208,7 +209,7 @@ static int qw_io_read(resmgr_context_t *ctp, io_read_t *msg, RESMGR_OCB_T *ocb) 
 
 /* echo '{"ack":SEQ,"nurse":"NAME"}' > /dev/quietward */
 static int qw_io_write(resmgr_context_t *ctp, io_write_t *msg, RESMGR_OCB_T *ocb) {
-    int status = iofunc_write_verify(ctp, msg, ocb, NULL);
+    int status = iofunc_write_verify(ctp, msg, &ocb->base, NULL);
     if (status != EOK) return status;
     if ((msg->i.xtype & _IO_XTYPE_MASK) != _IO_XTYPE_NONE) return ENOSYS;
 
@@ -254,7 +255,7 @@ static int qw_io_write(resmgr_context_t *ctp, io_write_t *msg, RESMGR_OCB_T *ocb
 }
 
 static int qw_io_devctl(resmgr_context_t *ctp, io_devctl_t *msg, RESMGR_OCB_T *ocb) {
-    int status = iofunc_devctl_default(ctp, msg, ocb);
+    int status = iofunc_devctl_default(ctp, msg, &ocb->base);
     if (status != _RESMGR_DEFAULT) return status;
 
     if (msg->i.dcmd != QW_DCMD_BED_STATE) return ENOSYS;
