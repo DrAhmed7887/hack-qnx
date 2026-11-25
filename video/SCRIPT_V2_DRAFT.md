@@ -7,11 +7,11 @@
 - **Audio:** original voiceover only — zero copyrighted music (no BGM/soundtrack)
 - **Language:** 100% English (on-screen text, captions, overlays, and narration)
 - **Third-party product brands/logos:** none (monitor model omitted in S01; plain-text citations only for openFDA/PhysioNet — no openFDA, PhysioNet, or vendor logos on screen)
-- **S01 evidence status:** `[BLOCKED ON MAUDE 10055677 RE-FETCH — see CLAIMS.md row 18]` (do not display quote or date on screen until the re-fetched exact text is recorded in `docs/EVIDENCE.md`)
+- **S01 evidence status:** `VERIFIED-REPO` (`docs/EVIDENCE.md`, `CLAIMS.md` row 18 — `mdr_report_key=10055677`, `date_received=20200514`, `mdr_text_key=191262317`, monitor model omitted)
 
-Variant B framing: a review and escalation gateway that never silently drops an alarm, with honest held-out results.
+Variant B framing: a review and escalation gateway that never silently drops an alarm, with honest held-out results and verified QNX 8.0 target execution.
 
-**Allowed facts only:** openFDA report 10055677 (BLOCKED until re-fetched into `docs/EVIDENCE.md` — see `CLAIMS.md` row 18), the real `data/demo/` records, the measured tables in `eval/results/`, the host test results, the PhysioNet 2015 winner scores with their caveat, and the ODC-BY 1.0 attribution. **No clinical figures from unsigned claims.** The rules file is `pending_signoff`, so no on-screen line may imply clinical validation.
+**Allowed facts only:** openFDA report 10055677 (`docs/EVIDENCE.md`, `CLAIMS.md` row 18), the real `data/demo/` records, the measured tables in `eval/results/`, the host test results, the QNX 8.0 target logs in `submission/g3/{p1_qnx8_guest_20261125.log,qnx8_live_proof_20261125.log,g3_run_01..10.txt,slog2_run_01..10.txt}`, the PhysioNet 2015 winner scores with their caveat, and the ODC-BY 1.0 attribution. **No clinical figures from unsigned claims.** The rules file is `pending_signoff`, so no on-screen line may imply clinical validation.
 
 **Always on screen (lower third, every scene):** "Research demo, not a medical device."
 
@@ -44,11 +44,11 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 ## S02 · 0:10-0:30 · The one rule
 
-**Screen:** `docs/workflow.svg`, with the amber fail-open path highlighted last.
+**Screen:** Light architectural canvas animating the QNX 8.0 microkernel topology (`docs/workflow.svg`): `qw_acq` -> `/dev/shmem/qw_ring_bed*` -> `qw_detector` -> `MsgSend`/`MsgReply` -> `qw_alarm_mgr` -> `/dev/quietward` + `slog2`, with the amber fail-open path highlighted last.
 
-**VO:** "Quiet Ward is a second opinion on bedside alarms, designed for QNX 8.0 with the QNX build pending. One rule: it never silently drops an alarm. The bedside alarm stays. If a second channel contradicts it, the alarm goes to a review queue for a nurse. If the detector stalls, crashes, overflows, loses shared memory or restarts, the answer is always confirm."
+**VO:** "Quiet Ward is a second opinion on bedside alarms, built and verified on QNX Neutrino 8.0. One rule: it never silently drops an alarm. The bedside alarm stays. If a second channel contradicts it, the alarm queues on `/dev/quietward` for a nurse. If the detector stalls, crashes, overflows, or loses shared memory, the answer is always confirm."
 
-**Overlay:** "Raw alarm preserved. Every fault fails open to CONFIRM."
+**Overlay:** "Raw alarm preserved. Built on QNX 8.0. Every fault fails open to CONFIRM."
 
 ## S03 · 0:30-0:50 · A false alarm goes to review, not to the bin
 
@@ -68,15 +68,13 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 **Overlay:** "Six-record replay: 5 CONFIRM, 1 SUPPRESS_TO_REVIEW, 0 true alarms in the queue. A demonstration, not an accuracy claim."
 
-## S05 · 1:15-1:40 · Fail-open under fault
+## S05 · 1:15-1:40 · Fail-open under fault on QNX 8.0
 
-**Screen (use what exists on recording day, and label it):**
-- If the QNX 8.0 QEMU boot is working: kill the detector process, show the alarm manager latch CONFIRM at the deadline, then `slog2info` lines.
-- Otherwise (current state): the host test output, labelled "host-portable C11, not QNX": `make gateway-test` -> "529 checks, 0 failed", with the deadline-expiry and queue-overflow cases highlighted.
+**Screen:** Real `QNX noname 8.0.0 x86_64` QEMU captures (`submission/g3/qnx8_live_proof_20261125.log`, `submission/g3/slog2_run_01.txt`, `submission/g3/g3_run_01..10.txt`): `pidin`, `/dev/quietward` JSONL + nurse ACK, `slay -s KILL qw_detector`, 500 ms watchdog latch `CONFIRM` (`failopen_active: 1`, `sev=CRIT`), supervisor respawn with new PID, standalone `qw_failopen` (`CONFIRM_ALL`), and 10/10 soak score (`230/230` checks, `0` failed).
 
-**VO (host version):** "The gateway logic is tested on its own. No decision within the deadline: latched confirm. The seventeenth pending alarm: confirm and a busy status. Detached shared memory: reported as detached, never as fresh data. The QNX processes themselves are the next step; this part runs on the host today."
+**VO:** "On booted QNX 8.0, kill the detector with slay minus s KILL. The 500 millisecond watchdog expires, and the alarm manager latches CONFIRM (`failopen_active: 1`) and logs critical to slog2, while the supervisor respawns the detector cleanly. Across ten reset-state soak runs, all 230 checks pass."
 
-**Overlay:** "Host test: 529 checks, 0 failed. QNX runtime pending SDK bring-up." Do not show a QEMU clip unless it was actually recorded.
+**Overlay:** "QNX 8.0.0 x86_64 QEMU · 10/10 Soak Passed (230/230 Checks) · Fail-Open Latched."
 
 ## S06 · 1:40-2:10 · Honest results
 
@@ -94,32 +92,34 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 ## S07 · 2:10-2:40 · Hostile input and reproducibility
 
-**Screen:** terminal: `make fuzz` (runs `scripts/fuzz_qw.py --count 1000` via `.venv/bin/python` when present, else `python3`) finishing with "1000/1000 passed"; then `make && make gateway-test && make reentrant-test && make demo-verify` running offline; then the first lines of `submission/g3/stress-checklist.md` showing HOST PASS and QEMU PENDING columns.
+**Screen:** Offline verification cards: `qcc -Vgcc_ntox86_64 -Wall -Wextra -Werror` (`0` warnings, 8 ELF binaries), `make fuzz` (`1000/1000 passed`), `make gateway-test` (`529 checks, 0 failed`, `torn=0`), `make reentrant-test` (`320` calls), ASan+UBSan clean, and `submission/g3/stress-checklist.md` (`HOST PASS` and `QEMU PASS`, plus honest untested edge rows).
 
-**VO:** "Bad input fails closed. A thousand seeded mutations of record files and configs: no crashes, every rejection explained. The ring buffer and the alarm queue are tested under load. The matrix says exactly what passed on the host and what still needs the QNX target. The host build and checks run from a clean git archive export without .git or .venv, with no network-using commands."
+**VO:** "Bad input fails closed. All eight QNX binaries compile cleanly with warnings treated as errors. One thousand seeded mutations crash zero parsers. Five hundred twenty-nine host gateway checks, ASan and UBSan, and our offline archive build all pass cleanly."
 
-**Overlay:** "Fuzz: 1000/1000. Stress matrix: host passes and QEMU pending, both shown."
+**Overlay:** "qcc: 0 warnings · Fuzz: 1000/1000 · Stress Matrix: Host & QEMU Verified."
+
+---
 
 ## S08 · 2:40-2:55 · Attribution card
 
-**Screen:** static card, high contrast, readable for 15 s.
+**Screen:** Dark closing card (zero logos/music), high contrast, readable for 15 s.
 
 > **Data:** PhysioNet/Computing in Cardiology Challenge 2015 dataset (real de-identified ICU records, ODC-BY 1.0, DOI 10.13026/c9fg-a467).
 > **Paper:** Clifford GD, Silva I, Moody B, Li Q, Kella D, Shahin A, Kooistra T, Perry D, Mark RG (2015). Computing in Cardiology 42:273-276.
 > **Research demo, not a medical device.** Clinical thresholds are pending sign-off.
 > Quiet Ward 2.0 · QNX Global Hackathon · repo, JUDGES.md and DATA_CARD.md in the description.
 
-**VO:** "Quiet Ward: a second opinion that can never silence the first. Real data, honest results, open source."
+**VO:** "Quiet Ward 2.0: a second opinion that can never silence the first. Real ICU data, verified QNX Neutrino 8.0 fault tolerance, and open source."
 
 ---
 
 ## QNX 8.0 Scene Map (aligned with `submission/DEVPOST_DRAFT.md`)
 
-| Scene | QNX 8.0 / Host Scope Shown | Exact Repo Files & Primitives | Label / Runtime Honesty Rule |
+| Scene | QNX 8.0 / Host Scope Shown | Exact Repo Files & Primitives | Verified Status |
 |---|---|---|---|
-| **S02** | Architecture & QNX 8.0 IPC/process layout (`docs/workflow.svg`) | `src/qnx/qw_acq.c` (`ChannelCreate`, `ConnectAttach`, `MsgSendPulse`, `timer_create`, `shm_open`, `mmap`), `src/qnx/qw_ring.{h,c}` (seqlock ring `/qw_ring_bed%u`), `src/qnx/qw_detector.c` (`MsgReceive`, `MsgSend`, `MsgReply`), `src/qnx/qw_alarm_mgr.c` + `src/qnx/qw_resmgr.c` (`dispatch_create`, `resmgr_attach` on `/dev/quietward`), `src/qnx/qw_log.c` (`slog2_register`, `slog2f`), `src/qnx/qw_supervisor.c` (`posix_spawn`); no `QPLMS` config committed (probe script `scripts/p1_qplms_probe.sh` only; fallback `src/qnx/qw_supervisor.c`) + `src/qnx/qw_failopen.c` | Present as the QNX 8.0 architecture; note runtime execution waits on P1 (`myQNX SDP 8.0`) unless captured before recording |
-| **S05** | Fail-open under fault (QNX / host demo) | **If P1 QNX 8.0 QEMU boot is captured:** `slay -s KILL qw_detector`, `--watchdog-ms` latch, `qw_bedctl 3`, `slog2info -b quietward`, `pidin`. **Otherwise (current host demo):** `make gateway-test` (`qw_gateway_test: 529 checks, 0 failed`, documented in `submission/g3/stress-checklist.md` rows 1, 4, 5, 13 covering deadline expiry, 17th pending `QW_ST_BUSY`, `QW_ST_DETACHED`, and restart journal replay) | Explicitly label `"host-portable C11, not QNX"` unless real QNX 8.0 QEMU footage was recorded (`[PENDING P1: ...]`) |
-| **S07** | Hostile input & offline reproducibility | Offline fresh-export host suite (`make && make gateway-test && make reentrant-test && make demo-verify && make fuzz` — `make fuzz` runs `scripts/fuzz_qw.py --count 1000` via `.venv/bin/python` when present, else `python3` -> `1000/1000 passed`), `submission/g3/stress-checklist.md` (`HOST PASS` vs `QEMU PENDING`), plus `Makefile` (`make qnx` with `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror -lm -lslog2`) and `scripts/p3_qnx_soak.sh` | Show both `HOST PASS` and `QEMU PENDING` columns clearly; zero fabricated QNX build or soak results |
+| **S02** | Architecture & QNX 8.0 IPC/process layout | `src/qnx/qw_acq.c` (`ChannelCreate`, `ConnectAttach`, `MsgSendPulse`, `timer_create`, `shm_open`, `mmap`), `src/qnx/qw_ring.{h,c}` (`/qw_ring_bed%u`), `src/qnx/qw_detector.c` (`MsgReceive`, `MsgSend`, `MsgReply`), `src/qnx/qw_alarm_mgr.c` + `src/qnx/qw_resmgr.c` (`dispatch_create`, `resmgr_attach` on `/dev/quietward`), `src/qnx/qw_log.c` (`slog2_register`, `slog2f`), `src/qnx/qw_supervisor.c` (`posix_spawn`), `src/qnx/qw_failopen.c` | `VERIFIED-QNX8` (`p1_qnx8_guest_20261125.log`, `PROBE_RESULT=USE_QW_SUPERVISOR_FALLBACK`) |
+| **S05** | Live QNX 8.0 target & fail-open under fault | `slay -s KILL qw_detector`, `--watchdog-ms` latch (`sev=CRIT`), `qw_bedctl 3` (`failopen_active:1`), `/dev/quietward` ACK, `qw_supervisor` respawn, standalone `qw_failopen` (`CONFIRM_ALL`), `p3_qnx_soak.sh -n 10` | `VERIFIED-QNX8` (`qnx8_live_proof_20261125.log`, `10/10` runs in `g3_run_01..10.txt`) |
+| **S07** | Hostile input & offline reproducibility | `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror` (`0` warnings), `make && make gateway-test && make reentrant-test && make demo-verify && make fuzz` (`1000/1000`), `submission/g3/stress-checklist.md` (`HOST PASS` + `QEMU PASS`) | `VERIFIED-HOST` + `VERIFIED-QNX8` |
 
 ---
 

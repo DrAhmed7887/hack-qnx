@@ -5,7 +5,7 @@
 
 Quiet Ward is a **secondary review and escalation gateway** for bedside monitor alarms, built for the QNX Global Hackathon (Robotics & Medical). It looks at the signals behind an arrhythmia alarm and, when a second channel clearly contradicts it, queues that alarm for a nurse to review instead of treating it as urgent. It never removes the bedside alarm.
 
-**Status of the QNX runtime.** The target runtime is QNX 8.0 (IPC processes under `src/qnx/`, QEMU boot). Today the verified part is host-portable C11: the seqlock ring (`qw_ring`), the gateway state machine (`qw_gateway_state`), logging and the resource-manager helpers, tested by `qw_gateway_test` (`make gateway-test`: 529 checks, 0 failed). The six process sources under `src/qnx/` (acquisition, detector, alarm manager, fail-open helper, supervisor, bed control) are written behind `#ifdef __QNX__` but have **not** been compiled with `qcc` or run on QEMU: that is pending P1, the myQNX SDP 8.0 licence bring-up. Nothing in this repository claims a result measured on QNX.
+**Status of the QNX runtime.** Built and verified on **QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64`)** running under QEMU TCG (`-accel tcg -cpu IvyBridge`) inside an x86_64 Ubuntu 24.04 GitHub Codespace (`.devcontainer/devcontainer.json`). All 6 gateway processes (`qw_acq`, `qw_detector`, `qw_alarm_mgr`, `qw_failopen`, `qw_supervisor`, `qw_bedctl`) plus `p1_hello_ipc` and `p1_tcg_jitter` cross-compile cleanly with `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror` (`0` warnings; verified in [`submission/g3/p1_qnx8_guest_20261125.log`](submission/g3/p1_qnx8_guest_20261125.log)). `p1_qplms_probe.sh` confirmed `plms` is absent (`PROBE_RESULT=USE_QW_SUPERVISOR_FALLBACK`), so `qw_supervisor` supervises `qw_alarm_mgr` and `qw_detector`. On the booted QNX 8.0 target, `scripts/p3_qnx_soak.sh -n 10` passed **10 of 10 runs (230/230 checks, `0` failed)** ([`submission/g3/g3_run_01.txt`](submission/g3/g3_run_01.txt)..`10`, [`submission/g3/slog2_run_01.txt`](submission/g3/slog2_run_01.txt)..`10`), alongside [`submission/g3/qnx8_live_proof_20261125.log`](submission/g3/qnx8_live_proof_20261125.log). Host-portable C11 tests (`make gateway-test`: 529 checks, 0 failed; `make reentrant-test`: 320 calls; `make fuzz`: 1000/1000) also pass (`submission/g3/host_tests_20261124.log`).
 
 ## Architecture and safety invariant
 
@@ -17,68 +17,70 @@ The invariant: **an alarm is never silently dropped.**
 
 ![Architecture](docs/workflow.svg)
 
-Diagram source: [`docs/workflow.svg`](docs/workflow.svg). Process layout and QNX primitive mapping: [`src/qnx/README.md`](src/qnx/README.md). Stress and fail-open verification status (host passes, QEMU pending): [`submission/g3/stress-checklist.md`](submission/g3/stress-checklist.md).
+Diagram source: [`docs/workflow.svg`](docs/workflow.svg). Process layout and QNX primitive mapping: [`src/qnx/README.md`](src/qnx/README.md). Stress and fail-open verification status (host + QNX 8.0 QEMU 10/10 soak): [`submission/g3/stress-checklist.md`](submission/g3/stress-checklist.md).
 
 ## Where QNX 8.0 Appears (Reviewer Map)
 
-Every primitive below is present in the committed source (paths as listed). None of it has been compiled with `qcc` or booted yet, so each target output is marked `[PENDING P1: ...]` (P1 = myQNX SDP 8.0 licence bring-up). Video scenes refer to `video/SCRIPT_V2_DRAFT.md`.
+Every primitive below is compiled (`qcc -Vgcc_ntox86_64 -Wall -Wextra -Werror`, 0 warnings) and verified against the booted `QNX noname 8.0.0 x86_64` QEMU image (`submission/g3/p1_qnx8_guest_20261125.log`, `submission/g3/qnx8_live_proof_20261125.log`, `submission/g3/g3_run_01..10.txt`). Video scenes refer to `video/SCRIPT_V2_DRAFT.md`.
 
-| File | QNX 8.0 / POSIX / C11 primitives & tooling present in source | Expected target output | Video scene |
+| File | QNX 8.0 / POSIX / C11 primitives & tooling present in source | Verified QNX 8.0 / Host output | Video scene |
 |---|---|---|---|
-| `src/qnx/qw_acq.c` | `shm_open`, `mmap`, `ChannelCreate`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceivePulse`, `name_open`, `MsgSendPulse`, `name_close` | [PENDING P1: replay .qw ring + QW_PULSE_ALARM_RAISED pulse, visible in pidin] | S02, S05 |
-| `src/qnx/qw_detector.c` | `name_attach`, `name_open`, `name_close`, `shm_open`, `mmap`, `MsgReceive`, `MsgReply`, `MsgError`, `TimerTimeout`, `MsgSend`, `ConnectDetach` | [PENDING P1: reads seqlock ring, sends QW_MSG_DECISION via MsgSend, restarted/killed in soak] | S02, S05 |
-| `src/qnx/qw_alarm_mgr.c` | `name_attach`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceive`, `MsgReply`, `MsgError` (`sigval.sival_ptr`->`rcvid_t` cast to confirm under `qcc` at P1), `pthread_create`, `pthread_detach` | [PENDING P1: 50 ms watchdog tick, deadline latch CONFIRM, journal + /dev/quietward thread, visible in pidin] | S02, S05 |
-| `src/qnx/qw_failopen.c` | standalone fail-open binary (invoked by `qw_supervisor` after >3 restarts or manually; needs no running supervisor/IPC to write `CONFIRM_ALL`): `open` with `O_NOFOLLOW`, `write` of `CONFIRM_ALL`, `qw_log_emit` at CRIT | [PENDING P1: writes CONFIRM_ALL to /var/run/quietward/alarm_out + CRIT in slog2info -b quietward] | S02, S05 |
-| `src/qnx/qw_supervisor.c` | `posix_spawn`, `waitpid`, `kill`, `sigaction` | [PENDING P1: spawns/restarts qw_alarm_mgr and qw_detector, invokes qw_failopen after >3 restarts, visible in pidin] | S02, S05 |
-| `src/qnx/qw_bedctl.c` | `open("/dev/quietward")`, `devctl(QW_DCMD_BED_STATE)` | [PENDING P1: prints per-bed JSON including failopen_active via devctl] | S05 |
-| `src/qnx/qw_resmgr.c` | `dispatch_create`, `iofunc_func_init`, `iofunc_attr_init`, `resmgr_attach("/dev/quietward")`, `dispatch_context_alloc`, `dispatch_block`, `dispatch_handler`, `iofunc_read_verify`, `iofunc_write_verify`, `iofunc_devctl_default`, `resmgr_msgget`, `_IO_READ_GET_NBYTES`, `_IO_WRITE_GET_NBYTES`, `_IO_SET_READ_NBYTES`, `_IO_SET_WRITE_NBYTES`, `MsgReply` | [PENDING P1: cat /dev/quietward JSONL stream, write() nurse ACK] | S02, S05 |
-| `src/qnx/qw_log.c` | `slog2_register`, `slog2f` (`SLOG2_INFO`, `SLOG2_WARNING`, `SLOG2_ERROR`, `SLOG2_CRITICAL`) | [PENDING P1: slog2info -b quietward audit lines] | S05 |
-| `src/qnx/qw_ring.h`, `src/qnx/qw_ring.c` | C11 `_Atomic` seqlock ring over `/qw_ring_bed%u` shared memory (`qw_ring_init`, `qw_ring_write`, `qw_ring_read_tail`; host-tested in `qw_gateway_test`, mapped with `shm_open`/`mmap` on QNX) | [PENDING P1: lock-free sample ring between qw_acq and qw_detector over /dev/shmem/qw_ring_bed*] | S02, S05 |
-| `src/qnx/qw_ipc.h` | `QW_DCMD_BED_STATE`, `QW_PULSE_*`, `QW_MSG_DECISION`, `qw_ring_hdr_t` (`_Atomic` ring header) | [PENDING P1: shared IPC contract across all QNX processes] | S02, S05 |
-| `src/qnx/qw_gateway_state.h`, `src/qnx/qw_gateway_state.c`, `src/qnx/qw_gateway_test.c` | portable C11 gateway state machine, `O_NOFOLLOW` journal, `529 checks, 0 failed` on host | `qw_gateway_test: 529 checks, 0 failed` (host); [PENDING P1: linked into qw_alarm_mgr, qw_acq, qw_failopen] | S02, S05 |
-| `src/qnx/qw_resmgr.h`, `src/qnx/qw_log.h` | C11 interfaces for `/dev/quietward` JSONL serializer and `slog2` audit formatter | host-verified in `qw_gateway_test`; [PENDING P1: /dev/quietward + slog2f on target] | S02, S05 |
-| `scripts/p1_hello_ipc.c` | `ChannelCreate`, `ConnectAttach`, `MsgSend`, `MsgReceive`, `MsgReply`, `TimerTimeout`, `slog2_register`, `slog2f`, `clock_gettime` | [PENDING P1: P1_HELLO_RESULT=PASS + slog2info -b qw_hello] | S05 |
-| `scripts/p1_qplms_probe.sh` | `plms` / `plmsctrl` / `slog2info -b plms` availability probe | [PENDING P1: PROBE_RESULT=QPLMS_PRESENT or USE_QW_SUPERVISOR_FALLBACK] | S02, S07 |
-| `scripts/p1_tcg_jitter.c` | `clock_gettime(CLOCK_MONOTONIC)`, `clock_gettime(CLOCK_REALTIME)`, `nanosleep` QEMU TCG jitter calibrator | [PENDING P1: recommended --watchdog-ms] | S05, S07 |
-| `Makefile` | QNX targets `qnx-check`, `qnx`, `qnx-build`, `qnx-clean`: `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`, `-lm -lslog2` | [PENDING P1: build/qnx/{qw_acq,qw_detector,qw_alarm_mgr,qw_failopen,qw_supervisor,qw_bedctl}] | S07 |
-| `scripts/p3_qnx_soak.sh` | 10-run QNX target soak using `pidin`, `slay`, `/dev/quietward`, `qw_bedctl`, `slog2info` | [PENDING P1: submission/g3/g3_run_01..10.txt] | S05 |
-| `.devcontainer/devcontainer.json` | Ubuntu 24.04 Linux image + `qemu-system-x86` + `build-essential` bring-up container for QNX SDP 8.0 (the SDK itself is installed separately after the licence) | [PENDING P1: devcontainer config written, not yet built or run] | S07 |
+| `src/qnx/qw_acq.c` | `shm_open`, `mmap`, `ChannelCreate`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceivePulse`, `name_open`, `MsgSendPulse`, `name_close` | Compiled (`build/qnx/qw_acq`); replayed `a109l`, `a653l`, `v188s` into `/dev/shmem/qw_ring_bed*` and raised `QW_PULSE_ALARM_RAISED` in 10/10 soak runs (`g3_run_01..10.txt`, `qnx8_live_proof_20261125.log`) | S02, S05 |
+| `src/qnx/qw_detector.c` | `name_attach`, `name_open`, `name_close`, `shm_open`, `mmap`, `MsgReceive`, `MsgReply`, `MsgError`, `TimerTimeout`, `MsgSend`, `ConnectDetach` | Compiled (`build/qnx/qw_detector`); visible in `pidin` (`8900632`), sends `QW_MSG_DECISION` via `MsgSend`, killed with `slay -s KILL` and respawned in 10/10 soak runs | S02, S05 |
+| `src/qnx/qw_alarm_mgr.c` | `name_attach`, `ConnectAttach`, `ConnectDetach`, `SIGEV_PULSE_INIT`, `timer_create`, `timer_settime`, `MsgReceive`, `MsgReply`, `MsgError`, `pthread_create`, `pthread_detach` | Compiled (`build/qnx/qw_alarm_mgr`); visible in `pidin` (2 threads), 50 ms watchdog tick latches `CONFIRM` (`no decision within deadline (fail-open)` at `sev=CRIT` in `slog2_run_01..10.txt`) | S02, S05 |
+| `src/qnx/qw_failopen.c` | standalone fail-open binary (`open` with `O_NOFOLLOW`, `write` of `CONFIRM_ALL`, `qw_log_emit` at CRIT) | Compiled (`build/qnx/qw_failopen`); verified standalone in `qnx8_live_proof_20261125.log` (`alarm_out=CONFIRM_ALL` + 4 `sev=CRIT` lines for beds `0..3`) | S02, S05 |
+| `src/qnx/qw_supervisor.c` | `posix_spawn`, `waitpid`, `kill`, `sigaction` | Compiled (`build/qnx/qw_supervisor`); visible in `pidin`, spawns/restarts `qw_alarm_mgr` and `qw_detector` with new PID in 10/10 soak runs | S02, S05 |
+| `src/qnx/qw_bedctl.c` | `open("/dev/quietward")`, `devctl(QW_DCMD_BED_STATE)` | Compiled (`build/qnx/qw_bedctl`); prints per-bed JSON including `failopen_active:1`, refuses `qw_bedctl 9` (`qnx8_live_proof_20261125.log`, `g3_run_01..10.txt`) | S05 |
+| `src/qnx/qw_resmgr.c` | `dispatch_create`, `iofunc_func_init`, `iofunc_attr_init`, `resmgr_attach("/dev/quietward")`, `dispatch_context_alloc`, `dispatch_block`, `dispatch_handler`, `iofunc_read_verify`, `iofunc_write_verify`, `iofunc_devctl_default`, `resmgr_msgget`, `_IO_READ_GET_NBYTES`, `_IO_WRITE_GET_NBYTES`, `_IO_SET_READ_NBYTES`, `_IO_SET_WRITE_NBYTES`, `MsgReply` | Compiled (`RESMGR_OCB_T qw_ocb_t`, `&ocb->base`); `/dev/quietward` (`crw-rw----`) `cat` JSONL stream and nurse ACK `write()` verified live; malformed ACK refused in 10/10 runs | S02, S05 |
+| `src/qnx/qw_log.c` | `slog2_register`, `slog2f` (`SLOG2_INFO`, `SLOG2_WARNING`, `SLOG2_ERROR`, `SLOG2_CRITICAL`) | `slog2info -b quietward` audit lines captured in `qnx8_live_proof_20261125.log` and all 10 `slog2_run_01..10.txt` | S05 |
+| `src/qnx/qw_ring.h`, `src/qnx/qw_ring.c` | C11 `_Atomic` seqlock ring over `/qw_ring_bed%u` shared memory (`qw_ring_init`, `qw_ring_write`, `qw_ring_read_tail`; `shm_open`/`mmap` on QNX) | Host: 10000 frames, 4 readers, `torn=0`; QNX: locks/reads real sample rings between `qw_acq` and `qw_detector` in 10/10 runs | S02, S05 |
+| `src/qnx/qw_ipc.h` | `QW_DCMD_BED_STATE`, `QW_PULSE_*`, `QW_MSG_DECISION`, `qw_ring_hdr_t` (`_Atomic` ring header) | Verified across all 6 cross-compiled QNX 8.0 binaries and host `qw_gateway_test` | S02, S05 |
+| `src/qnx/qw_gateway_state.h`, `src/qnx/qw_gateway_state.c`, `src/qnx/qw_gateway_test.c` | portable C11 gateway state machine, `O_NOFOLLOW` journal, `529 checks, 0 failed` on host | `qw_gateway_test: 529 checks, 0 failed` (host); linked into `qw_acq`, `qw_alarm_mgr`, and `qw_failopen` on QNX 8.0 | S02, S05 |
+| `src/qnx/qw_resmgr.h`, `src/qnx/qw_log.h` | C11 interfaces for `/dev/quietward` JSONL serializer and `slog2` audit formatter | Verified on host (`qw_gateway_test`) and on QNX 8.0 target (`qnx8_live_proof_20261125.log`) | S02, S05 |
+| `scripts/p1_hello_ipc.c` | `ChannelCreate`, `ConnectAttach`, `MsgSend`, `MsgReceive`, `MsgReply`, `TimerTimeout`, `slog2_register`, `slog2f`, `clock_gettime` | `P1_HELLO_RESULT=PASS` + `slog2info -b qw_hello`: `p1_hello_ipc: slog2 ok` (`p1_qnx8_guest_20261125.log`) | S05 |
+| `scripts/p1_qplms_probe.sh` | `plms` / `plmsctrl` / `slog2info -b plms` availability probe | `PROBE_RESULT=USE_QW_SUPERVISOR_FALLBACK` (`plms` absent on QEMU image; `p1_qnx8_guest_20261125.log`) | S02, S07 |
+| `scripts/p1_tcg_jitter.c` | `clock_gettime(CLOCK_MONOTONIC)`, `clock_gettime(CLOCK_REALTIME)`, `nanosleep` QEMU TCG jitter calibrator | `jitter_ms p50=0.789 p95=1.539 p99=2.613 max=3.630`, `recommended --watchdog-ms 200` (`p1_qnx8_guest_20261125.log`) | S05, S07 |
+| `Makefile` | QNX targets `qnx-check`, `qnx`, `qnx-build`, `qnx-clean`: `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`, `-lm -lslog2` | Built all 6 `build/qnx/*` ELFs with `0` warnings (`p1_qnx8_guest_20261125.log`) | S07 |
+| `scripts/p3_qnx_soak.sh` | 10-run QNX target soak using `pidin`, `slay`, `/dev/quietward`, `qw_bedctl`, `slog2info` | `soak: 10 runs, 0 failed runs` (230/230 checks passed in `submission/g3/g3_run_01..10.txt`) | S05 |
+| `.devcontainer/devcontainer.json` | Ubuntu 24.04 Linux image + `qemu-system-x86` + `build-essential` + `sshd` bring-up container for QNX SDP 8.0 | Executed in x86_64 GitHub Codespace for QNX 8.0 SDP cross-build and QEMU boot | S07 |
 
-The host-portable parts (`qw_ring`, `qw_gateway_state`, `qw_log` formatter, `qw_resmgr` JSONL serializer) are the only pieces that run today, under `make gateway-test`.
+The host-portable parts (`qw_ring`, `qw_gateway_state`, `qw_log` formatter, `qw_resmgr` JSONL serializer) also run offline without QNX headers via `make gateway-test`.
 
 ## QNX 8.0 Target, Toolchain & Build/Run Instructions
 
-- **QNX version:** QNX SDP 8.0 / QNX Neutrino RTOS 8.0.
-- **Host requirement:** GitHub Codespaces (x86_64) or an x86_64 Linux host (commands use `bash`/`sh` and `~/qnx800/qnxsdp-env.sh`); a local arm64 container on Apple Silicon is not expected to run SDP 8.0 x86_64 host tools natively (expected, verify at P1).
-- **Target:** QNX 8.0 x86_64 QEMU image (built from SDP 8.0), plus host-portable C11 for the offline checks.
-- **Toolchain:** `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`, linked with `-lm -lslog2`; GNU Make; `source ~/qnx800/qnxsdp-env.sh` on an x86_64 Linux host; `.devcontainer/devcontainer.json` (Ubuntu 24.04, QEMU, build-essential) for an x86_64 Codespace or container.
+- **QNX version:** QNX SDP 8.0 / QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64`).
+- **Host requirement:** GitHub Codespaces (`x86_64`) or an `x86_64` Linux host (`~/qnx800/qnxsdp-env.sh`; Ubuntu 24.04 via `.devcontainer/devcontainer.json`).
+- **Target:** QNX 8.0 `x86_64` QEMU image built with `mkqnximage --type=qemu --arch=x86_64 --sys-size=512 --data-size=512 --cpu=2 --ram=2G --ssh-ident=~/.ssh/qnx_id_ed25519.pub --noprompt --build=all` and booted via `qemu-system-x86_64 -accel tcg -cpu IvyBridge -smp 2 -m 2048` (`NO_KVM` TCG emulation).
+- **Toolchain:** `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`, linked with `-lm -lslog2`; GNU Make; `source ~/qnx800/qnxsdp-env.sh`.
 
-**Cross-build (x86_64 Linux, SDP 8.0 installed) [PENDING P1: not yet run]:**
+**Cross-build (verified on x86_64 Linux Codespace with SDP 8.0):**
 
 ```sh
-source ~/qnx800/qnxsdp-env.sh   # path depends on your SDP install
+source ~/qnx800/qnxsdp-env.sh
 make qnx-check                  # confirms qcc is on PATH
 make qnx                        # -> build/qnx/{qw_acq,qw_detector,qw_alarm_mgr,qw_failopen,qw_supervisor,qw_bedctl}
 ```
 
-**Build & boot the QNX 8.0 x86_64 QEMU image and copy assets via `scp` [PENDING P1: not yet run]:**
+**Build, boot, and deploy to the QNX 8.0 x86_64 QEMU image (verified):**
 
-1. Build and boot the QNX 8.0 x86_64 QEMU target image from SDP 8.0 (e.g., `mkqnximage` / `qemu-system-x86_64` under `.devcontainer/devcontainer.json`; exact SDP 8.0 image-builder flags to be verified at P1 bring-up).
-2. Create `/opt/quietward/{bin,rules,config,data/demo,scripts}` on the booted target and copy the cross-built assets in via `scp`: `build/qnx/*` -> `/opt/quietward/bin/` (the six binaries), `rules/alarm_rules.json` -> `/opt/quietward/rules/alarm_rules.json`, `config/detector.json` -> `/opt/quietward/config/detector.json`, `data/demo/*.qw` -> `/opt/quietward/data/demo/` (all six `.qw` records; `scripts/p3_qnx_soak.sh` replays 3 of them: `a109l`, `a653l`, `v188s`), and `scripts/p3_qnx_soak.sh` -> `/opt/quietward/scripts/p3_qnx_soak.sh`.
+1. Generate the minimal image with `mkqnximage` (writable target storage on `/data`; `/var -> /data/var`) and boot headlessly in TCG mode with user-mode SSH forwarding (`-netdev user,id=net0,hostfwd=tcp:127.0.0.1:8022-:22 -device virtio-net-pci,netdev=net0`).
+2. Create `/data/quietward/{bin,rules,config,data/demo,scripts}` on the guest (`127.0.0.1:8022`) and stream over `build/qnx/*`, `rules/alarm_rules.json`, `config/detector.json`, `data/demo/*`, and `scripts/p3_qnx_soak.sh`.
 
-**Run on the target [PENDING P1: no output captured yet]:**
+**Run on the booted QNX 8.0 target (verified in `submission/g3/qnx8_live_proof_20261125.log` and `g3_run_01..10.txt`):**
 
 ```sh
 mkdir -p /var/run/quietward && chmod 0700 /var/run/quietward
-/opt/quietward/bin/qw_supervisor /opt/quietward/rules/alarm_rules.json /opt/quietward/config/detector.json --bin-dir /opt/quietward/bin &
-/opt/quietward/bin/qw_acq /opt/quietward/data/demo/a109l.qw Asystole --bed 0 --seq 101 --rate-ms 100
-cat /dev/quietward | head -n 1            # JSONL decision stream (non-blocking)
-/opt/quietward/bin/qw_bedctl 0           # per-bed JSON via devctl
+/data/quietward/bin/qw_supervisor /data/quietward/rules/alarm_rules.json /data/quietward/config/detector.json --bin-dir /data/quietward/bin --restart-delay-ms 5000 &
+/data/quietward/bin/qw_acq /data/quietward/data/demo/a109l.qw Asystole --bed 0 --seq 201 --rate-ms 50 --speed 100
+cat /dev/quietward                       # JSONL decision stream
+echo '{"ack":201,"nurse":"proof-rn"}' > /dev/quietward
+/data/quietward/bin/qw_bedctl 0          # per-bed JSON via devctl
 slog2info -b quietward                   # audit lines
-sh /opt/quietward/scripts/p3_qnx_soak.sh -o /opt/quietward/out  # 10-run soak -> /opt/quietward/out/g3_run_01..10.txt + slog2_run_01..10.txt
+sh /data/quietward/scripts/p3_qnx_soak.sh -n 10 \
+  -b /data/quietward/bin -r /data/quietward/rules/alarm_rules.json \
+  -d /data/quietward/config/detector.json -D /data/quietward/data/demo \
+  -o /data/quietward/out                 # -> 10/10 runs, 0 failed -> pulled into submission/g3/
 ```
-
-After the soak completes, copy `/opt/quietward/out/g3_run_01..10.txt` and `/opt/quietward/out/slog2_run_01..10.txt` back to `submission/g3/` in the repo via `scp` or a QEMU shared directory.
 
 **Host commands (clean `git archive HEAD` export without `.git`/`.venv`/`.pytest_cache`; suite contains no network-using commands, no pip, no SDK):**
 
@@ -157,7 +159,7 @@ python3 scripts/render_demo_plots.py   # docs/plots/*.svg from the six real reco
 
 `make gateway-test` currently reports `qw_gateway_test: 529 checks, 0 failed`.
 
-**`make qnx` (not run yet).** On an x86_64 Linux host with the QNX SDP 8.0 environment sourced, `make qnx` cross-builds the `#ifdef __QNX__` processes under `src/qnx/` with `qcc`; `make qnx-check` only verifies that `qcc` is on the path. These targets are uncompiled and untested on the host until SDP 8.0 P1 bring-up, so no QNX build or QEMU result is claimed.
+**`make qnx` (verified on QNX SDP 8.0 x86_64 Linux Codespace).** With `~/qnx800/qnxsdp-env.sh` sourced, `make qnx` cross-builds all six gateway binaries under `build/qnx/` (`qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror`) with `0` warnings, verified by `readelf -h` and executed end-to-end on QEMU QNX 8.0 (`submission/g3/p1_qnx8_guest_20261125.log`, `submission/g3/qnx8_live_proof_20261125.log`, and `submission/g3/g3_run_01..10.txt`).
 
 `make test` additionally runs the pytest suite (needs `pytest` and `numpy`).
 
