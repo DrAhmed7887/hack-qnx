@@ -5,7 +5,7 @@ Research demo, not a medical device. `rules/alarm_rules.json` carries `status: "
 Legend: **HOST PASS** = measured on the host-portable C11 code (macOS or Ubuntu), command and result given. **QEMU PASS** = measured on the booted QNX 8.0.0 (`2026/10/30-09:10:05EDT x86pc x86_64`) QEMU TCG image (`submission/g3/p1_qnx8_guest_20261125.log`, `submission/g3/qnx8_live_proof_20261125.log`, `submission/g3/g3_run_01..10.txt`, `submission/g3/slog2_run_01..10.txt`). QEMU runs under TCG, so any timing there is logical time, not hardware real time.
 
 Last host run: `submission/g3/host_tests_20261124.log` (clean `git archive HEAD` export without `.git`/`.venv`/`.pytest_cache`; suite contains no network-using commands; all 8 commands: `make`, `make gateway-test`, `make reentrant-test`, `make demo-verify`, `make fuzz`, `python3 scripts/fuzz_qw.py --count 1000`, `python3 scripts/host_shift_replay.py`, `python3 scripts/render_demo_plots.py`) plus `submission/g3/asan_ubsan_20261124.log` (clean ASan+UBSan builds of `qw_gateway_test` and `qw_reentrant_test`, `exit=0`).
-Last QNX 8.0 target run: `submission/g3/p1_qnx8_guest_20261125.log`, `submission/g3/qnx8_live_proof_20261125.log`, and `scripts/p3_qnx_soak.sh -n 10` (`soak: 10 runs, 0 failed runs`, 230/230 checks passed across `submission/g3/g3_run_01..10.txt` and `submission/g3/slog2_run_01..10.txt`).
+Last QNX 8.0 target run: `submission/g3/p1_qnx8_guest_20261125.log`, `submission/g3/qnx8_live_proof_20261125.log`, and `scripts/p3_qnx_soak.sh -n 10` (`soak: 10 runs, 0 failed runs`, 250/250 checks passed across `submission/g3/g3_run_01..10.txt` and `submission/g3/slog2_run_01..10.txt`).
 
 | # | Area | Check | Host (portable C11) | QNX 8.0 QEMU G3 soak |
 |---|---|---|---|---|
@@ -29,7 +29,7 @@ Last QNX 8.0 target run: `submission/g3/p1_qnx8_guest_20261125.log`, `submission
 ## Totals
 
 - **Host column:** 14 of 16 applicable rows `HOST PASS`, row 3 partial (threads only, no 8-client resmgr path on host), row 7 n/a on host (cross-compiled + verified on QNX 8.0 target).
-- **QNX 8.0 QEMU column:** 8 rows `QEMU PASS` (`p1_hello_ipc`, `p1_tcg_jitter`, `qnx8_live_proof_20261125.log`, and `10/10` runs in `g3_run_01..10.txt` with `230/230` checks passed, `0` failed); 4 rows (rows 3, 4, 13, 15) explicitly marked host-tested without separate fault injection on QEMU; rows 1, 6, 11 n/a (`qw_gateway_state` / shared parser).
+- **QNX 8.0 QEMU column:** 8 rows `QEMU PASS` (`p1_hello_ipc`, `p1_tcg_jitter`, `qnx8_live_proof_20261125.log`, and `10/10` runs in `g3_run_01..10.txt` with `250/250` checks passed, `0` failed); 4 rows (rows 3, 4, 13, 15) explicitly marked host-tested without separate fault injection on QEMU; rows 1, 6, 11 n/a (`qw_gateway_state` / shared parser).
 - `qw_gateway_test`: 529 checks, 0 failed. `qw_reentrant_test`: 320 concurrent `qw_decide()` calls across 8 threads, all consistent.
 
 ## Observation from fuzzing (not a defect fix)

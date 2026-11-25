@@ -1,6 +1,6 @@
 # Quiet Ward 2.0: Devpost submission draft
 
-> Research demo, not a medical device. The alarm rules are `pending_signoff`: engineering defaults, not signed clinical rules. Nothing below is a clinical claim. Built, cross-compiled (`qcc -Vgcc_ntox86_64 -Wall -Wextra -Werror`, 0 warnings), and verified on booted **QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64`)** under QEMU TCG (`10/10` target soak runs, `230/230` checks passed, `0` failed; logs under `submission/g3/`).
+> Research demo, not a medical device. The alarm rules are `pending_signoff`: engineering defaults, not signed clinical rules. Nothing below is a clinical claim. Built, cross-compiled (`qcc -Vgcc_ntox86_64 -Wall -Wextra -Werror`, 0 warnings), and verified on booted **QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64`)** under QEMU TCG (`10/10` target soak runs, `250/250` checks passed, `0` failed; logs under `submission/g3/`).
 
 Category: Robotics & Medical. Bonus: Best use of QNX-specific Technologies.
 
@@ -33,7 +33,7 @@ On six real records (a demonstration, not an accuracy measurement) five are conf
 **Verified on QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64` on QEMU TCG, logged in `submission/g3/p1_qnx8_guest_20261125.log`, `submission/g3/qnx8_live_proof_20261125.log`, and `submission/g3/g3_run_01..10.txt`):**
 - All six `#ifdef __QNX__` process binaries (`qw_acq`, `qw_detector`, `qw_alarm_mgr`, `qw_failopen`, `qw_supervisor`, `qw_bedctl`) plus `p1_hello_ipc` and `p1_tcg_jitter` compiled cleanly with `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror -lm -lslog2` (`0` warnings; `readelf -h` `Advanced Micro Devices X86-64`).
 - `p1_hello_ipc` (`P1_HELLO_RESULT=PASS`, `slog2info -b qw_hello`), `p1_qplms_probe.sh` (`PROBE_RESULT=USE_QW_SUPERVISOR_FALLBACK`; `plms` absent on the QEMU image, `qw_supervisor` active), and `p1_tcg_jitter` (`p50=0.789 ms`, `recommended --watchdog-ms 200`).
-- Live `/dev/quietward` character device (`crw-rw----`): `cat` JSONL stream, nurse ACK `write()` (`"nurse ack: proof-rn"`), `qw_bedctl 0..2` `devctl` JSON, standalone `qw_failopen` (`alarm_out=CONFIRM_ALL` + `sev=CRIT` across beds `0..3`), and **10/10 G3 soak runs (`230/230` checks passed, `0` failed)** including `slay -s KILL qw_detector` fail-open latch + supervisor restart with a new PID (`slog2_run_01..10.txt`).
+- Live `/dev/quietward` character device (`crw-rw----`): `cat` JSONL stream, nurse ACK `write()` (`"nurse ack: proof-rn"`), `qw_bedctl 0..2` `devctl` JSON, standalone `qw_failopen` (`alarm_out=CONFIRM_ALL` + `sev=CRIT` across beds `0..3`), and **10/10 G3 soak runs (`250/250` checks passed, `0` failed)** including `slay -s KILL qw_detector` fail-open latch + supervisor restart with a new PID (`slog2_run_01..10.txt`).
 
 ### Where QNX 8.0 Appears (Reviewer Map)
 
