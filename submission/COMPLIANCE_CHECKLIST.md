@@ -28,6 +28,6 @@ Topics: `qnx`, `qnx-neutrino`, `rtos`, `c11`, `medical-devices`, `patient-monito
 ## Owner's remaining clicks (in order)
 
 1. **Devpost (~5 min):** complete the browser check on `https://qnx.devpost.com/` and paste `submission/DEVPOST_DRAFT.md` (Category: Robotics & Medical, Bonus: Best use of QNX-specific Technologies).
-2. **Watch & upload video:** inspect `/Users/ahmedzayed/QNX/quiet-ward-video/out/QUIET_WARD_2_DEMO_1080P.mp4` (`2:49.6` / `169.6 s`, `<3:00`, public YouTube, original ElevenLabs instrumental bed, zero third-party logos) and link it on Devpost.
+2. **Watch & upload video:** inspect the external render `quiet-ward-video/out/QUIET_WARD_2_DEMO_1080P.mp4` (`2:49.6` / `169.6 s`, `<3:00`, public YouTube, original ElevenLabs instrumental bed, zero third-party logos) and link it on Devpost.
 3. **Clinical sign-off (optional/pending):** review and sign `rules/alarm_rules.json` if clinical claims are ever intended; otherwise keep `pending_signoff` + non-discarding nurse-review gateway framing.
 4. **Before final submission (Fri 11 Dec target):** switch GitHub visibility of `DrAhmed7887/hack-qnx` to Public and submit on `https://qnx.devpost.com/`.

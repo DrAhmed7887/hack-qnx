@@ -132,9 +132,9 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report (hardware lamp/spea
 
 ---
 
-## Video production gate checks (verified externally in `/Users/ahmedzayed/QNX/quiet-ward-video/`)
+## Video production gate checks (verified externally in `quiet-ward-video/`)
 
-- **Scope note:** No video project, rendered `.mp4`, or `node_modules` is committed in this repository; the finished V3 render lives externally at `/Users/ahmedzayed/QNX/quiet-ward-video/out/QUIET_WARD_2_DEMO_1080P.mp4` (`169.6 s`, `1920x1080`, `30 fps`, `18.94 MB`).
+- **Scope note:** No video project, rendered `.mp4`, or `node_modules` is committed in this repository; the finished V3 render lives externally at `quiet-ward-video/out/QUIET_WARD_2_DEMO_1080P.mp4` (`169.6 s`, `1920x1080`, `30 fps`, `18.94 MB`).
 - **Structure & Transitions:** `TransitionSeries` with 9 scenes (`S00`–`S08`) and 12-frame `wipe` / `slide` / `fade` transitions, total runtime `2:49.6` (`<= 2:55`; Devpost hard limit `< 3:00`).
 - **Audio & voiceover policy:** Original spoken English voiceover (`s01`–`s08`, ElevenLabs Daniel) + original instrumental documentary score (`bgm_elevenlabs.mp3`, ElevenLabs `music_v2_5` under paid Creator license, ducked under VO, mastered to `-16.1 LUFS` / `-1.0 dBTP`); zero copyrighted third-party music.
 - **Post-render `ffmpeg` QA gates (`qc_video.py`, `qc_pass: true`):**
