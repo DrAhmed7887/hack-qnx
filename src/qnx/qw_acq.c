@@ -5,7 +5,7 @@
  * journal 'R', then a non-blocking pulse to qw_detector and qw_alarm_mgr.
  * It never waits on the detector, so analysis cannot stall acquisition.
  *
- *   qw_acq <qw_file> <alarm_name> [--bed N] [--seq N] [--rate-ms N]
+ *   qw_acq <qw_file> <alarm_name> [--bed N] [--seq N] [--rate-ms N] [--speed N]
  *
  * The PhysioNet 2015 convention used by qw_decide() puts the alarm 300 s
  * into the record, so only samples before that point are streamed, and only
@@ -59,12 +59,12 @@ static void notify(const char *name, int code, int value) {
 
 int main(int argc, char **argv) {
     if (argc < 3) {
-        fprintf(stderr, "usage: %s <qw_file> <alarm_name> [--bed N] [--seq N] [--rate-ms N]\n", argv[0]);
+        fprintf(stderr, "usage: %s <qw_file> <alarm_name> [--bed N] [--seq N] [--rate-ms N] [--speed N]\n", argv[0]);
         return 2;
     }
     const char *qw_file = argv[1];
     int aid = qw_alarm_id_from_name(argv[2]);
-    uint32_t bed = 0, seq = 1, rate_ms = ACQ_DEFAULT_RATE_MS;
+    uint32_t bed = 0, seq = 1, rate_ms = ACQ_DEFAULT_RATE_MS, speed = 1;
     if (aid < 0) {
         fprintf(stderr, "%s: unknown alarm '%s'\n", argv[0], argv[2]);
         return 2;
@@ -77,6 +77,8 @@ int main(int argc, char **argv) {
             bad = parse_u32(argv[++i], 0xFFFFFFu, &seq);
         else if (i + 1 < argc && strcmp(argv[i], "--rate-ms") == 0)
             bad = parse_u32(argv[++i], 60000u, &rate_ms) || rate_ms == 0;
+        else if (i + 1 < argc && strcmp(argv[i], "--speed") == 0)
+            bad = parse_u32(argv[++i], 1000u, &speed) || speed == 0;
         if (bad) {
             fprintf(stderr, "%s: bad option near '%s'\n", argv[0], argv[i]);
             return 2;
@@ -103,7 +105,7 @@ int main(int argc, char **argv) {
     uint32_t alarm_sample = off_samples > (uint64_t)rec.n_samples ? rec.n_samples : (uint32_t)off_samples;
     uint32_t ring_len = ACQ_RING_SAMPLES;
     uint32_t pos = alarm_sample > ring_len ? alarm_sample - ring_len : 0;
-    uint32_t chunk = (uint32_t)(((uint64_t)rec.fs * rate_ms) / 1000u);
+    uint32_t chunk = (uint32_t)(((uint64_t)rec.fs * rate_ms * speed) / 1000u);
     if (chunk == 0) chunk = 1;
     if (chunk > ring_len) chunk = ring_len;
 

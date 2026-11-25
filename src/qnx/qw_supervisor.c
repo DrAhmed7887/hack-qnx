@@ -1,6 +1,6 @@
 /* qw_supervisor.c -- small fallback process supervisor (QNX 8.0).
  *
- *   qw_supervisor <rules.json> <detector.json> [--bin-dir DIR]
+ *   qw_supervisor <rules.json> <detector.json> [--bin-dir DIR] [--restart-delay-ms N]
  *
  * Starts qw_alarm_mgr and qw_detector with posix_spawn(), waits with
  * waitpid(), restarts a dead worker up to MAX_RESTARTS times, and on a
@@ -14,6 +14,7 @@
 #include <signal.h>
 #include <spawn.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -75,13 +76,35 @@ static void kill_all(worker_t *w) {
     }
 }
 
+static int parse_u32(const char *s, uint32_t max, uint32_t *out) {
+    char *end = NULL;
+    errno = 0;
+    unsigned long v = strtoul(s, &end, 10);
+    if (errno != 0 || end == s || *end != '\0' || s[0] == '-' || v > max) return -1;
+    *out = (uint32_t)v;
+    return 0;
+}
+
 int main(int argc, char **argv) {
     const char *dir = ".";
+    uint32_t restart_delay_ms = 0;
     if (argc < 3) {
-        fprintf(stderr, "usage: %s <rules.json> <detector.json> [--bin-dir DIR]\n", argv[0]);
+        fprintf(stderr, "usage: %s <rules.json> <detector.json> [--bin-dir DIR] [--restart-delay-ms N]\n", argv[0]);
         return 2;
     }
-    if (argc == 5 && strcmp(argv[3], "--bin-dir") == 0) dir = argv[4];
+    for (int i = 3; i < argc; i++) {
+        int bad = 1;
+        if (i + 1 < argc && strcmp(argv[i], "--bin-dir") == 0) {
+            dir = argv[++i];
+            bad = 0;
+        } else if (i + 1 < argc && strcmp(argv[i], "--restart-delay-ms") == 0) {
+            bad = parse_u32(argv[++i], 30000u, &restart_delay_ms);
+        }
+        if (bad) {
+            fprintf(stderr, "usage: %s <rules.json> <detector.json> [--bin-dir DIR] [--restart-delay-ms N]\n", argv[0]);
+            return 2;
+        }
+    }
     qw_log_init("qw_supervisor");
 
     struct sigaction sa;
@@ -108,6 +131,11 @@ int main(int argc, char **argv) {
             if (w[i].pid != dead) continue;
             qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, i == 0 ? "qw_alarm_mgr exited" : "qw_detector exited");
             if (++w[i].restarts > MAX_RESTARTS) goto fail;
+            for (uint32_t slept = 0; slept < restart_delay_ms && !g_stop; slept += 50u) {
+                struct timespec ts = {0, 50000000L}; /* 50 ms */
+                nanosleep(&ts, NULL);
+            }
+            if (g_stop) break;
             w[i].pid = spawn_one(dir, w[i].name, i == 1 ? det_args : NULL);
             if (w[i].pid < 0) goto fail;
         }

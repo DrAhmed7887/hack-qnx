@@ -1,0 +1,59 @@
+=== QNX 8.0 READELF ===
+File: build/qnx/qw_acq
+  OS/ABI:                            UNIX - System V
+  Machine:                           Advanced Micro Devices X86-64
+File: build/qnx/qw_detector
+  OS/ABI:                            UNIX - System V
+  Machine:                           Advanced Micro Devices X86-64
+File: build/qnx/qw_alarm_mgr
+  OS/ABI:                            UNIX - System V
+  Machine:                           Advanced Micro Devices X86-64
+File: build/qnx/qw_failopen
+  OS/ABI:                            UNIX - System V
+  Machine:                           Advanced Micro Devices X86-64
+File: build/qnx/qw_supervisor
+  OS/ABI:                            UNIX - System V
+  Machine:                           Advanced Micro Devices X86-64
+File: build/qnx/qw_bedctl
+  OS/ABI:                            UNIX - System V
+  Machine:                           Advanced Micro Devices X86-64
+File: build/qnx/p1_hello_ipc
+  OS/ABI:                            UNIX - System V
+  Machine:                           Advanced Micro Devices X86-64
+File: build/qnx/p1_tcg_jitter
+  OS/ABI:                            UNIX - System V
+  Machine:                           Advanced Micro Devices X86-64
+=== P1 GUEST RESULTS ===
+=== UNAME ===
+QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64
+=== PIDIN INFO ===
+CPU:X86_64 Release:8.0.0  FreeMem:1873MB/2047MB BootTime:Nov 25 01:48:40 UTC 2026
+Processes: 21, Threads: 113
+Processor1: 197294 Core i7/5/3 Stepping 9 2295MHz FPU 
+Processor2: 197294 Core i7/5/3 Stepping 9 2295MHz FPU 
+=== P1_HELLO_IPC ===
+PASS slog2_register + slog2f (verify with: slog2info -b qw_hello)
+PASS ChannelCreate chid=1
+PASS ConnectAttach coid=1073741826
+PASS MsgSend/MsgReceive/MsgReply (41 -> 42)
+PASS clock_gettime(CLOCK_MONOTONIC)
+P1_HELLO_RESULT=PASS
+=== SLOG2INFO QW_HELLO ===
+Nov 25 01:49:42.756                qw_hello.905237                 main*     0  p1_hello_ipc: slog2 ok
+=== P1_QPLMS_PROBE ===
+== uname ==
+QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64
+== binaries ==
+missing: plms
+missing: plmsctrl
+== headers / libs ==
+no dir: /usr/include
+none under /proc/boot
+none under /system
+== slog2 ==
+PROBE_RESULT=USE_QW_SUPERVISOR_FALLBACK
+=== P1_TCG_JITTER ===
+iters=500 period_ms=10
+jitter_ms p50=0.789 p95=1.539 p99=2.613 max=3.630
+drift_ms (realtime - monotonic over run) = -0.108
+recommended --watchdog-ms 200

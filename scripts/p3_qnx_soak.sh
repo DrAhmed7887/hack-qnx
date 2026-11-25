@@ -21,6 +21,7 @@
 #
 # Usage: scripts/p3_qnx_soak.sh [-n RUNS] [-b BIN_DIR] [-r RULES] [-d DETECTOR]
 #                               [-D DEMO_DIR] [-o OUT_DIR] [-m RATE_MS]
+#                               [-s SPEED] [-R RESTART_DELAY_MS]
 # Exit status: 0 only if every run passed every check.
 
 set -u
@@ -31,7 +32,9 @@ RULES=${QW_RULES:-/opt/quietward/rules/alarm_rules.json}
 DETCFG=${QW_DETECTOR_CFG:-/opt/quietward/config/detector.json}
 DEMO_DIR=${QW_DEMO_DIR:-/opt/quietward/data/demo}
 OUT_DIR=${QW_OUT_DIR:-submission/g3}
-RATE_MS=${QW_RATE_MS:-100}
+RATE_MS=${QW_RATE_MS:-50}
+SPEED=${QW_SPEED:-100}
+RESTART_DELAY_MS=${QW_RESTART_DELAY_MS:-5000}
 STATE_DIR=/var/run/quietward
 DEV=/dev/quietward
 RECORDS="a109l a653l v188s"
@@ -39,9 +42,9 @@ ALARM_FOR_a109l=Asystole
 ALARM_FOR_a653l=Asystole
 ALARM_FOR_v188s=Ventricular_Tachycardia
 # Wait slightly longer than the 500 ms decision deadline, in whole seconds.
-DEADLINE_WAIT_S=2
+DEADLINE_WAIT_S=1
 
-while getopts "n:b:r:d:D:o:m:h" opt; do
+while getopts "n:b:r:d:D:o:m:s:R:h" opt; do
     case "$opt" in
         n) RUNS=$OPTARG ;;
         b) BIN_DIR=$OPTARG ;;
@@ -50,6 +53,8 @@ while getopts "n:b:r:d:D:o:m:h" opt; do
         D) DEMO_DIR=$OPTARG ;;
         o) OUT_DIR=$OPTARG ;;
         m) RATE_MS=$OPTARG ;;
+        s) SPEED=$OPTARG ;;
+        R) RESTART_DELAY_MS=$OPTARG ;;
         *) sed -n '2,31p' "$0"; exit 2 ;;
     esac
 done
@@ -80,7 +85,7 @@ reset_state() {
 }
 
 replay_record() { # replay_record <name> <alarm> <bed> <seq>
-    "$BIN_DIR/qw_acq" "$DEMO_DIR/$1.qw" "$2" --bed "$3" --seq "$4" --rate-ms "$RATE_MS"
+    "$BIN_DIR/qw_acq" "$DEMO_DIR/$1.qw" "$2" --bed "$3" --seq "$4" --rate-ms "$RATE_MS" --speed "$SPEED"
 }
 
 journal_has() { grep -q "^$1 $2 " "$STATE_DIR/journal"; } # journal_has <op> <seq>
@@ -94,7 +99,7 @@ one_run() {
     echo "=== run $run_n of $RUNS: $(date) ==="
     reset_state
 
-    "$BIN_DIR/qw_supervisor" "$RULES" "$DETCFG" --bin-dir "$BIN_DIR" &
+    "$BIN_DIR/qw_supervisor" "$RULES" "$DETCFG" --bin-dir "$BIN_DIR" --restart-delay-ms "$RESTART_DELAY_MS" &
     SUP_PID=$!
     sleep 2
 
@@ -151,7 +156,7 @@ one_run() {
     check "fail-open: C $seq journalled with no detector" journal_has C "$seq"
     check "fail-open: bedctl 3 shows failopen_active" sh -c \
         "$BIN_DIR/qw_bedctl 3 | grep -q '\"failopen_active\":1'"
-    sleep 2
+    sleep 4
     check "supervisor restarted qw_detector" alive qw_detector
     new_det=$(pidin -p qw_detector 2>/dev/null | awk 'NR==2{print $1}')
     check "restarted detector has a new pid (was ${old_det:-none})" \
