@@ -1,0 +1,41 @@
+=== HOST ELF PROVENANCE (P4 FAULT STRESS) ===
+05ae7bdc96f96aab860046a071dccc9330e7753c00391d03f3d5e760663635a7  build/qnx/qw_acq
+601513748259974d394a845292fd95edd5492b53d3540ae934af948a9bee086e  build/qnx/qw_detector
+68d8ba4bddaa48a89f8ac456aa038622e229cb00df9c310900e8601a0d9b719e  build/qnx/qw_alarm_mgr
+973797c67d2201eedc2134031db33a897324828099bb3e441efbd994bd7b92e6  build/qnx/qw_failopen
+b7777abd5f5587f96d6e9b97d073936b40be1f9f19ff63aa62efe3e7659924af  build/qnx/qw_supervisor
+d608d2b2db930a4ac8b9f7b92b9261db68761c59e342766878a7eb1aad252800  build/qnx/qw_bedctl
+8d3f6888a8b922441087b29bc6305eca5b5eca78f20aa0fde47d9968813c7571  build/qnx/p4_resmgr_cap_test
+Warning: Permanently added '[127.0.0.1]:22222' (ED25519) to the list of known hosts.
+=== P4 QNX 8.0 EXTENDED FAULT-INJECTION STRESS SUITE ===
+PASS  playlist a109l (Asystole, bed 0, seq 101) exit 0
+PASS  playlist a653l (Asystole, bed 1, seq 102) exit 0
+PASS  playlist t116s (Tachycardia, bed 2, seq 103) exit 0
+PASS  playlist t106s (Tachycardia, bed 3, seq 104) exit 0
+PASS  playlist v188s (Ventricular_Tachycardia, bed 0, seq 105) exit 0
+PASS  playlist f450s (Ventricular_Flutter_Fib, bed 1, seq 106) exit 0
+PASS  playlist a109l -> Q 101 (SUPPRESS_TO_REVIEW)
+PASS  playlist a653l -> C 102 (CONFIRM)
+PASS  playlist t116s -> C 103 (conservative CONFIRM)
+PASS  playlist t106s -> C 104 (low-SQI CONFIRM)
+PASS  playlist v188s -> C 105 (TRUE VT CONFIRM)
+PASS  playlist f450s -> C 106 (never_suppress CONFIRM)
+PASS  resmgr cap: 8 concurrent /dev/quietward readers + 9th EBUSY + release
+PASS  4th crash: qw_supervisor exited non-zero (rc=1)
+PASS  4th crash: alarm_out contains CONFIRM_ALL
+PASS  4th crash: slog2 logged fault limit + qw_failopen
+PASS  4th crash: slog2 logged fail-open all beds CONFIRM
+PASS  corrupt journal: bed 0 failopen_active:1
+PASS  corrupt journal: bed 1 failopen_active:1
+PASS  corrupt journal: bed 2 failopen_active:1
+PASS  corrupt journal: bed 3 failopen_active:1
+PASS  corrupt journal: slog2 latched unresolved alarms
+PASS  symlink journal: bed 0 failopen_active:1
+PASS  symlink journal: bed 1 failopen_active:1
+PASS  symlink journal: bed 2 failopen_active:1
+PASS  symlink journal: bed 3 failopen_active:1
+PASS  symlink journal: target file untouched
+PASS  admission failure: qw_acq exits non-zero without manager (rc=1)
+PASS  admission failure: slog2 logged CRIT admission/journal fail
+PASS  admission failure: seq 301 did NOT log RAISED
+=== P4 SUMMARY: 30 checks, 0 failed ===

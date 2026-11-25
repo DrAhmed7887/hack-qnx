@@ -1,0 +1,4 @@
+=== ASAN+UBSAN CHECKS (2026-11-25T12:54:42Z) ===
+ok: 320 concurrent qw_decide() calls across 8 threads, all consistent with their own record
+ring stress: 10000 frames, 4 readers, ok=32530 busy=21857 torn=0
+qw_gateway_test: 529 checks, 0 failed
