@@ -2,9 +2,9 @@
 
 ## Compliance Header
 
-- **Target length:** `2:46` (`165.77 s` / `4973 frames @ 30fps`; verified `<= 2:55`, Devpost hard limit `< 3:00`; eight strictly sequential scenes, zero overlap)
+- **Target length:** `2:49.6` (`169.6 s` / `5087 frames @ 30fps`; verified `<= 2:55`, Devpost hard limit `< 3:00`; nine `TransitionSeries` scenes `S00`–`S08` with 12-frame `wipe` / `slide` / `fade` transitions)
 - **YouTube visibility:** Public
-- **Audio:** original voiceover only — zero copyrighted music (no BGM/soundtrack)
+- **Audio:** original ElevenLabs Daniel spoken English voiceover (`s01`–`s08`) + original ElevenLabs Music instrumental documentary bed (`bgm_elevenlabs.mp3`, `music_v2_5`, Creator tier, ducked from `0.30` in intro to `0.085` under VO; zero third-party/copyrighted music)
 - **Language:** 100% English (on-screen text, captions, overlays, and narration)
 - **Third-party product brands/logos:** none (monitor model omitted in S01; plain-text citations only for openFDA/PhysioNet — no openFDA, PhysioNet, or vendor logos on screen)
 - **S01 evidence status:** `VERIFIED-REPO` (`docs/EVIDENCE.md`, `CLAIMS.md` row 18 — `mdr_report_key=10055677`, `date_received=20200514`, `mdr_text_key=191262317`, monitor model omitted)
@@ -17,14 +17,23 @@ Variant B framing: a review and escalation gateway that never silently drops an 
 
 | Scene | Time | Length |
 |---|---|---|
-| S01 | 0:00-0:13.7 | 13.7 s |
-| S02 | 0:13.7-0:33.6 | 19.9 s |
-| S03 | 0:33.6-0:53.9 | 20.3 s |
-| S04 | 0:53.9-1:17.7 | 23.8 s |
-| S05 | 1:17.7-1:41.8 | 24.0 s |
-| S06 | 1:41.8-2:05.8 | 24.0 s |
-| S07 | 2:05.8-2:25.5 | 19.7 s |
-| S08 | 2:25.5-2:45.8 | 20.3 s |
+| S00 (Intro) | 0:00-0:07.0 | 7.0 s |
+| S01 | 0:06.6-0:20.3 | 13.7 s |
+| S02 | 0:19.9-0:39.8 | 19.9 s |
+| S03 | 0:39.4-0:59.7 | 20.3 s |
+| S04 | 0:59.3-1:23.1 | 23.8 s |
+| S05 | 1:22.7-1:46.8 | 24.0 s |
+| S06 | 1:46.4-2:10.4 | 24.0 s |
+| S07 | 2:10.0-2:29.7 | 19.7 s |
+| S08 | 2:29.3-2:49.6 | 20.3 s |
+
+---
+
+## S00 · 0:00-0:07.0 · Animated Title Intro
+
+**Screen:** Google Flow (Omni 1.2 Flash) 3D glass-plane + crystal-prism backdrop (`omni_intro.mp4`), live SVG glowing ECG sweep, `QUIET WARD 2.0` title lockup, and staggered pills (`Lock-Free C11 Core`, `Fail-Open QNX 8.0 RTOS`, `Real PhysioNet ICU Data`).
+
+**Audio:** ElevenLabs instrumental intro swell (`bgm_elevenlabs.mp3` at `0.30`), ducking cleanly before S01 narration enters.
 
 *Fallback if S01 is skipped:* if you prefer not to open on a MAUDE malfunction card, omit S01 and open directly with S02 ("The one rule"), shifting `S02`–`S08` to a `2:45` total runtime (still `<= 2:55` and `< 3:00`).
 
@@ -125,13 +134,13 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 ## Video production gate checks (verified externally in `/Users/ahmedzayed/QNX/quiet-ward-video/`)
 
-- **Scope note:** No video project, rendered `.mp4`, or `node_modules` is committed in this repository; the finished render lives externally at `/Users/ahmedzayed/QNX/quiet-ward-video/out/QUIET_WARD_2_DEMO_1080P.mp4` (`165.8 s`, `1920x1080`, `30 fps`, `15.07 MB`).
-- **Sequential structure:** Eight strictly sequential scene blocks (`S01`–`S08`), zero overlap, total runtime `2:45.8` (`<= 2:55`; Devpost hard limit `< 3:00`).
-- **Audio & voiceover policy:** Original spoken English voiceover track only (ElevenLabs Daniel, mastered to `-16.0 LUFS` / `-1.0 dBTP`); zero background music, zero third-party audio samples.
+- **Scope note:** No video project, rendered `.mp4`, or `node_modules` is committed in this repository; the finished V3 render lives externally at `/Users/ahmedzayed/QNX/quiet-ward-video/out/QUIET_WARD_2_DEMO_1080P.mp4` (`169.6 s`, `1920x1080`, `30 fps`, `18.94 MB`).
+- **Structure & Transitions:** `TransitionSeries` with 9 scenes (`S00`–`S08`) and 12-frame `wipe` / `slide` / `fade` transitions, total runtime `2:49.6` (`<= 2:55`; Devpost hard limit `< 3:00`).
+- **Audio & voiceover policy:** Original spoken English voiceover (`s01`–`s08`, ElevenLabs Daniel) + original instrumental documentary score (`bgm_elevenlabs.mp3`, ElevenLabs `music_v2_5` under paid Creator license, ducked under VO, mastered to `-16.1 LUFS` / `-1.0 dBTP`); zero copyrighted third-party music.
 - **Post-render `ffmpeg` QA gates (`qc_video.py`, `qc_pass: true`):**
   - `blackdetect`: `0` unintended black segments (`blackdetect=d=0.1:pix_th=0.10`).
   - `silencedetect`: `0` dead-air gaps `>= 2.0 s` (`silencedetect=n=-45dB:d=2.0`).
-  - `ebur128`: integrated loudness `-16.0 LUFS`, true peak `-1.0 dBTP`, full decode check clean.
+  - `ebur128`: integrated loudness `-16.1 LUFS`, true peak `-1.0 dBTP`, full decode check clean.
 
 ---
 
@@ -142,5 +151,5 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 - [x] Held-out table matches `eval/results/` exactly (51.46% rounded to 51.5% in the 1-decimal table, FN 18 to 3, `Kill Rule: FAIL`).
 - [x] No on-screen text implies clinical validation, a medical device, or any figure outside the allowed list above; `"Research demo, not a medical device."` visible on every frame.
 - [x] S05 shows only QNX 8.0 target outputs that exist (`qnx8_live_proof_20261125.log`, `g3_run_01..10.txt`, `slog2_run_01..10.txt`).
-- [x] Mastered length `165.8 s` (`<= 2:55`, `< 3:00` Devpost limit); 100% English; zero music; zero third-party product brands/logos; `[ ]` set YouTube visibility to Public when uploading.
-- [x] Eight strictly sequential scene blocks (`S01`–`S08`) verified with `qc_video.py` (`blackdetect`, `silencedetect`, `ebur128`, full decode clean).
+- [x] Mastered V3 length `169.6 s` (`2:49.6`, `< 3:00` Devpost limit); 100% English; original ElevenLabs Music instrumental bed (zero copyrighted third-party music); zero third-party product brands/logos; `[ ]` set YouTube visibility to Public when uploading.
+- [x] Nine `TransitionSeries` scenes (`S00`–`S08`) verified with `qc_video.py` (`blackdetect`, `silencedetect`, `ebur128`, full decode clean).
