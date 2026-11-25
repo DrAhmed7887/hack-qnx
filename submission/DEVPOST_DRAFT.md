@@ -1,6 +1,6 @@
 # Quiet Ward 2.0: Devpost submission draft
 
-ICU nurses face relentless **alarm fatigue**: bedside monitors fire overwhelmingly false arrhythmia alerts, burying genuine patient deterioration in noise. Quiet Ward 2.0 is a deterministic C11 secondary review gateway on **QNX Neutrino RTOS 8.0** built around one hard safety invariant: **an alarm is never silently dropped.** The bedside alarm stays intact, candidate false alarms with clear hemodynamic contradiction are routed to `/dev/quietward` for nurse review, and every fault path (detector crash, deadline miss, queue overflow, detached shared memory, restart) fails open to `CONFIRM`.
+ICU clinicians face relentless **alarm fatigue**: bedside monitors fire overwhelmingly false arrhythmia alerts, burying genuine patient deterioration in noise. Quiet Ward 2.0 is a deterministic C11 secondary review gateway on **QNX Neutrino RTOS 8.0** designed as **central-station / secondary corridor-pager triage** around one hard safety invariant: **an alarm is never silently dropped.** The in-room bedside monitor stays intact as the fail-safe backstop, contradicted candidate false alarms are suppressed from firing secondary hallway pagers and queued onto `/dev/quietward` for batched nurse review, and every fault path (detector crash, deadline miss, queue overflow, detached shared memory, restart) fails open to `CONFIRM`.
 
 > Research demo, not a medical device. The alarm rules carry `status: "pending_signoff"`: engineering defaults, not signed clinical rules. Built, cross-compiled (`qcc -Vgcc_ntox86_64 -Wall -Wextra -Werror`, 0 warnings), and verified on booted **QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64`)** under QEMU TCG (`10/10` target soak runs, `250/250` checks passed, `0` failed; logs under `submission/g3/`).
 
@@ -24,19 +24,19 @@ Bedside monitors in the ICU generate constant alarm fatigue, yet any automated f
 
 On six real `train`-split demonstration records (`data/demo/`), five are confirmed and one false asystole alarm (`a109l`) is routed to nurse review with zero true alarms suppressed (`t116s` is a conservative confirmed false alarm -- the intended failure direction).
 
-![Real PhysioNet 2015 demo waveforms](../docs/plots/demo_overview.svg)
+![Real PhysioNet 2015 demo waveforms](docs/plots/demo_overview.svg)
 
 ## How we built it
 
 **Verified on the host (portable C11, logged in `submission/g3/host_tests_20261124.log`):**
 - Reentrant signal detection and rule core (`qw_core`, `rules`, `qw_detector_config`).
-- IPC and gateway building blocks in plain C11: per-bed `_Atomic` seqlock ring, pending/review state machine with `O_NOFOLLOW` restart journal, audit-line formatter, and JSONL serializer.
-- `make gateway-test`: `529 checks, 0 failed`; `make reentrant-test`: `320` concurrent `qw_decide()` calls across `8` threads; `make fuzz`: `1000/1000` seeded mutations passed; `pytest`: `105 passed`.
+- IPC and gateway building blocks in plain C11: per-bed `_Atomic` seqlock ring, pending/review state machine with `O_NOFOLLOW` restart journal (`write()` + `fsync()`), audit-line formatter, and JSONL serializer.
+- `make gateway-test`: `529 checks, 0 failed`; `make reentrant-test`: `320` concurrent `qw_decide()` calls across `8` threads; `make fuzz`: `1000/1000` seeded mutations passed; `pytest`: `107 passed` (with ASan+UBSan runtime checks clean).
 
 **Verified on QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64` on QEMU TCG, logged in `submission/g3/p1_qnx8_guest_20261125.log`, `submission/g3/qnx8_live_proof_20261125.log`, and `submission/g3/g3_run_01..10.txt`):**
 - All six `#ifdef __QNX__` process binaries (`qw_acq`, `qw_detector`, `qw_alarm_mgr`, `qw_failopen`, `qw_supervisor`, `qw_bedctl`) plus `p1_hello_ipc` and `p1_tcg_jitter` compiled cleanly with `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror -lm -lslog2` (`0` warnings; `readelf -h` x86-64).
 - `p1_hello_ipc` (`P1_HELLO_RESULT=PASS`, `slog2info -b qw_hello`), `p1_qplms_probe.sh` (`PROBE_RESULT=USE_QW_SUPERVISOR_FALLBACK`; `plms` absent on QEMU image, `qw_supervisor` active), and `p1_tcg_jitter` (`p50=0.789 ms`, `recommended --watchdog-ms 200`).
-- Live `/dev/quietward` (`crw-rw----`): `cat` JSONL stream, nurse ACK `write()` (`"nurse ack: proof-rn"`), `qw_bedctl 0..2` `devctl` JSON, standalone `qw_failopen` (`alarm_out=CONFIRM_ALL` + `sev=CRIT` across beds `0..3`), and **10/10 target soak runs (`250/250` checks passed, `0` failed)** including `slay -s KILL qw_detector` fail-open latch + supervisor respawn with a new PID (`slog2_run_01..10.txt`).
+- Live `/dev/quietward` (`crw-rw----`): `cat` JSONL stream, nurse ACK `write()` (`"nurse ack: proof-rn"`), `qw_bedctl 0..3` `devctl` JSON (including bed 3 `failopen_active:1` after detector kill), Tier-2 standalone `qw_failopen` (`alarm_out=CONFIRM_ALL` + `sev=CRIT` across beds `0..3`), and **10/10 target soak runs (`250/250` checks passed, `0` failed)** including `slay -s KILL qw_detector` fail-open latch + supervisor respawn with a new PID (`slog2_run_01..10.txt`). `qw_alarm_mgr` decouples disk `fsync()` onto a dedicated background `journal_thread` (`pthread_cond_signal`) so storage I/O cannot stall the real-time `MsgReceive` / `50 ms` watchdog loop.
 
 ### Where QNX 8.0 Appears (Reviewer Map)
 
@@ -66,15 +66,18 @@ Source: real PhysioNet/CinC 2015 training records, local split (`eval/split.json
 | Train (`eval/results/train_fixed.json`) | 523 | 39.20% | 40.19% (49) | 53.83% (3) | 98.5% (202/205) [95.8-99.5] | 27.0% (86/318) |
 | Held-out (`eval/results/heldout_fixed.json`) | 227 | 39.21% | 40.80% (18) | 51.46% (3) | 96.6% (86/89) [90.6-98.8] | 26.8% (37/138) |
 
-**Pre-registered threshold integrity:** We locked all thresholds on the `n=523` train split before scoring the `n=227` held-out split and report the unedited held-out result with zero post-hoc retuning (Ventricular Tachycardia missed true alarms fell from 11 under v0 to 0, while 1 of 7 true Asystole alarms on `n=37` Asystole records went to nurse review vs 0 in v0, keeping Quiet Ward framed strictly as a secondary nurse-review gateway). Unlike offline retrospective PhysioNet 2015 ML ensembles (which scored 81.39 and 85.04 on a different 500-record hidden test set with unconstrained retrospective pipelines), Quiet Ward runs as a deterministic, zero-alloc, reentrant C11 RTOS watchdog gateway on QNX 8.0 where any uncertainty or fault latches `CONFIRM`.
+**Pre-registered threshold integrity & Kill Rule disclosure:** We locked all thresholds on the `n=523` train split before scoring the `n=227` held-out split and report the unedited held-out result with zero post-hoc retuning:
+- Ventricular Tachycardia missed true alarms fell from `11` under v0 to `0` (`100.0%` recall, `27/27`).
+- `1 of 7` true Asystole alarms (`14.3%`, sensitivity `85.7%` vs `100%` in v0 across `n=37` Asystole records) and `1 of 39` true Tachycardia alarms were routed to nurse review (`3` FN total). Tachycardia showed `-8.08 pp` net harm (`92.86% -> 84.78%`), making Tachycardia a candidate to join VFib in `never_suppress` in v2 clinical signoff.
+- Because the Kill Rule (`Score >= 72%` AND `FN == 0`) fails, Quiet Ward ships strictly as a Variant B central-station / corridor-pager review gateway rather than an unassisted bedside suppressor. Unlike offline retrospective PhysioNet 2015 ML ensembles (which scored 81.39 and 85.04 on a different 500-record hidden test set with unconstrained retrospective pipelines), Quiet Ward runs as a deterministic, reentrant C11 RTOS watchdog gateway on QNX 8.0 where any uncertainty or fault latches `CONFIRM`.
 
-Also verified: 529 host gateway checks (`0` failed), 320 concurrent reentrant calls across 8 threads, 105 pytest checks, 1000/1000 fuzzer inputs, zero synthetic waveforms, zero paid APIs, and clean offline host builds from `git archive HEAD`.
+Also verified: 529 host gateway checks (`0` failed), 320 concurrent reentrant calls across 8 threads, 107 pytest checks, 1000/1000 fuzzer inputs, zero synthetic waveforms, zero paid APIs in the C11 runtime, QNX gateway, or test suite (demo video VO/music produced separately offline via paid ElevenLabs Creator + Google Flow), and clean offline host builds from `git archive HEAD`.
 
 ## Challenges & Limitations
 
 - **QNX 8.0 target bring-up:** QNX 8.0 SDP requires an `x86_64` Linux host (executed in `.devcontainer/devcontainer.json`), and `plms` is absent on the minimal QEMU image (`PROBE_RESULT=USE_QW_SUPERVISOR_FALLBACK`), so `qw_supervisor` manages process restarts while `qw_failopen` stays decoupled.
 - **Un-signed clinical rules:** `rules/alarm_rules.json` thresholds carry `pending_signoff` and require clinician review before any clinical deployment.
-- **Conservative VF / VTach floor:** `Ventricular_Flutter_Fib` is never suppressed (`never_suppress`), and high-rate `Ventricular_Tachycardia` false alarms remain mostly confirmed (`5.3%` routed on held-out).
+- **Conservative VF / VTach floor & Tachycardia sensitivity:** `Ventricular_Flutter_Fib` is never suppressed (`never_suppress`); `64%` (`92/138`) of held-out false alarms are VT/VFib, yet only `4/92` (`4.3%`) route because false-VTach ECG artifact triggers `ECG max HR > 100 bpm`. Tachycardia net harm (`-8.08 pp`) motivates adding it to `never_suppress` in v2.
 - **Signal quality gating:** Any pulsatile channel SQI below `0.90` forces `CONFIRM` (`t106s`), trading extra bedside alerts for safety.
 - **QEMU TCG emulation:** Live QNX 8.0 soak runs (`p50=0.789 ms` timer jitter) reflect QEMU TCG logical timing rather than certified hardware real time.
 - **Held-out run cap:** Run 3 of 3 is reserved in `eval/heldout_runs.log` so held-out evaluation cannot be overfit.

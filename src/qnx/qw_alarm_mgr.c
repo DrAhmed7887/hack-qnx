@@ -2,16 +2,16 @@
  *
  *   qw_alarm_mgr [--watchdog-ms N] [--escalate-ms N] [--journal PATH]
  *
- * Two threads share one qw_gw_state_t behind one mutex:
+ * Three threads share one qw_gw_state_t cleanly without blocking RT IPC:
  *   A: the /dev/quietward resource manager (qw_resmgr_run).
- *   B (main): the message loop on the "qw_alarm_mgr" name: alarm pulses,
- *      a 50 ms watchdog tick, and detector decision messages.
+ *   B (main): real-time message loop on "qw_alarm_mgr": alarm pulses,
+ *      50 ms watchdog tick, and detector decision messages (never fsyncs).
+ *   C (journal_thread): wakes on signal to batch unseen log entries, fsync
+ *      journal lines ('C'/'Q'), and emit slog2 audit records off the RT loop.
  *
- * Journal discipline: 'R' is written before an alarm is registered, so a
- * crash at any point replays as CONFIRM. Latch ('C') and review ('Q') lines
- * are written by drain_log(), which walks the state machine's log ring for
- * entries it has not seen yet; the same pass emits the audit log line. Every
- * fault path in the state machine already latches CONFIRM; nothing here can
+ * Journal discipline: qw_acq durably writes 'R' via atomic O_APPEND write()
+ * before pulsing qw_alarm_mgr, so a crash at any point replays as CONFIRM.
+ * Every fault path in the state machine latches CONFIRM; nothing here can
  * drop an alarm.
  */
 #ifdef __QNX__
@@ -40,9 +40,13 @@
 static qw_gw_state_t g_st;
 static pthread_mutex_t g_mu = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t g_journal_mu = PTHREAD_MUTEX_INITIALIZER; /* lock order: g_journal_mu -> g_mu */
+static pthread_mutex_t g_jnotify_mu = PTHREAD_MUTEX_INITIALIZER; /* leaf lock for journal_thread wakeup */
+static pthread_cond_t g_journal_cv = PTHREAD_COND_INITIALIZER;
+static uint64_t g_jnotify_seq = 0;
+static int g_jnotify_stop = 0;
 static int g_journal_degraded = 0; /* sticky latch under g_journal_mu: withhold A after any write failure */
 static const char *g_journal = QW_JOURNAL_PATH;
-static uint64_t g_seen; /* log entries already journalled and logged; guarded by g_mu */
+static uint64_t g_seen; /* log entries already journalled and logged; guarded by g_journal_mu -> g_mu */
 static volatile sig_atomic_t g_stop;
 
 static void on_term(int sig) {
@@ -112,6 +116,31 @@ static void sync_and_flush_journal(void) {
     pthread_mutex_unlock(&g_journal_mu);
 }
 
+static void wake_journal_thread(void) {
+    pthread_mutex_lock(&g_jnotify_mu);
+    g_jnotify_seq++;
+    pthread_cond_signal(&g_journal_cv);
+    pthread_mutex_unlock(&g_jnotify_mu);
+}
+
+static void *journal_thread(void *arg) {
+    (void)arg;
+    uint64_t seen_seq = 0;
+    for (;;) {
+        pthread_mutex_lock(&g_jnotify_mu);
+        while (g_jnotify_seq == seen_seq && !g_jnotify_stop) {
+            pthread_cond_wait(&g_journal_cv, &g_jnotify_mu);
+        }
+        seen_seq = g_jnotify_seq;
+        int stop = g_jnotify_stop;
+        pthread_mutex_unlock(&g_jnotify_mu);
+
+        sync_and_flush_journal();
+        if (stop) break;
+    }
+    return NULL;
+}
+
 static void journal_ack_ordered(uint32_t seq, uint32_t bed, uint32_t alarm, const char *nurse) {
     pthread_mutex_lock(&g_journal_mu);
     if (flush_pending_journal_locked() != 0) {
@@ -128,10 +157,13 @@ static void journal_ack_ordered(uint32_t seq, uint32_t bed, uint32_t alarm, cons
 static int write_alarm_out_failopen(void) {
     const char *apath = getenv("QW_ALARM_OUT_PATH");
     if (apath == NULL || apath[0] == '\0') apath = QW_ALARM_OUT_PATH;
-    int fd = open(apath, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0600);
+    int fd = open(apath, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK, 0600);
     if (fd < 0) return -1;
     static const char msg[] = "CONFIRM_ALL\n";
-    int ok = write(fd, msg, sizeof msg - 1) == (ssize_t)(sizeof msg - 1);
+    struct stat sb;
+    int ok = fstat(fd, &sb) == 0 && S_ISREG(sb.st_mode) && sb.st_uid == geteuid() &&
+             sb.st_nlink == 1 &&
+             write(fd, msg, sizeof msg - 1) == (ssize_t)(sizeof msg - 1);
     if (ok && fsync(fd) != 0) ok = 0;
     if (close(fd) != 0) ok = 0;
     return ok ? 0 : -1;
@@ -183,12 +215,20 @@ int main(int argc, char **argv) {
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGINT, &sa, NULL);
 
-    qw_resmgr_ctx_t ctx = {&g_st, &g_mu, g_journal, now_ms, journal_ack_ordered};
-    pthread_t rt;
+    static qw_resmgr_ctx_t ctx;
+    ctx.st = &g_st;
+    ctx.mu = &g_mu;
+    ctx.journal_path = g_journal;
+    ctx.now_ms_fn = now_ms;
+    ctx.ack_journal_fn = journal_ack_ordered;
+    pthread_t rt, jt;
     if (pthread_create(&rt, NULL, resmgr_thread, &ctx) != 0)
         qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "cannot start resource manager thread");
     else
         pthread_detach(rt);
+    int have_jt = pthread_create(&jt, NULL, journal_thread, NULL) == 0;
+    if (!have_jt)
+        qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "cannot start journal thread; synchronous fallback");
 
     name_attach_t *att = name_attach(NULL, QW_NAME_ALARM_MGR, 0);
     if (att == NULL) {
@@ -239,7 +279,10 @@ int main(int argc, char **argv) {
                     pthread_mutex_lock(&g_mu);
                     qw_gw_apply_decision(&g_st, &m.decision, now_ms(), &reply);
                     pthread_mutex_unlock(&g_mu);
-                    sync_and_flush_journal();
+                    if (have_jt)
+                        wake_journal_thread();
+                    else
+                        sync_and_flush_journal();
                 } else {
                     qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, "decision with bad version rejected");
                 }
@@ -257,7 +300,9 @@ int main(int argc, char **argv) {
             continue;
         }
         if (m.pulse.code == _PULSE_CODE_UNBLOCK) {
-            /* Standard POSIX sigval.sival_ptr avoids assuming QNX-specific sival_long; confirm under qcc at P1. */
+            /* QNX 8.0 x86_64: rcvid_t is 64-bit; _pulse.value.sival_ptr carries the full client rcvid. */
+            _Static_assert(sizeof(m.pulse.value.sival_ptr) >= sizeof(rcvid_t),
+                           "sival_ptr must hold QNX 8.0 rcvid_t");
             MsgError((rcvid_t)(intptr_t)m.pulse.value.sival_ptr, EINTR);
             continue;
         }
@@ -270,27 +315,37 @@ int main(int argc, char **argv) {
                 qw_log_emit(QW_LOG_ERROR, bed, seq, NULL, NULL, "malformed alarm pulse ignored");
                 continue;
             }
-            /* Register in-memory BEFORE disk fsync so a fast detector MsgSend
-             * never loses a race with journal_append. */
+            /* qw_acq durably appended 'R' via O_APPEND write() prior to this pulse. */
             int failopen = 0;
             pthread_mutex_lock(&g_mu);
             qw_gw_raise_alarm(&g_st, bed, (qw_alarm_id_t)aid, seq, now_ms(), &failopen);
             pthread_mutex_unlock(&g_mu);
-            pthread_mutex_lock(&g_journal_mu);
-            if (qw_gw_journal_append(g_journal, 'R', seq, bed, aid, "raised") != 0)
-                g_journal_degraded = 1;
-            flush_pending_journal_locked();
-            pthread_mutex_unlock(&g_journal_mu);
+            if (have_jt)
+                wake_journal_thread();
+            else
+                sync_and_flush_journal();
         } else if (m.pulse.code == QW_PULSE_WATCHDOG_TICK) {
             pthread_mutex_lock(&g_mu);
             uint64_t t = now_ms();
             qw_gw_check_deadlines(&g_st, t);
             qw_gw_check_escalations(&g_st, t);
             pthread_mutex_unlock(&g_mu);
-            sync_and_flush_journal();
+            if (have_jt)
+                wake_journal_thread();
+            else
+                sync_and_flush_journal();
         }
     }
 
+    if (have_jt) {
+        pthread_mutex_lock(&g_jnotify_mu);
+        g_jnotify_stop = 1;
+        pthread_cond_broadcast(&g_journal_cv);
+        pthread_mutex_unlock(&g_jnotify_mu);
+        pthread_join(jt, NULL);
+    } else {
+        sync_and_flush_journal();
+    }
     if (have_timer) timer_delete(tid);
     if (tick_coid >= 0) ConnectDetach(tick_coid);
     name_detach(att, 0);

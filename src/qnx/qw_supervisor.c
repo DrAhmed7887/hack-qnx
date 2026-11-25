@@ -41,7 +41,8 @@ typedef struct {
 
 static pid_t spawn_one(const char *dir, const char *name, char *const extra[]) {
     char path[256];
-    snprintf(path, sizeof path, "%s/%s", dir, name);
+    int n = snprintf(path, sizeof path, "%s/%s", dir, name);
+    if (n < 0 || (size_t)n >= sizeof path) return -1;
     char *argv[6] = {path, NULL, NULL, NULL, NULL, NULL};
     for (int i = 0; extra != NULL && extra[i] != NULL && i < 4; i++) argv[i + 1] = extra[i];
     pid_t pid = -1;
@@ -49,12 +50,20 @@ static pid_t spawn_one(const char *dir, const char *name, char *const extra[]) {
     return pid;
 }
 
+static void reap_matching(worker_t *w) {
+    pid_t r;
+    while ((r = waitpid(-1, NULL, WNOHANG)) > 0) {
+        for (int i = 0; i < N_WORKERS; i++) {
+            if (w[i].pid == r) w[i].pid = -1;
+        }
+    }
+}
+
 static void kill_all(worker_t *w) {
     for (int i = 0; i < N_WORKERS; i++)
         if (w[i].pid > 0) kill(w[i].pid, SIGTERM);
     for (int iter = 0; iter < 50; iter++) { /* 1 s graceful grace window */
-        while (waitpid(-1, NULL, WNOHANG) > 0) {
-        }
+        reap_matching(w);
         int any = 0;
         for (int i = 0; i < N_WORKERS; i++)
             if (w[i].pid > 0 && kill(w[i].pid, 0) == 0) any = 1;
@@ -65,8 +74,7 @@ static void kill_all(worker_t *w) {
     for (int i = 0; i < N_WORKERS; i++)
         if (w[i].pid > 0) kill(w[i].pid, SIGKILL);
     for (int iter = 0; iter < 25; iter++) {
-        while (waitpid(-1, NULL, WNOHANG) > 0) {
-        }
+        reap_matching(w);
         int any = 0;
         for (int i = 0; i < N_WORKERS; i++)
             if (w[i].pid > 0 && kill(w[i].pid, 0) == 0) any = 1;
@@ -129,6 +137,7 @@ int main(int argc, char **argv) {
         }
         for (int i = 0; i < N_WORKERS; i++) {
             if (w[i].pid != dead) continue;
+            w[i].pid = -1;
             qw_log_emit(QW_LOG_ERROR, 0, 0, NULL, NULL, i == 0 ? "qw_alarm_mgr exited" : "qw_detector exited");
             if (++w[i].restarts > MAX_RESTARTS) goto fail;
             for (uint32_t slept = 0; slept < restart_delay_ms && !g_stop; slept += 50u) {

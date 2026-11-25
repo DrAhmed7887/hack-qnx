@@ -6,12 +6,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
-      # Stdlib Python only: no pip installs, so no network flake.
+      # Stdlib Python for host suite + fuzzer; gitleaks image runs secret scan.
       - name: Build, C tests, demo pack, parser fuzz
         run: |
           make
           make gateway-test
           make reentrant-test
           make demo-verify
-          python3 scripts/fuzz_qw.py --count 200
+          python3 scripts/fuzz_qw.py --count 1000
       - run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo -v --redact

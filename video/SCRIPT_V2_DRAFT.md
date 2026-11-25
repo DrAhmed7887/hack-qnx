@@ -39,19 +39,19 @@ Variant B framing: a review and escalation gateway that never silently drops an 
 
 ---
 
-## S01 · 0:00-0:10 · An alarm that never sounded
+## S01 · 0:06.6-0:20.3 · An alarm that never sounded
 
-**Screen:** plain-text card displaying the omitted-model quote below on a neutral slide (no openFDA, PhysioNet, or vendor logos or webpage screenshots), text highlighted, nothing else.
+**Screen:** plain-text card displaying the redacted-model hardware malfunction quote below on a neutral slide (no openFDA, PhysioNet, or vendor logos or webpage screenshots), text highlighted, nothing else.
 
-**On-screen quote (from `docs/EVIDENCE.md`, `mdr_report_key=10055677`, `mdr_text_key=191262317`, monitor model omitted):**
+**On-screen quote (adapted from `docs/EVIDENCE.md`, `mdr_report_key=10055677`, `mdr_text_key=191262317`, third-party monitor model redacted):**
 "THE CUSTOMER REPORTED THAT THE EXTERNAL ALARM LAMP FOR NICU BED 4 DID NOT LIGHT AND NO ALARM SOUNDED ON THE [bedside patient monitor — model omitted]. THE DEVICE WAS REPORTED TO BE IN USE ON A PATIENT, BUT NO ADVERSE EVENT TO PATIENT OR USER WAS REPORTED."
-Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 2020 (model name omitted)."
+Caption: "openFDA MAUDE, report 10055677, Malfunction report (hardware lamp/speaker failure motivating fail-open engineering), received 14 May 2020 (model name omitted)."
 
 **VO:** "In FDA report 1005 5677, a bedside monitor's alarm never sounded. Any real clinical gateway must answer one question first: what happens when something goes wrong?"
 
-*Verified from openFDA (`date_received=20200514`, `mdr_text_key=191262317`) and committed in `docs/EVIDENCE.md` (`CLAIMS.md` row 18 `VERIFIED-REPO`). Keep the third-party hardware brand/model explicitly omitted on screen (`[bedside patient monitor — model omitted]` and `"model name omitted"` in the caption) so no third-party product brand/logo is displayed in the public YouTube video, and do not describe this as a patient harm event.*
+*Verified from openFDA (`date_received=20200514`, `mdr_text_key=191262317`) and committed in `docs/EVIDENCE.md` (`CLAIMS.md` row 18 `VERIFIED-REPO`). Keep the third-party hardware brand/model explicitly omitted on screen (`[bedside patient monitor — model omitted]` and `"model name omitted"` in the caption) so no third-party product brand/logo is displayed in the public YouTube video, note that 10055677 is a hardware alarm-lamp/speaker malfunction (not software suppression), and do not describe this as a patient harm event.*
 
-## S02 · 0:10-0:30 · The one rule
+## S02 · 0:19.9-0:39.8 · The one rule
 
 **Screen:** Light architectural canvas animating the QNX 8.0 microkernel topology (`docs/workflow.svg`): `qw_acq` -> `/dev/shmem/qw_ring_bed*` -> `qw_detector` -> `MsgSend`/`MsgReply` -> `qw_alarm_mgr` -> `/dev/quietward` + `slog2`, with the amber fail-open path highlighted last.
 
@@ -59,7 +59,7 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 **Overlay:** "Raw alarm preserved. Built on QNX 8.0. Every fault fails open to CONFIRM."
 
-## S03 · 0:30-0:50 · A false alarm goes to review, not to the bin
+## S03 · 0:39.4-0:59.7 · A false alarm goes to review, not to the bin
 
 **Screen:** terminal, `build/qw` on record a109l (Asystole), real ICU record from the PhysioNet/CinC 2015 training set. Show the JSON line: decision SUPPRESS_TO_REVIEW, pulse present in the trailing 5 s, "logged for nurse review (never discarded)".
 
@@ -67,7 +67,7 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 **Overlay:** "Real ICU record, ODC-BY 1.0. a109l: false alarm (ground truth)."
 
-## S04 · 0:50-1:15 · True alarms stay on
+## S04 · 0:59.3-1:23.1 · True alarms stay on
 
 **Screen:** two terminal runs side by side, then the one-line replay summary from `submission/g3/host_shift_review.md`.
 1. a653l (Asystole, true alarm): CONFIRM, trailing gap 3.41 s over the 3.20 s limit.
@@ -77,7 +77,7 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 **Overlay:** "Six-record replay: 5 CONFIRM, 1 SUPPRESS_TO_REVIEW, 0 true alarms in the queue. A demonstration, not an accuracy claim."
 
-## S05 · 1:15-1:40 · Fail-open under fault on QNX 8.0
+## S05 · 1:22.7-1:46.8 · Fail-open under fault on QNX 8.0
 
 **Screen:** Real `QNX noname 8.0.0 x86_64` QEMU captures (`submission/g3/qnx8_live_proof_20261125.log`, `submission/g3/slog2_run_01.txt`, `submission/g3/g3_run_01..10.txt`): `pidin`, `/dev/quietward` JSONL + nurse ACK, `slay -s KILL qw_detector`, 500 ms watchdog latch `CONFIRM` (`failopen_active: 1`, `sev=CRIT`), supervisor respawn with new PID, standalone `qw_failopen` (`CONFIRM_ALL`), and 10/10 soak score (`250/250` checks, `0` failed).
 
@@ -85,7 +85,7 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 **Overlay:** "QNX 8.0.0 x86_64 QEMU · 10/10 Soak Passed (250/250 Checks) · Fail-Open Latched."
 
-## S06 · 1:40-2:10 · Honest results
+## S06 · 1:46.4-2:10.4 · Honest results
 
 **Screen:** the held-out table from `eval/results/heldout_fixed.json` and `heldout_v0-frozen.json`, then the Kill Rule line.
 
@@ -99,7 +99,7 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 **VO:** "Honest held-out results on 227 records: fixed rules raise Challenge score from 40.8 to 51.5 percent, cutting false negatives from 18 to 3. Yet asystole misses moved from zero to one across 37 records, breaking our Kill Rule. So we do not retune: we ship Variant B."
 
-## S07 · 2:10-2:40 · Hostile input and reproducibility
+## S07 · 2:10.0-2:29.7 · Hostile input and reproducibility
 
 **Screen:** Offline verification cards: `qcc -Vgcc_ntox86_64 -Wall -Wextra -Werror` (`0` warnings, 8 ELF binaries), `make fuzz` (`1000/1000 passed`), `make gateway-test` (`529 checks, 0 failed`, `torn=0`), `make reentrant-test` (`320` calls), ASan+UBSan clean, and `submission/g3/stress-checklist.md` (`HOST PASS` and `QEMU PASS`, plus honest untested edge rows).
 
@@ -109,9 +109,9 @@ Caption: "openFDA MAUDE, report 10055677, Malfunction report, received 14 May 20
 
 ---
 
-## S08 · 2:40-2:55 · Attribution card
+## S08 · 2:29.3-2:49.6 · Attribution card
 
-**Screen:** Dark closing card (zero logos/music), high contrast, readable for 15 s.
+**Screen:** Dark closing card (zero third-party logos; ElevenLabs instrumental outro fade), high contrast, readable for 20.3 s.
 
 > **Data:** PhysioNet/Computing in Cardiology Challenge 2015 dataset (real de-identified ICU records, ODC-BY 1.0, DOI 10.13026/c9fg-a467).
 > **Paper:** Clifford GD, Silva I, Moody B, Li Q, Kella D, Shahin A, Kooistra T, Perry D, Mark RG (2015). Computing in Cardiology 42:273-276.

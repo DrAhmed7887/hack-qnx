@@ -352,6 +352,11 @@ int qw_gw_journal_append(const char *path, char op, uint32_t seq, uint32_t bed_i
     if (n == 0) clean[n++] = '-';
     clean[n] = '\0';
 
+    char line[256];
+    int nline = snprintf(line, sizeof line, "%c %" PRIu32 " %" PRIu32 " %" PRIu32 " %s\n",
+                         op, seq, bed_id, alarm_id, clean);
+    if (nline < 0 || (size_t)nline >= sizeof line) return -1;
+
     /* O_NONBLOCK: a planted FIFO must not block us. fstat before use: only a
      * regular, single-link file owned by us is ever appended to. */
     int fd = open(path, O_WRONLY | O_CREAT | O_APPEND | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK, 0600);
@@ -362,19 +367,11 @@ int qw_gw_journal_append(const char *path, char op, uint32_t seq, uint32_t bed_i
         close(fd);
         return -1;
     }
-    FILE *f = fdopen(fd, "a");
-    if (f == NULL) {
-        close(fd);
-        return -1;
-    }
     int rc = 0;
-    if (fprintf(f, "%c %" PRIu32 " %" PRIu32 " %" PRIu32 " %s\n", op, seq, bed_id, alarm_id,
-                clean) < 0) {
-        rc = -1;
-    }
-    if (fflush(f) != 0) rc = -1;
-    if (rc == 0 && fsync(fileno(f)) != 0) rc = -1;
-    if (fclose(f) != 0) rc = -1;
+    ssize_t wr = write(fd, line, (size_t)nline);
+    if (wr != (ssize_t)nline) rc = -1;
+    if (rc == 0 && fsync(fd) != 0) rc = -1;
+    if (close(fd) != 0) rc = -1;
 
     /* Best effort: make the (possibly new) directory entry durable too. */
     if (rc == 0) {

@@ -26,6 +26,7 @@
 #include <sys/mman.h>
 #include <sys/neutrino.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "qw_core.h"
@@ -141,21 +142,37 @@ out:
 }
 
 static void send_decision(int *coid, uint32_t bed, uint32_t aid, uint32_t seq, qw_decision_t d) {
-    if (*coid < 0) *coid = name_open(QW_NAME_ALARM_MGR, 0);
-    if (*coid < 0) {
-        qw_log_emit(QW_LOG_ERROR, bed, seq, qw_alarm_name((qw_alarm_id_t)aid), NULL,
-                    "qw_alarm_mgr unreachable; its deadline will latch CONFIRM");
+    const char *alarm = qw_alarm_name((qw_alarm_id_t)aid);
+    for (int attempt = 0; attempt < 6; attempt++) {
+        if (*coid < 0) *coid = name_open(QW_NAME_ALARM_MGR, 0);
+        if (*coid < 0) {
+            qw_log_emit(QW_LOG_ERROR, bed, seq, alarm, NULL,
+                        "qw_alarm_mgr unreachable; its deadline will latch CONFIRM");
+            return;
+        }
+        qw_msg_decision_t msg = {QW_IPC_VERSION, bed, aid, seq, (uint32_t)d};
+        qw_msg_reply_t reply;
+        uint64_t timeout = DET_SEND_TIMEOUT_NS;
+        TimerTimeout(CLOCK_MONOTONIC, _NTO_TIMEOUT_SEND | _NTO_TIMEOUT_REPLY, NULL, &timeout, NULL);
+        if (MsgSend(*coid, &msg, sizeof msg, &reply, sizeof reply) == -1) {
+            qw_log_emit(QW_LOG_ERROR, bed, seq, alarm, NULL,
+                        "decision send failed; alarm manager deadline will latch CONFIRM");
+            name_close(*coid);
+            *coid = -1;
+            return;
+        }
+        if (reply.status == (int32_t)QW_ST_OK) return;
+        if (reply.status == (int32_t)QW_ST_NOT_FOUND && attempt < 5) {
+            /* Alarm pulse may still be queued ahead in qw_alarm_mgr; brief 10 ms backoff. */
+            struct timespec ts = {0, 10000000L};
+            nanosleep(&ts, NULL);
+            continue;
+        }
+        char note[128];
+        snprintf(note, sizeof note, "decision reply status %d; alarm manager will fail open",
+                 (int)reply.status);
+        qw_log_emit(QW_LOG_ERROR, bed, seq, alarm, NULL, note);
         return;
-    }
-    qw_msg_decision_t msg = {QW_IPC_VERSION, bed, aid, seq, (uint32_t)d};
-    qw_msg_reply_t reply;
-    uint64_t timeout = DET_SEND_TIMEOUT_NS;
-    TimerTimeout(CLOCK_MONOTONIC, _NTO_TIMEOUT_SEND | _NTO_TIMEOUT_REPLY, NULL, &timeout, NULL);
-    if (MsgSend(*coid, &msg, sizeof msg, &reply, sizeof reply) == -1) {
-        qw_log_emit(QW_LOG_ERROR, bed, seq, qw_alarm_name((qw_alarm_id_t)aid), NULL,
-                    "decision send failed; alarm manager deadline will latch CONFIRM");
-        name_close(*coid);
-        *coid = -1;
     }
 }
 
@@ -205,6 +222,10 @@ int main(int argc, char **argv) {
         }
         if (m.pulse.code == _PULSE_CODE_DISCONNECT) {
             ConnectDetach(m.pulse.scoid);
+            continue;
+        }
+        if (m.pulse.code == _PULSE_CODE_UNBLOCK) {
+            MsgError((rcvid_t)(intptr_t)m.pulse.value.sival_ptr, EINTR);
             continue;
         }
         if (m.pulse.code != QW_PULSE_ALARM_RAISED) continue;

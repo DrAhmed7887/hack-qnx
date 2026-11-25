@@ -179,8 +179,6 @@ int main(int argc, char **argv) {
         qw_log_emit(QW_LOG_WARN, bed, seq, argv[2], NULL, "journal append failed");
     int pv = QW_PULSE_VAL(bed, aid, seq);
     notify(QW_NAME_ALARM_MGR, QW_PULSE_ALARM_RAISED, pv);
-    struct timespec lead = {0, 2000000L}; /* 2 ms scheduling handoff window */
-    nanosleep(&lead, NULL);
     notify(QW_NAME_DETECTOR, QW_PULSE_ALARM_RAISED, pv);
     qw_log_emit(QW_LOG_INFO, bed, seq, argv[2], "RAISED", "alarm raised at end of replay");
 

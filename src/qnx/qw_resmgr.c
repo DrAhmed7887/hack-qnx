@@ -137,6 +137,7 @@ typedef struct qw_ocb qw_ocb_t;
 
 /* Full ring capacity: QW_LOG_RING (256) * worst-case single JSONL line. */
 #define SNAPSHOT_MAX ((size_t)QW_LOG_RING * (size_t)JSONL_LINE_MAX)
+#define MAX_OPEN_SNAPS 8
 
 struct qw_ocb {
     iofunc_ocb_t base;
@@ -145,6 +146,7 @@ struct qw_ocb {
 };
 
 static qw_resmgr_ctx_t *g_ctx; /* one resource manager per process */
+static int g_open_snaps = 0;   /* guarded by g_ctx->mu */
 
 static qw_ocb_t *qw_ocb_calloc(resmgr_context_t *ctp, IOFUNC_ATTR_T *attr) {
     (void)ctp;
@@ -154,7 +156,12 @@ static qw_ocb_t *qw_ocb_calloc(resmgr_context_t *ctp, IOFUNC_ATTR_T *attr) {
 
 static void qw_ocb_free(qw_ocb_t *ocb) {
     if (ocb != NULL) {
-        free(ocb->snap);
+        if (ocb->snap != NULL) {
+            pthread_mutex_lock(g_ctx->mu);
+            if (g_open_snaps > 0) g_open_snaps--;
+            pthread_mutex_unlock(g_ctx->mu);
+            free(ocb->snap);
+        }
         free(ocb);
     }
 }
@@ -175,13 +182,29 @@ static int qw_io_read(resmgr_context_t *ctp, io_read_t *msg, RESMGR_OCB_T *ocb) 
     if (ocb->base.offset < 0) return EINVAL;
 
     if (ocb->snap == NULL && ocb->base.offset == 0) {
+        pthread_mutex_lock(g_ctx->mu);
+        if (g_open_snaps >= MAX_OPEN_SNAPS) {
+            pthread_mutex_unlock(g_ctx->mu);
+            return EBUSY;
+        }
+        g_open_snaps++;
+        pthread_mutex_unlock(g_ctx->mu);
+
         ocb->snap = malloc(SNAPSHOT_MAX);
-        if (ocb->snap == NULL) return ENOMEM;
+        if (ocb->snap == NULL) {
+            pthread_mutex_lock(g_ctx->mu);
+            if (g_open_snaps > 0) g_open_snaps--;
+            pthread_mutex_unlock(g_ctx->mu);
+            return ENOMEM;
+        }
         size_t len = 0;
         pthread_mutex_lock(g_ctx->mu);
         int rc = qw_gw_format_log_jsonl(g_ctx->st, ocb->snap, SNAPSHOT_MAX, &len);
         pthread_mutex_unlock(g_ctx->mu);
         if (rc != 0) {
+            pthread_mutex_lock(g_ctx->mu);
+            if (g_open_snaps > 0) g_open_snaps--;
+            pthread_mutex_unlock(g_ctx->mu);
             free(ocb->snap);
             ocb->snap = NULL;
             return EIO;
@@ -306,7 +329,7 @@ int qw_resmgr_run(qw_resmgr_ctx_t *ctx) {
         .funcs = &ocb_funcs,
     };
     iofunc_attr_t ioattr;
-    iofunc_attr_init(&ioattr, S_IFCHR | 0660, NULL, NULL); /* nurse-station group, not world */
+    iofunc_attr_init(&ioattr, S_IFCHR | 0660, NULL, NULL); /* inherits process UID/GID; deploy under dedicated nurse-station service GID */
     ioattr.mount = &mount;
 
     if (resmgr_attach(dpp, &rattr, QW_DEV_PATH, _FTYPE_ANY, 0, &cfuncs, &ifuncs, &ioattr) == -1) {

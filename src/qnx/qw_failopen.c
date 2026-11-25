@@ -40,11 +40,17 @@ int main(void) {
     char note[QW_LOG_REASON_LEN];
     snprintf(note, sizeof note, "fail-open: all beds CONFIRM; %d unresolved journal alarms", unresolved);
 
-    int fd = open(apath, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0600);
+    int fd = open(apath, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK, 0600);
     static const char msg[] = "CONFIRM_ALL\n";
-    int ok = fd >= 0 && write(fd, msg, sizeof msg - 1) == (ssize_t)(sizeof msg - 1);
-    if (ok && fsync(fd) != 0) ok = 0;
-    if (fd >= 0 && close(fd) != 0) ok = 0;
+    int ok = 0;
+    if (fd >= 0) {
+        struct stat sb;
+        ok = fstat(fd, &sb) == 0 && S_ISREG(sb.st_mode) && sb.st_uid == geteuid() &&
+             sb.st_nlink == 1 &&
+             write(fd, msg, sizeof msg - 1) == (ssize_t)(sizeof msg - 1);
+        if (ok && fsync(fd) != 0) ok = 0;
+        if (close(fd) != 0) ok = 0;
+    }
 
     for (uint32_t b = 0; b < QW_MAX_BEDS; b++)
         qw_log_emit(QW_LOG_CRIT, b, 0, NULL, "CONFIRM", ok ? note : "fail-open requested but alarm_out write FAILED");

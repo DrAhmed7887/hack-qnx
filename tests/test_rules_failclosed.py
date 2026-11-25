@@ -134,3 +134,49 @@ def test_alarm_missing_every_threshold_field_fails_closed(tmp_path):
 
     assert proc.returncode != 0
     assert "load_failed" in proc.stderr
+
+
+def test_never_suppress_overflow_fails_closed(tmp_path):
+    """More than QW_MAX_NEVER_SUPPRESS (16) entries must be rejected rather than silently truncated."""
+    import json
+
+    rules_path = tmp_path / "rules.json"
+    rules = {
+        "status": "pending_signoff",
+        "alarms": {"Asystole": {"no_beat_s": 4}},
+        "suppression": {
+            "window_s": 16,
+            "min_signal_quality": 0.9,
+            "never_suppress": [f"Alarm_{i}" for i in range(17)],
+        },
+    }
+    with open(rules_path, "w") as f:
+        json.dump(rules, f)
+
+    proc = dump_rules_raw(rules_path)
+
+    assert proc.returncode != 0
+    assert "load_failed" in proc.stderr
+
+
+def test_rules_trailing_tokens_fails_closed(tmp_path):
+    """Trailing JSON tokens or garbage after the closing root brace must fail closed."""
+    import json
+
+    rules_path = tmp_path / "rules.json"
+    rules = {
+        "status": "pending_signoff",
+        "alarms": {"Asystole": {"no_beat_s": 4}},
+        "suppression": {
+            "window_s": 16,
+            "min_signal_quality": 0.9,
+            "never_suppress": ["Ventricular_Flutter_Fib"],
+        },
+    }
+    with open(rules_path, "w") as f:
+        f.write(json.dumps(rules) + " {\"extra\": 1}")
+
+    proc = dump_rules_raw(rules_path)
+
+    assert proc.returncode != 0
+    assert "load_failed" in proc.stderr

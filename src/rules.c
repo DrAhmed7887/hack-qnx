@@ -99,10 +99,9 @@ static int parse_string_array(qw_lexer_t *lx, char out[][QW_NAME_LEN], size_t ma
     if (t.kind == QW_TOK_RBRACKET) return 0;
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
-        if (*n_out < max) {
-            qw_copy_str(out[*n_out], QW_NAME_LEN, t.text);
-            (*n_out)++;
-        }
+        if (*n_out >= max) return -1;
+        qw_copy_str(out[*n_out], QW_NAME_LEN, t.text);
+        (*n_out)++;
         if (qw_lex_next(lx, &t) != 0) return -1;
         if (t.kind == QW_TOK_RBRACKET) return 0;
         if (t.kind != QW_TOK_COMMA) return -1;
@@ -152,7 +151,10 @@ static int parse_root(qw_lexer_t *lx, qw_rules_t *rules) {
     qw_token_t t;
     if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_LBRACE) return -1;
     if (qw_lex_next(lx, &t) != 0) return -1;
-    if (t.kind == QW_TOK_RBRACE) return 0;
+    if (t.kind == QW_TOK_RBRACE) {
+        if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_EOF) return -1;
+        return 0;
+    }
     for (;;) {
         if (t.kind != QW_TOK_STRING) return -1;
         char key[QW_NAME_LEN];
@@ -177,7 +179,10 @@ static int parse_root(qw_lexer_t *lx, qw_rules_t *rules) {
         }
 
         if (qw_lex_next(lx, &t) != 0) return -1;
-        if (t.kind == QW_TOK_RBRACE) return 0;
+        if (t.kind == QW_TOK_RBRACE) {
+            if (qw_lex_next(lx, &t) != 0 || t.kind != QW_TOK_EOF) return -1;
+            return 0;
+        }
         if (t.kind != QW_TOK_COMMA) return -1;
         if (qw_lex_next(lx, &t) != 0) return -1;
     }
