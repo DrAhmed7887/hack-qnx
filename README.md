@@ -7,6 +7,7 @@
 <p align="center">
   <strong>Shadow-Mode Secondary Review Gateway Prototype on QNX Neutrino RTOS 8.0</strong><br />
   <a href="docs/index.html">Interactive Companion (docs/index.html)</a> ·
+  <a href="https://youtu.be/1vQkHxxzaIQ">Demo Video (YouTube)</a> ·
   <a href="https://www.figma.com/design/6yKhzpDwLqsvxt3T9dfb3K">Figma Architecture &amp; Benchmark Deck</a> ·
   <a href="JUDGES.md">Judging Map</a> ·
   <a href="CLAIMS.md">Verified Claims</a>

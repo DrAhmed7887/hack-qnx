@@ -4,7 +4,7 @@ ICU clinicians face relentless **alarm fatigue**: bedside monitors fire overwhel
 
 > Research demo, not a medical device. The alarm rules carry `status: "pending_signoff"`: engineering defaults, not signed clinical rules. Built, cross-compiled (`qcc -Vgcc_ntox86_64 -Wall -Wextra -Werror`, 0 warnings), and verified on booted **QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64`)** under QEMU TCG (`10/10` target soak runs, `250/250` checks passed, `0` failed; logs under `submission/g3/`).
 
-Category: Robotics & Medical. Bonus: Best use of QNX-specific Technologies.
+Category: Robotics & Medical. Bonus: Best use of QNX-specific Technologies. Demo video: https://youtu.be/1vQkHxxzaIQ.
 
 ## Elevator Pitch
 
@@ -87,7 +87,7 @@ Also verified: 529 host gateway checks (`0` failed), 320 concurrent reentrant ca
 
 1. Clinical threshold sign-off on `rules/alarm_rules.json` if deployment beyond a research review gateway is ever pursued.
 2. Hardware-in-the-loop QNX 8.0 validation on bare-metal ICU monitor feeds.
-3. Final Devpost video upload (`<3:00` 1080p) and public repository flip.
+3. Link Public YouTube video (`https://youtu.be/1vQkHxxzaIQ`), ensure Public repository visibility, and submit on Devpost.
 
 **Live QNX 8.0 `pidin` & `slog2info` capture (`submission/g3/qnx8_live_proof_20261125.log` & `slog2_run_01.txt`):**
 - `uname -a`: `QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64`
@@ -102,4 +102,4 @@ C11, POSIX, QNX Neutrino 8.0 (message passing, pulses, `/dev/quietward` resource
 
 - `DrAhmed7887/hack-qnx` is a new, non-fork repository; first commit `d1d0bd6` on 22 Nov 2026 (`submission/g3/git_birth_commit.txt`). Code: Apache License 2.0 (`LICENSE`). Data: ODC-BY 1.0 (PhysioNet/CinC Challenge 2015 dataset, DOI 10.13026/c9fg-a467; Clifford et al., Computing in Cardiology 42:273-276, 2015).
 - openFDA MAUDE report `10055677` (`Malfunction` report, received 14 May 2020, `mdr_text_key=191262317`; no adverse event to patient or user reported; verified in `docs/EVIDENCE.md`, device model omitted).
-- Interactive companion: `docs/index.html`; claims map: `CLAIMS.md`; judges map: `JUDGES.md`; compliance: `submission/COMPLIANCE_CHECKLIST.md`.
+- Demo video: https://youtu.be/1vQkHxxzaIQ; interactive companion: `docs/index.html`; claims map: `CLAIMS.md`; judges map: `JUDGES.md`; compliance: `submission/COMPLIANCE_CHECKLIST.md`.
