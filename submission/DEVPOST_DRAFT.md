@@ -8,7 +8,7 @@ Category: Robotics & Medical. Bonus: Best use of QNX-specific Technologies.
 
 ## Elevator Pitch
 
-A shadow-mode second opinion on bedside alarms built on QNX Neutrino 8.0. On `n=227` held-out PhysioNet/CinC 2015 ICU records, Quiet Ward routes **26.8% (37/138)** of false alarms -- including **76.7% (23/30)** of false Asystole alarms and **69.2% (9/13)** of false Bradycardia alarms -- to nurse review while preserving **96.6% (86/89)** true-alarm recall (`3` FN total) and discarding **0** alarms in routing logic (Challenge score **51.46%** vs **39.21%** baseline; Kill Rule failed).
+A shadow-mode second opinion on bedside alarms built on QNX Neutrino 8.0. On `n=227` held-out PhysioNet/CinC 2015 ICU records, Quiet Ward routes **26.8% (37/138)** of false alarms -- including **76.7% (23/30)** of false Asystole alarms and **69.2% (9/13)** of false Bradycardia alarms -- to nurse review while preserving **96.6% (86/89)** true-alarm recall (`3` FN total) and discarding **0** alarms in routing logic (Challenge score **51.46%** vs **39.21%** baseline; pre-registered `FN == 0` sign-off bar not met).
 
 ## Inspiration
 
@@ -28,7 +28,7 @@ On six real `train`-split demonstration records (`data/demo/`), five are confirm
 
 ## How we built it
 
-**Verified on the host (portable C11, logged in `submission/g3/host_tests_20261124.log`):**
+**Verified on the host (portable C11, logged in `submission/g3/host_tests_20261124.log` and `submission/g3/host_tests_20261125.log`):**
 - Reentrant signal detection and rule core (`qw_core`, `rules`, `qw_detector_config`).
 - IPC and gateway building blocks in plain C11: per-bed `_Atomic` seqlock ring, pending/review state machine with `O_NOFOLLOW` restart journal (`write()` + `fsync()`), audit-line formatter, and JSONL serializer.
 - `make gateway-test`: `529 checks, 0 failed`; `make reentrant-test`: `320` concurrent `qw_decide()` calls across `8` threads; `make fuzz`: `1000/1000` seeded mutations passed; `pytest`: `115 passed` (with ASan+UBSan runtime checks clean locally and in CI).
@@ -36,7 +36,7 @@ On six real `train`-split demonstration records (`data/demo/`), five are confirm
 **Verified on QNX Neutrino RTOS 8.0 (`QNX noname 8.0.0 2026/10/30-09:10:05EDT x86pc x86_64` on QEMU TCG, logged in `submission/g3/p1_qnx8_guest_20261125.log`, `submission/g3/qnx8_live_proof_20261125.log`, and `submission/g3/g3_run_01..10.txt`):**
 - All six `#ifdef __QNX__` process binaries (`qw_acq`, `qw_detector`, `qw_alarm_mgr`, `qw_failopen`, `qw_supervisor`, `qw_bedctl`) plus `p1_hello_ipc` and `p1_tcg_jitter` compiled cleanly with `qcc -Vgcc_ntox86_64 -std=c11 -D_QNX_SOURCE -O2 -Wall -Wextra -Werror -lm -lslog2` (`0` warnings; `readelf -h` x86-64).
 - `p1_hello_ipc` (`P1_HELLO_RESULT=PASS`, `slog2info -b qw_hello`), `p1_qplms_probe.sh` (`PROBE_RESULT=USE_QW_SUPERVISOR_FALLBACK`; `plms` absent on QEMU image, `qw_supervisor` active), and `p1_tcg_jitter` (`p50=0.789 ms`, `recommended --watchdog-ms 200`).
-- Live `/dev/quietward` (`crw-rw----`): `cat` JSONL stream, nurse ACK `write()` (`"nurse ack: proof-rn"`), `qw_bedctl 0..3` `devctl` JSON (including bed 3 `failopen_active:1` after detector kill), **10/10 target soak runs (`250/250` checks passed, `0` failed)**, AND **P4 extended target fault-injection suite (`30/30` checks passed, `0` failed in `submission/g3/qnx8_fault_stress_20261125.log`)** covering all 6 demo records on QNX, 8 concurrent `/dev/quietward` readers + 9th `EBUSY` cap (`p4_resmgr_cap_test.c`), 4th-crash auto-trigger of Tier-2 `qw_failopen` (`CONFIRM_ALL`), corrupt & `O_NOFOLLOW` symlink journal fail-open across all 4 beds, and `qw_acq` admission refusal when `qw_alarm_mgr` is down. `qw_alarm_mgr` decouples disk `fsync()` onto a dedicated background `journal_thread` (`pthread_cond_signal`) so storage I/O cannot stall the real-time `MsgReceive` / `50 ms` watchdog loop.
+- Live `/dev/quietward` (`crw-rw----`): `cat` JSONL stream, nurse ACK `write()` (`"nurse ack: proof-rn"`), `qw_bedctl 0..3` `devctl` JSON (including bed 3 `failopen_active:1` after detector kill), **10/10 target soak runs (`250/250` checks passed, `0` failed)**, AND **extended target fault-injection suite (`30/30` checks passed, `0` failed in `submission/g3/qnx8_fault_stress_20261125.log`)** covering all 6 demo records on QNX, 8 concurrent `/dev/quietward` readers + 9th `EBUSY` cap (`p4_resmgr_cap_test.c`), 4th-crash auto-trigger of Tier-2 `qw_failopen` (`CONFIRM_ALL`), corrupt & `O_NOFOLLOW` symlink journal fail-open across all 4 beds, and `qw_acq` admission refusal when `qw_alarm_mgr` is down. `qw_alarm_mgr` decouples disk `fsync()` onto a dedicated background `journal_thread` (`pthread_cond_signal`) so storage I/O cannot stall the real-time `MsgReceive` / `50 ms` watchdog loop.
 
 ### Where QNX 8.0 Appears (Reviewer Map)
 
@@ -66,10 +66,10 @@ Source: real PhysioNet/CinC 2015 training records, local split (`eval/split.json
 | Train (`eval/results/train_fixed.json`) | 523 | 39.20% | 40.19% (49) | 53.83% (3) | 98.5% (202/205) [95.8-99.5] | 27.0% (86/318) |
 | Held-out (`eval/results/heldout_fixed.json`) | 227 | 39.21% | 40.80% (18) | 51.46% (3) | 96.6% (86/89) [90.6-98.8] | 26.8% (37/138) |
 
-**Pre-registered threshold integrity & Kill Rule disclosure:** We locked all thresholds on the `n=523` train split before scoring the `n=227` held-out split and report the unedited held-out result with zero post-hoc retuning:
+**Pre-registered threshold integrity & sign-off bar disclosure:** We locked all thresholds on the `n=523` train split before scoring the `n=227` held-out split and report the unedited held-out result with zero post-hoc retuning:
 - Ventricular Tachycardia missed true alarms fell from `11` under v0 to `0` (`100.0%` recall, `27/27`).
 - All `3` held-out FNs: `1 of 7` true Asystole alarms (`14.3%` missed, `85.7%` recall vs `100%` in v0 across `n=37`), `1 of 14` true Bradycardia alarms (`92.9%` recall across `n=27`), and `1 of 39` true Tachycardia alarms (`97.4%` recall across `n=42`). Tachycardia showed `-8.08 pp` net harm (`92.86% -> 84.78%`), making Tachycardia a candidate policy change for future `never_suppress` validation.
-- Because the Kill Rule (`Score >= 72%` AND `FN == 0`) fails, Quiet Ward remains strictly a **shadow-mode research prototype** rather than an unassisted bedside suppressor or deployed clinical pager filter. Unlike offline retrospective PhysioNet 2015 ML ensembles (which scored 81.39 and 85.04 on a different 500-record hidden test set with unconstrained retrospective pipelines), Quiet Ward runs as a deterministic, reentrant C11 RTOS watchdog gateway on QNX 8.0 where uncertainty or tested faults latch `CONFIRM`.
+- Because the pre-registered sign-off bar (`Score >= 72%` AND `FN == 0`) is not met, Quiet Ward remains strictly a **shadow-mode research prototype** rather than an unassisted bedside suppressor or deployed clinical pager filter. Unlike offline retrospective PhysioNet 2015 ML ensembles (which scored 81.39 and 85.04 on a different 500-record hidden test set with unconstrained retrospective pipelines), Quiet Ward runs as a deterministic, reentrant C11 RTOS watchdog gateway on QNX 8.0 where uncertainty or tested faults latch `CONFIRM`.
 
 Also verified: 529 host gateway checks (`0` failed), 320 concurrent reentrant calls across 8 threads, 115 pytest checks, 1000/1000 fuzzer inputs, zero synthetic waveforms, zero paid APIs in the C11 runtime, QNX gateway, or test suite (demo video VO/music produced separately offline via paid ElevenLabs Creator + Google Flow), and clean offline host builds from `git archive HEAD`.
 
